@@ -13,7 +13,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.jeremyhennessy.zero2fit.healthbridge
         PRODUCT_NAME: Zero2FitHealthBridge
-        SWIFT_VERSION: "6.0"
+        SWIFT_VERSION: "5.0"
         CODE_SIGN_ENTITLEMENTS: Zero2FitHealthBridge.entitlements
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Zero2Fit Bridge
@@ -25,6 +25,7 @@ targets:
       path: Zero2FitHealthBridge.entitlements
     dependencies:
       - sdk: HealthKit.framework
+      - sdk: Security.framework
 schemes:
   Zero2FitHealthBridge:
     build:
