@@ -65,6 +65,10 @@ assert_dom 'Offline auto-adventure'
 assert_dom 'Real fitness creates Adventure Energy'
 assert_dom 'Loot &amp; equipment'
 assert_dom 'Foundation Trail'
+assert_dom 'id="z11AdventureStatus"' 'Build 011 Adventure status panel'
+assert_dom 'Automatic progression'
+assert_dom 'Materials &amp; progression wall'
+assert_dom 'Real-world capability ceiling'
 assert_dom 'Private aligned visual timeline'
 assert_dom 'Use camera'
 assert_dom 'Save aligned photo'
@@ -96,4 +100,4 @@ if grep -q 'Zero2Fit Build 008 photos failed' "$DOM_FILE"; then
   exit 1
 fi
 
-echo 'Browser smoke passed: training, devices, approved UI, RPG adventure, progress-photo modules, and private-sync shell rendered.'
+echo 'Browser smoke passed: training, devices, approved UI, adaptive/personal intelligence, RPG adventure v2, progress-photo modules, and private-sync shell rendered.'
