@@ -9,9 +9,11 @@ on:
       - main
       - agent/build-002-location-exercise-substitutions
     paths:
+      - 'training-core.mjs'
       - 'tools/sync-fitness-data.mjs'
       - 'tools/build-training-catalog.mjs'
       - 'tools/validate-fitness-data.mjs'
+      - 'tools/test-training-planner.mjs'
       - 'data/location_profiles.json'
       - 'data/energy_model.json'
       - 'data/programming_rules.json'
@@ -41,6 +43,9 @@ jobs:
 
       - name: Validate generated fitness data
         run: node tools/validate-fitness-data.mjs
+
+      - name: Test automatic workout planner
+        run: node tools/test-training-planner.mjs
 
       - name: Commit refreshed catalogs when changed
         shell: bash
