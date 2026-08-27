@@ -24,11 +24,17 @@ jobs:
           node --check build003-integration.js
           node --check device-core.mjs
           node --check build004-integration.js
+          node --check adventure-core.mjs
+          node --check photo-core.mjs
+          node --check build007-adventure.js
+          node --check build008-photos.js
           node --check tools/build-training-catalog.mjs
           node --check tools/validate-fitness-data.mjs
           node --check tools/test-training-planner.mjs
           node --check tools/test-device-ingestion.mjs
           node --check tools/test-device-driven-progress.mjs
+          node --check tools/test-adventure-core.mjs
+          node --check tools/test-photo-core.mjs
           node --check tools/check-index-contract.mjs
 
       - name: Check required static and reference files
@@ -39,6 +45,7 @@ jobs:
           test -s build003.css
           test -s build004.css
           test -s build006.css
+          test -s build007.css
           test -s app.js
           test -s training-core.mjs
           test -s storage.js
@@ -46,6 +53,11 @@ jobs:
           test -s build003-integration.js
           test -s device-core.mjs
           test -s build004-integration.js
+          test -s adventure-core.mjs
+          test -s photo-core.mjs
+          test -s build007-adventure.js
+          test -s build008-photos.js
+          test -s data/adventure_catalog.json
           test -s supabase/schema.sql
           test -s data/generated/training_exercises.json
           test -s data/generated/met_activities.json
@@ -56,13 +68,18 @@ jobs:
           test -s data/energy_model.json
           grep -q './styles.css' index.html
           grep -q './build006.css' index.html
+          grep -q './build007.css' index.html
           grep -q './storage.js' index.html
           grep -q './ingestion.js' index.html
           grep -q './app.js' index.html
           grep -q './build003-integration.js' index.html
           grep -q './build004-integration.js' index.html
+          grep -q './build007-adventure.js' index.html
+          grep -q './build008-photos.js' index.html
           grep -q '#070b09' build006.css
           grep -q '#b7f34a' build006.css
+          grep -q 'progress_photos' storage.js
+          grep -q 'raw_photos_included: false' storage.js
 
       - name: Reject embedded private credential patterns
         run: |
@@ -82,6 +99,12 @@ jobs:
 
       - name: Test device-driven progress
         run: node tools/test-device-driven-progress.mjs
+
+      - name: Test RPG adventure engine
+        run: node tools/test-adventure-core.mjs
+
+      - name: Test progress-photo helpers
+        run: node tools/test-photo-core.mjs
 
       - name: Check UI compatibility contract
         run: node tools/check-index-contract.mjs

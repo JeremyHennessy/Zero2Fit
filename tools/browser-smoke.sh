@@ -27,7 +27,7 @@ fi
   --no-sandbox \
   --disable-gpu \
   --disable-dev-shm-usage \
-  --virtual-time-budget=12000 \
+  --virtual-time-budget=15000 \
   --dump-dom "http://127.0.0.1:${PORT}/" >"$DOM_FILE"
 
 grep -q 'Use what is actually available' "$DOM_FILE"
@@ -44,12 +44,22 @@ grep -q 'IndexedDB' "$DOM_FILE"
 grep -q 'Export JSON backup' "$DOM_FILE"
 
 grep -q 'Train outside. Advance inside.' "$DOM_FILE"
-grep -q 'Campaign frontier' "$DOM_FILE"
 grep -q 'Latest body snapshot' "$DOM_FILE"
-grep -q 'Aligned visual timeline' "$DOM_FILE"
 grep -q 'Your devices, one private timeline' "$DOM_FILE"
 grep -q 'z4SensorStrip' "$DOM_FILE"
 grep -q './build006.css' "$DOM_FILE"
+grep -q './build007.css' "$DOM_FILE"
+
+grep -q 'Frontier expedition' "$DOM_FILE"
+grep -q 'Offline auto-adventure' "$DOM_FILE"
+grep -q 'Real fitness creates Adventure Energy' "$DOM_FILE"
+grep -q 'Loot &amp; equipment' "$DOM_FILE"
+grep -q 'Foundation Trail' "$DOM_FILE"
+grep -q 'Private aligned visual timeline' "$DOM_FILE"
+grep -q 'Use camera' "$DOM_FILE"
+grep -q 'Save aligned photo' "$DOM_FILE"
+grep -q 'Local only' "$DOM_FILE"
+grep -q 'id="z8Stage"' "$DOM_FILE"
 
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then
   echo 'Workout catalog load failed in browser.' >&2
@@ -66,4 +76,14 @@ if grep -q 'Zero2Fit Build 004 initialization failed' "$DOM_FILE"; then
   exit 1
 fi
 
-echo 'Browser smoke passed: training, device ingestion, device-driven UI, and approved dark visual stylesheet rendered.'
+if grep -q 'Zero2Fit Build 007 adventure failed' "$DOM_FILE"; then
+  echo 'Build 007 adventure initialization failed in browser.' >&2
+  exit 1
+fi
+
+if grep -q 'Zero2Fit Build 008 photos failed' "$DOM_FILE"; then
+  echo 'Build 008 photo initialization failed in browser.' >&2
+  exit 1
+fi
+
+echo 'Browser smoke passed: training, devices, approved UI, RPG adventure, and progress-photo modules rendered.'

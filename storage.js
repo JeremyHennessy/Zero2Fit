@@ -2,7 +2,7 @@
   'use strict';
 
   const DB_NAME = 'zero2fit';
-  const DB_VERSION = 3;
+  const DB_VERSION = 4;
   const SNAPSHOT_KEY = 'current';
   let dbPromise = null;
 
@@ -33,10 +33,16 @@
           store.createIndex('captured_at', 'captured_at', { unique: false });
           store.createIndex('view', 'view', { unique: false });
         }
+        if (!db.objectStoreNames.contains('progress_photos')) {
+          const store = db.createObjectStore('progress_photos', { keyPath: 'photo_id' });
+          store.createIndex('captured_at', 'captured_at', { unique: false });
+          store.createIndex('view', 'view', { unique: false });
+          store.createIndex('session_id', 'session_id', { unique: false });
+        }
       };
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error || new Error('Could not open Zero2Fit IndexedDB.'));
-      request.onblocked = () => reject(new Error('Zero2Fit IndexedDB upgrade was blocked by another open tab.'));
+      request.onblocked = () => reject(new Error('Zero2Fit IndexedDB upgrade was blocked by another open tab. Close other Zero2Fit tabs and reload.'));
     });
     return dbPromise;
   }
@@ -54,6 +60,15 @@
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error || new Error('IndexedDB request failed.'));
     });
+  }
+
+  function photoMetadata(record = {}) {
+    const { blob, thumbnail_blob, source_blob, ...metadata } = record;
+    return {
+      ...metadata,
+      has_blob: !!blob,
+      has_thumbnail: !!thumbnail_blob
+    };
   }
 
   async function saveSnapshot(state) {
@@ -115,33 +130,87 @@
     return all.sort((a,b) => String(b.imported_at).localeCompare(String(a.imported_at)));
   }
 
-  async function getStats() {
-    if (!hasIndexedDb()) return { indexedDb:false, events:0, imports:0, snapshot:false, lastSavedAt:null };
+  async function saveProgressPhoto(record) {
+    if (!record?.photo_id || !record?.blob) throw new Error('A progress photo requires photo_id and blob.');
+    if (!hasIndexedDb()) return { persisted: false, reason: 'indexeddb-unavailable' };
     const db = await openDb();
-    const tx = db.transaction(['events','imports','snapshots'], 'readonly');
+    const tx = db.transaction(['progress_photos', 'photo_metadata'], 'readwrite');
+    tx.objectStore('progress_photos').put(record);
+    tx.objectStore('photo_metadata').put(photoMetadata(record));
+    await transactionDone(tx);
+    return { persisted: true, photo_id: record.photo_id };
+  }
+
+  async function getProgressPhotos(limit = 200) {
+    if (!hasIndexedDb()) return [];
+    const db = await openDb();
+    const tx = db.transaction('progress_photos', 'readonly');
+    const done = transactionDone(tx);
+    const all = await requestPromise(tx.objectStore('progress_photos').getAll());
+    await done;
+    return all.sort((a,b) => String(b.captured_at).localeCompare(String(a.captured_at))).slice(0, Math.max(0, limit));
+  }
+
+  async function getProgressPhoto(photoId) {
+    if (!hasIndexedDb()) return null;
+    const db = await openDb();
+    const tx = db.transaction('progress_photos', 'readonly');
+    const done = transactionDone(tx);
+    const result = await requestPromise(tx.objectStore('progress_photos').get(photoId));
+    await done;
+    return result || null;
+  }
+
+  async function deleteProgressPhoto(photoId) {
+    if (!hasIndexedDb()) return { deleted:false, reason:'indexeddb-unavailable' };
+    const db = await openDb();
+    const tx = db.transaction(['progress_photos', 'photo_metadata'], 'readwrite');
+    tx.objectStore('progress_photos').delete(photoId);
+    tx.objectStore('photo_metadata').delete(photoId);
+    await transactionDone(tx);
+    return { deleted:true };
+  }
+
+  async function getAllPhotoMetadata() {
+    if (!hasIndexedDb()) return [];
+    const db = await openDb();
+    const tx = db.transaction('photo_metadata', 'readonly');
+    const done = transactionDone(tx);
+    const all = await requestPromise(tx.objectStore('photo_metadata').getAll());
+    await done;
+    return all.sort((a,b) => String(b.captured_at).localeCompare(String(a.captured_at)));
+  }
+
+  async function getStats() {
+    if (!hasIndexedDb()) return { indexedDb:false, events:0, imports:0, photos:0, snapshot:false, lastSavedAt:null };
+    const db = await openDb();
+    const tx = db.transaction(['events','imports','snapshots','progress_photos'], 'readonly');
     const done = transactionDone(tx);
     const events = requestPromise(tx.objectStore('events').count());
     const imports = requestPromise(tx.objectStore('imports').count());
+    const photos = requestPromise(tx.objectStore('progress_photos').count());
     const snapshot = requestPromise(tx.objectStore('snapshots').get(SNAPSHOT_KEY));
-    const [eventCount, importCount, snapshotRecord] = await Promise.all([events, imports, snapshot]);
+    const [eventCount, importCount, photoCount, snapshotRecord] = await Promise.all([events, imports, photos, snapshot]);
     await done;
-    return { indexedDb:true, events:eventCount, imports:importCount, snapshot:!!snapshotRecord, lastSavedAt:snapshotRecord?.saved_at || null };
+    return { indexedDb:true, events:eventCount, imports:importCount, photos:photoCount, snapshot:!!snapshotRecord, lastSavedAt:snapshotRecord?.saved_at || null };
   }
 
   async function exportBackup(localState) {
     return {
-      format: 'zero2fit-backup-v3',
+      format: 'zero2fit-backup-v4',
       exported_at: new Date().toISOString(),
       state: localState || null,
       normalized_events: await getRecentEvents(Number.MAX_SAFE_INTEGER),
-      imports: await getAllImports()
+      imports: await getAllImports(),
+      photo_metadata: await getAllPhotoMetadata(),
+      raw_photos_included: false
     };
   }
 
   async function clearAll() {
     if (!hasIndexedDb()) return { cleared:false, reason:'indexeddb-unavailable' };
     const db = await openDb();
-    const stores = ['snapshots','events','imports','device_connections','photo_metadata'];
+    const stores = ['snapshots','events','imports','device_connections','photo_metadata','progress_photos'];
     const tx = db.transaction(stores, 'readwrite');
     stores.forEach(name => tx.objectStore(name).clear());
     await transactionDone(tx);
@@ -161,5 +230,9 @@
     };
   }
 
-  window.Zero2FitStorage = { DB_NAME, DB_VERSION, openDb, saveSnapshot, loadSnapshot, upsertEvents, recordImport, getRecentEvents, getAllImports, getStats, exportBackup, clearAll, remoteStatus };
+  window.Zero2FitStorage = {
+    DB_NAME, DB_VERSION, openDb, saveSnapshot, loadSnapshot, upsertEvents, recordImport,
+    getRecentEvents, getAllImports, getStats, exportBackup, clearAll, remoteStatus,
+    saveProgressPhoto, getProgressPhotos, getProgressPhoto, deleteProgressPhoto, getAllPhotoMetadata
+  };
 })();
