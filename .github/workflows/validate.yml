@@ -19,6 +19,7 @@ jobs:
         run: |
           node --check app.js
           node --check training-core.mjs
+          node --check adaptive-core.mjs
           node --check storage.js
           node --check ingestion.js
           node --check build003-integration.js
@@ -32,9 +33,11 @@ jobs:
           node --check remote-sync-core.mjs
           node --check remote-sync.js
           node --check build008-device-sync.js
+          node --check build009-adaptive.js
           node --check tools/build-training-catalog.mjs
           node --check tools/validate-fitness-data.mjs
           node --check tools/test-training-planner.mjs
+          node --check tools/test-adaptive-core.mjs
           node --check tools/test-device-ingestion.mjs
           node --check tools/test-device-driven-progress.mjs
           node --check tools/test-remote-sync.mjs
@@ -53,6 +56,7 @@ jobs:
           test -s build007.css
           test -s app.js
           test -s training-core.mjs
+          test -s adaptive-core.mjs
           test -s storage.js
           test -s ingestion.js
           test -s build003-integration.js
@@ -66,6 +70,7 @@ jobs:
           test -s remote-sync-core.mjs
           test -s remote-sync.js
           test -s build008-device-sync.js
+          test -s build009-adaptive.js
           test -s ios/Zero2FitHealthBridge/project.yml
           test -s ios/Zero2FitHealthBridge/Zero2FitHealthBridge.entitlements
           test -s ios/Zero2FitHealthBridge/Sources/HealthKitBridge.swift
@@ -92,6 +97,7 @@ jobs:
           grep -q './build007-adventure.js' index.html
           grep -q './build008-photos.js' index.html
           grep -q './build008-device-sync.js' index.html
+          grep -q 'build009-adaptive.js' build008-device-sync.js
           grep -q '#070b09' build006.css
           grep -q '#b7f34a' build006.css
           grep -q 'progress_photos' storage.js
@@ -112,6 +118,9 @@ jobs:
 
       - name: Test automatic workout planner
         run: node tools/test-training-planner.mjs
+
+      - name: Test adaptive workout engine
+        run: node tools/test-adaptive-core.mjs
 
       - name: Test device ingestion
         run: node tools/test-device-ingestion.mjs

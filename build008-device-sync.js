@@ -200,3 +200,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true });
   else init();
 })();
+
+import('./build009-adaptive.js').catch(error => console.warn('Zero2Fit Build 009 adaptive engine failed to load', error));
