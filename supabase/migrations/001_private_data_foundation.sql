@@ -24,9 +24,11 @@ create table if not exists public.device_connections (
   last_import_at timestamptz,
   metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  unique (user_id, family, coalesce(model, ''), coalesce(app_name, ''))
+  updated_at timestamptz not null default now()
 );
+
+create unique index if not exists device_connections_owner_identity_uidx
+  on public.device_connections (user_id, family, coalesce(model, ''), coalesce(app_name, ''));
 
 create table if not exists public.import_batches (
   id uuid primary key default gen_random_uuid(),
