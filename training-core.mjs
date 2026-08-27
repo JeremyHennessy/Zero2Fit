@@ -126,7 +126,7 @@ export function scoreSubstitute(candidate, current, slot, options = {}) {
 export function rankSubstitutes(exercises, currentExercise, slot, locationKey, substitutionRules = {}) {
   const options = {
     weights: substitutionRules.scoreWeights || DEFAULT_WEIGHTS,
-    preferSimpleEquipment: locationKey !== 'fullGym'
+    preferSimpleEquipment: locationKey === 'home'
   };
   return exercises
     .filter(candidate => candidate.id !== currentExercise.id && locationCompatible(candidate, locationKey))
@@ -154,7 +154,7 @@ function modeSettings(programmingRules, mode) {
 
 function unavailableReason(slot, locationKey) {
   const isPull = slot.intent === 'horizontal_pull' || slot.intent === 'vertical_pull_lats' || slot.preferredPatterns?.some(pattern => pattern.includes('pull'));
-  if (isPull && (locationKey === 'home' || locationKey === 'apartmentGym')) {
+  if (isPull && locationKey === 'home') {
     return 'No true pulling-resistance exercise is available with the confirmed equipment at this location.';
   }
   return `No sufficiently close strength exercise is available for ${slot.intent} with the confirmed equipment.`;
@@ -168,7 +168,7 @@ export function generateWorkout({ exercises, template, locationKey, mode = 'stan
   const minimumScore = Number(substitutionRules.plannerMinimumScore || DEFAULT_PLANNER_MIN_SCORE);
   const slots = template.slots.slice(0, settings.slotLimit).map(slot => {
     const ranked = rankCandidates(exercises, slot, locationKey, {
-      preferSimpleEquipment: locationKey !== 'fullGym',
+      preferSimpleEquipment: locationKey === 'home',
       allowedCategories: slot.allowedCategories || ['strength']
     });
     const previousId = previousSelections[slot.intent];
@@ -232,7 +232,7 @@ export function estimateEnergy({ met, weightLb, durationMinutes }) {
 export function sessionEnergyProfile({ locationKey, mode, energyModel }) {
   const profiles = energyModel?.referenceProfiles || {};
   if (mode === 'quick') return profiles.circuit_light || { code: '02034', met: 3.5, description: 'Circuit training, light effort' };
-  if (locationKey === 'home' || locationKey === 'apartmentGym') return profiles.bodyweight_general || { code: '02056', met: 3.0, description: 'Body weight resistance exercises, general' };
+  if (locationKey === 'home') return profiles.bodyweight_general || { code: '02056', met: 3.0, description: 'Body weight resistance exercises, general' };
   return profiles.resistance_general || { code: '02054', met: 3.5, description: 'Resistance training, multiple exercises' };
 }
 
