@@ -270,3 +270,5 @@ async function init() {
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true });
 else init();
+
+import('./build010-intelligence.js').catch(error => console.warn('Zero2Fit Build 010 personal intelligence failed to load', error));
