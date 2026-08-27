@@ -245,3 +245,5 @@ async function init() {
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true });
 else init();
+
+import('./build011-adventure.js').catch(error => console.warn('Zero2Fit Build 011 Adventure extension failed to load', error));
