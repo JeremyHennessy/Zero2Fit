@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "scope": "Personal Zero2Fit workout generation for a healthy adult starting from a low training baseline. These are planning defaults, not medical advice or a diagnosis-specific prescription.",
+  "evidence": [
+    {
+      "name": "ACSM 2026 Resistance Training Position Stand",
+      "doi": "10.1249/MSS.0000000000003897",
+      "summary": "Progressive resistance training improves strength, hypertrophy and physical function. High-effort resistance training at least twice weekly engaging all major muscle groups is the primary recommendation; home-based and bodyweight resistance training are effective options."
+    },
+    {
+      "name": "CDC Adult Physical Activity Guidelines",
+      "url": "https://www.cdc.gov/physical-activity-basics/guidelines/adults.html",
+      "summary": "Adults should work toward at least 150 minutes of moderate aerobic activity per week plus muscle-strengthening activity on at least 2 days per week."
+    }
+  ],
+  "foundationPhase": {
+    "strengthDaysPerWeek": 2,
+    "optionalThirdDayAfterConsistency": true,
+    "workoutStyle": "full_body",
+    "priority": "consistency_before_complexity",
+    "quickMode": { "targetMinutes": 12, "slotLimit": 3, "defaultSetsPerExercise": 1 },
+    "standardMode": { "targetMinutes": 30, "slotLimit": 4, "defaultSetsPerExercise": 2 },
+    "fullMode": { "targetMinutes": 45, "slotLimit": 5, "defaultSetsPerExercise": 2 },
+    "progressionRule": "When the top of the assigned rep range is completed with controlled form in two consecutive exposures, advance one small step: add repetitions first when load is fixed; otherwise add the smallest practical load and return to the lower end of the rep range.",
+    "progressionRuleType": "Zero2Fit implementation rule",
+    "failureTrainingDefault": false,
+    "notes": "Advanced techniques are not required for the Foundation phase. The planner should prefer exercises that are simple to execute and easy to progress."
+  },
+  "templates": [
+    {
+      "id": "full_body_a",
+      "name": "Full Body A",
+      "slots": [
+        { "intent": "knee_dominant", "preferredPatterns": ["squat", "lunge", "knee_dominant"], "primaryMuscles": ["quadriceps", "glutes"], "repRange": [8, 12] },
+        { "intent": "horizontal_push", "preferredPatterns": ["horizontal_push", "push_other", "upper_push"], "primaryMuscles": ["chest", "triceps"], "repRange": [6, 12] },
+        { "intent": "horizontal_pull", "preferredPatterns": ["horizontal_pull", "pull_other", "upper_back"], "primaryMuscles": ["middle back", "lats"], "repRange": [8, 15] },
+        { "intent": "hip_hinge", "preferredPatterns": ["hinge", "posterior_chain"], "primaryMuscles": ["hamstrings", "glutes"], "repRange": [8, 15] },
+        { "intent": "core_stability", "preferredPatterns": ["core"], "primaryMuscles": ["abdominals"], "repRange": [8, 15] }
+      ]
+    },
+    {
+      "id": "full_body_b",
+      "name": "Full Body B",
+      "slots": [
+        { "intent": "single_leg", "preferredPatterns": ["lunge", "squat", "knee_dominant"], "primaryMuscles": ["quadriceps", "glutes"], "repRange": [8, 12] },
+        { "intent": "vertical_push", "preferredPatterns": ["vertical_push", "shoulder_isolation", "push_other"], "primaryMuscles": ["shoulders", "triceps"], "repRange": [6, 12] },
+        { "intent": "vertical_pull_lats", "preferredPatterns": ["vertical_pull", "pull_other", "horizontal_pull"], "primaryMuscles": ["lats", "biceps"], "repRange": [8, 15] },
+        { "intent": "posterior_chain", "preferredPatterns": ["hinge", "posterior_chain"], "primaryMuscles": ["hamstrings", "glutes", "lower back"], "repRange": [8, 15] },
+        { "intent": "core", "preferredPatterns": ["core"], "primaryMuscles": ["abdominals"], "repRange": [8, 15] }
+      ]
+    }
+  ]
+}
