@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "purpose": "Automatically rank exercise substitutes without requiring manual exercise or equipment entry.",
+  "hardFilters": [
+    "exercise equipment must be available at the selected location",
+    "exercise must not be excluded by a later user-specific restriction",
+    "exercise must have at least one primary muscle or movement-pattern match to the workout slot"
+  ],
+  "scoreWeights": {
+    "sameMovementPattern": 40,
+    "preferredMovementPattern": 28,
+    "samePrimaryMuscle": 22,
+    "primaryMuscleOverlapPerMuscle": 10,
+    "sameForce": 8,
+    "sameMechanic": 5,
+    "sameDifficulty": 4,
+    "oneDifficultyStepAway": 2
+  },
+  "qualityBands": {
+    "80": "direct_substitute",
+    "55": "good_substitute",
+    "35": "partial_substitute",
+    "0": "fallback_only"
+  },
+  "rules": {
+    "preserveIntentBeforeExerciseName": true,
+    "preservePrimaryMuscleBeforeEquipmentPreference": true,
+    "preferSameMovementPattern": true,
+    "preferSimilarDifficulty": true,
+    "allowDifferentEquipmentAtSameLocation": true,
+    "neverAssumeUnavailableEquipment": true,
+    "doNotClaimEquivalentWhenQualityIsFallbackOnly": true
+  },
+  "homePullingLimitation": {
+    "appliesWhen": "selected location has only bodyweight and yoga_mat",
+    "message": "A true loaded lat/back pull may not be available with the confirmed home equipment. Zero2Fit may offer a lower-equivalence bodyweight movement for pattern practice, but it must label the limitation instead of pretending it is an equivalent lat-strength exercise."
+  }
+}
