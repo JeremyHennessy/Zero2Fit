@@ -19,7 +19,7 @@ const IMPLICIT_RULES = [
   { id: 'sled', equipment: 'sled', pattern: /(prowler|sled push|sled drag|sled pull)/i },
   { id: 'partner', equipment: 'partner', pattern: /\bpartner\b/i },
   { id: 'wall', equipment: 'wall', pattern: /(wall sit|wall push|wall handstand|handstand push[- ]?up)/i },
-  { id: 'chair', equipment: 'chair', pattern: /(chair squat|chair dips?)/i }
+  { id: 'chair', equipment: 'chair', pattern: /\bchair\b/i }
 ];
 
 const NON_APPARATUS_SOURCE_EQUIPMENT = new Set(['bodyweight']);
