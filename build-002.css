@@ -1,0 +1,29 @@
+/* Build 002 additions only. Build 001 styles.css remains unchanged. */
+select { font: inherit; color: inherit; }
+
+.workout-controls { margin-bottom: 14px; }
+.location-grid { margin-bottom: 10px; }
+.exercise-details { display: flex; flex-wrap: wrap; gap: 7px 12px; margin-top: 8px; color: var(--muted); font-size: 11px; }
+.exercise-details strong { color: var(--ink); font-weight: 700; }
+.exercise-substitution { display: grid; grid-template-columns: auto minmax(150px, 1fr); gap: 8px; align-items: center; margin-top: 12px; }
+.exercise-substitution label { color: var(--muted); font-size: 11px; font-weight: 700; }
+.exercise-substitution select,
+.device-import-form select,
+.device-import-form input[type="file"] {
+  width: 100%; min-width: 0; border: 1px solid var(--line); border-radius: 10px; background: white; padding: 9px 10px; outline: none;
+}
+.exercise-substitution select:focus,
+.device-import-form select:focus,
+.device-import-form input[type="file"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(91,115,93,.08); }
+.device-import-form { display: grid; gap: 10px; margin-top: 16px; }
+.device-import-form label { color: var(--muted); font-size: 11px; font-weight: 750; }
+.secondary-button { border: 1px solid var(--line); border-radius: 13px; background: #f5f3ee; padding: 12px 16px; font-weight: 750; cursor: pointer; }
+.secondary-button:hover { background: #efede7; }
+.data-tools-grid { margin-bottom: 18px; }
+.data-warning { color: var(--danger); font-size: 12px; min-height: 18px; margin-bottom: 0; }
+.primary-button:disabled,.secondary-button:disabled { opacity: .55; cursor: not-allowed; box-shadow: none; }
+
+@media (max-width: 760px) {
+  .location-grid { grid-template-columns: 1fr; }
+  .exercise-substitution { grid-template-columns: 1fr; }
+}

@@ -7,6 +7,7 @@
   <meta name="description" content="Zero2Fit personal fitness dashboard and progression tracker." />
   <title>Zero2Fit</title>
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./build-002.css" />
 </head>
 <body>
   <div class="app-shell">
@@ -30,7 +31,7 @@
 
       <div class="sidebar-note">
         <strong>Local-first build</strong>
-        <span>Your entries are stored in this browser until device sync is added.</span>
+        <span>Your entries remain usable without a cloud account. Build 002 also mirrors structured data to IndexedDB.</span>
       </div>
     </aside>
 
@@ -41,7 +42,7 @@
           <h1 id="pageTitle">Today</h1>
         </div>
         <div class="topbar-actions">
-          <span class="sync-pill"><span class="sync-dot"></span> Local data</span>
+          <span class="sync-pill"><span class="sync-dot"></span> Local-first</span>
           <button class="icon-button" id="resetDemo" title="Reset local data" aria-label="Reset local data">↻</button>
         </div>
       </header>
@@ -71,10 +72,7 @@
 
           <article class="card momentum-card">
             <div class="card-heading">
-              <div>
-                <div class="eyebrow">Today</div>
-                <h2>Momentum</h2>
-              </div>
+              <div><div class="eyebrow">Today</div><h2>Momentum</h2></div>
               <div class="momentum-ring" id="momentumRing"><span id="momentumValue">0</span></div>
             </div>
             <p class="muted" id="momentumMessage">Complete one useful action to get moving.</p>
@@ -88,20 +86,14 @@
 
         <div class="content-grid">
           <article class="card quest-card">
-            <div class="card-heading">
-              <div>
-                <div class="eyebrow">Daily plan</div>
-                <h2>Quest board</h2>
-              </div>
-              <span class="small-tag">Recovery-safe</span>
-            </div>
+            <div class="card-heading"><div><div class="eyebrow">Daily plan</div><h2>Quest board</h2></div><span class="small-tag">Recovery-safe</span></div>
             <div id="questList" class="quest-list"></div>
           </article>
 
           <article class="card today-workout-card">
             <div class="eyebrow">Recommended next</div>
-            <h2>Full Body A</h2>
-            <p class="muted">Simple foundation session. Pick the version that fits the day.</p>
+            <h2 id="todayWorkoutName">Full Body A</h2>
+            <p class="muted">Simple foundation session · <span id="todayWorkoutLocation">Home</span>. Pick the version that fits the day.</p>
             <div class="mode-grid">
               <button class="mode-button" data-workout-mode="quick"><strong>Quick</strong><span>12 min</span></button>
               <button class="mode-button selected" data-workout-mode="standard"><strong>Standard</strong><span>30 min</span></button>
@@ -111,13 +103,7 @@
           </article>
 
           <article class="card metric-card">
-            <div class="card-heading">
-              <div>
-                <div class="eyebrow">Body</div>
-                <h2>Weight</h2>
-              </div>
-              <span class="source-label">Manual</span>
-            </div>
+            <div class="card-heading"><div><div class="eyebrow">Body</div><h2>Weight</h2></div><span class="source-label" id="weightSourceLabel">Manual</span></div>
             <div class="metric-value"><span id="latestWeight">—</span><small>lb</small></div>
             <p class="trend-line" id="weightTrend">Add your first weigh-in.</p>
             <form id="weightForm" class="inline-form">
@@ -127,13 +113,7 @@
           </article>
 
           <article class="card metric-card">
-            <div class="card-heading">
-              <div>
-                <div class="eyebrow">Activity</div>
-                <h2>Steps</h2>
-              </div>
-              <span class="source-label">Manual</span>
-            </div>
+            <div class="card-heading"><div><div class="eyebrow">Activity</div><h2>Steps</h2></div><span class="source-label" id="stepSourceLabel">Manual</span></div>
             <div class="metric-value"><span id="stepValue">0</span><small>/ 7,000</small></div>
             <div class="progress-track large"><div class="progress-fill" id="stepBar"></div></div>
             <form id="stepsForm" class="inline-form">
@@ -148,12 +128,7 @@
         <div class="character-page-grid">
           <article class="card character-sheet">
             <div class="character-stage">
-              <div class="character-visual large" aria-hidden="true">
-                <div class="avatar-halo"></div>
-                <div class="avatar-head"></div>
-                <div class="avatar-body"></div>
-                <div class="avatar-emblem">I</div>
-              </div>
+              <div class="character-visual large" aria-hidden="true"><div class="avatar-halo"></div><div class="avatar-head"></div><div class="avatar-body"></div><div class="avatar-emblem">I</div></div>
               <div class="title-ribbon" id="characterTitle">The Rebuilder</div>
             </div>
             <div class="character-main-stats">
@@ -181,21 +156,25 @@
             <div class="progress-track large"><div class="progress-fill" id="bossBar"></div></div>
             <p class="muted compact">Boss goals are longer-term objectives. Missing a day never resets them.</p>
           </article>
-
-          <article class="card">
-            <div class="eyebrow">Achievements</div>
-            <h2>Milestones</h2>
-            <div id="achievementGrid" class="achievement-grid"></div>
-          </article>
+          <article class="card"><div class="eyebrow">Achievements</div><h2>Milestones</h2><div id="achievementGrid" class="achievement-grid"></div></article>
         </div>
       </section>
 
       <section class="page" id="page-train">
+        <article class="card workout-controls">
+          <div class="card-heading"><div><div class="eyebrow">Training location</div><h2>Same intent, appropriate equipment</h2></div><span class="small-tag">Auto substitutions</span></div>
+          <div class="mode-grid location-grid">
+            <button class="mode-button selected" data-workout-location="home"><strong>Home</strong><span>Bodyweight + mat</span></button>
+            <button class="mode-button" data-workout-location="apartment"><strong>Apartment Gym</strong><span>Inventory pending</span></button>
+            <button class="mode-button" data-workout-location="gym"><strong>Full Gym</strong><span>Commercial equipment</span></button>
+          </div>
+          <p class="muted compact" id="workoutEquipmentNote"></p>
+        </article>
         <div class="train-header card">
           <div>
             <div class="eyebrow">Workout 1</div>
-            <h2>Full Body A</h2>
-            <p class="muted">Foundation strength · selected mode: <strong id="selectedModeLabel">Standard</strong></p>
+            <h2 id="trainWorkoutName">Full Body A</h2>
+            <p class="muted"><span id="trainWorkoutFocus">Foundation strength</span> · selected mode: <strong id="selectedModeLabel">Standard</strong></p>
           </div>
           <div class="workout-score"><span id="workoutCompletion">0%</span><small>complete</small></div>
         </div>
@@ -206,8 +185,7 @@
       <section class="page" id="page-nutrition">
         <div class="nutrition-grid">
           <article class="card nutrition-summary">
-            <div class="eyebrow">Today</div>
-            <h2>Nutrition</h2>
+            <div class="eyebrow">Today</div><h2>Nutrition</h2>
             <div class="nutrition-numbers">
               <div><span>Calories</span><strong><span id="calorieTotal">0</span> <small>/ 2300</small></strong></div>
               <div><span>Protein</span><strong><span id="proteinTotal">0</span> <small>/ 160 g</small></strong></div>
@@ -215,14 +193,10 @@
             <p class="muted">Targets are placeholders until you explicitly set them. This build does not infer a medical or weight-loss target.</p>
           </article>
           <article class="card">
-            <div class="eyebrow">Fast entry</div>
-            <h2>Add food</h2>
+            <div class="eyebrow">Fast entry</div><h2>Add food</h2>
             <form id="mealForm" class="meal-form">
               <input id="mealName" type="text" placeholder="Meal or food" required />
-              <div class="split-inputs">
-                <input id="mealCalories" type="number" min="0" max="10000" placeholder="Calories" required />
-                <input id="mealProtein" type="number" min="0" max="500" placeholder="Protein g" required />
-              </div>
+              <div class="split-inputs"><input id="mealCalories" type="number" min="0" max="10000" placeholder="Calories" required /><input id="mealProtein" type="number" min="0" max="500" placeholder="Protein g" required /></div>
               <button class="primary-button" type="submit">Add entry</button>
             </form>
           </article>
@@ -235,63 +209,69 @@
 
       <section class="page" id="page-journey">
         <div class="journey-hero card">
-          <div>
-            <div class="eyebrow">Journey</div>
-            <h2>Evidence that you're moving forward</h2>
-            <p class="muted">Zero2Fit will compare you with your own baseline, not with other people.</p>
-          </div>
+          <div><div class="eyebrow">Journey</div><h2>Evidence that you're moving forward</h2><p class="muted">Zero2Fit will compare you with your own baseline, not with other people.</p></div>
           <div class="journey-total"><span>Lifetime XP</span><strong id="journeyXp">0</strong></div>
         </div>
         <div class="content-grid">
-          <article class="card">
-            <div class="eyebrow">Body trend</div>
-            <h2>Weight history</h2>
-            <div id="weightChart" class="weight-chart"></div>
-            <p class="muted compact" id="weightHistoryText">No weigh-ins yet.</p>
-          </article>
-          <article class="card">
-            <div class="eyebrow">Training</div>
-            <h2>Completed workouts</h2>
-            <div class="metric-value"><span id="completedWorkouts">0</span><small> lifetime</small></div>
-            <p class="muted compact">Each finished session advances Strength, Consistency and the Foundation Gate.</p>
-          </article>
-          <article class="card">
-            <div class="eyebrow">This week</div>
-            <h2>Consistency</h2>
-            <div class="week-dots" id="weekDots"></div>
-            <p class="muted compact">A low day does not erase previous work.</p>
-          </article>
-          <article class="card">
-            <div class="eyebrow">Recent XP</div>
-            <h2>Progress log</h2>
-            <div id="xpLog" class="xp-log"></div>
-          </article>
+          <article class="card"><div class="eyebrow">Body trend</div><h2>Weight history</h2><div id="weightChart" class="weight-chart"></div><p class="muted compact" id="weightHistoryText">No weigh-ins yet.</p></article>
+          <article class="card"><div class="eyebrow">Training</div><h2>Completed workouts</h2><div class="metric-value"><span id="completedWorkouts">0</span><small> lifetime</small></div><p class="muted compact">Each finished session advances Strength, Consistency and the Foundation Gate.</p></article>
+          <article class="card"><div class="eyebrow">This week</div><h2>Consistency</h2><div class="week-dots" id="weekDots"></div><p class="muted compact">A low day does not erase previous work.</p></article>
+          <article class="card"><div class="eyebrow">Recent XP</div><h2>Progress log</h2><div id="xpLog" class="xp-log"></div></article>
         </div>
       </section>
 
       <section class="page" id="page-data">
         <div class="data-intro card">
-          <div>
-            <div class="eyebrow">Data architecture</div>
-            <h2>One timeline, many sources</h2>
-            <p class="muted">The app will normalize device/app data but preserve its original source and timestamp. Build 001 uses manual/local entries only.</p>
-          </div>
-          <span class="small-tag">No cloud storage yet</span>
+          <div><div class="eyebrow">Data architecture · Build <span id="buildNumber">002</span></div><h2>One timeline, many sources</h2><p class="muted">Build 002 normalizes device/app data while retaining original source, time and confidence. Local structured storage is active; cloud sync is not yet enabled.</p></div>
+          <span class="small-tag">Local-first</span>
         </div>
+
         <div class="connection-grid">
-          <article class="connection-card connected"><div class="connection-icon">✎</div><div><strong>Manual / local</strong><span>Weight, steps, meals, workouts</span></div><span>Active</span></article>
-          <article class="connection-card"><div class="connection-icon">♥</div><div><strong>Apple Health</strong><span>Requires companion/sync integration</span></div><span>Planned</span></article>
-          <article class="connection-card"><div class="connection-icon">W</div><div><strong>Withings</strong><span>Scale and body composition</span></div><span>Planned</span></article>
-          <article class="connection-card"><div class="connection-icon">G</div><div><strong>Garmin / Fitbit</strong><span>Activity, HR, sleep, workouts</span></div><span>Planned</span></article>
-          <article class="connection-card"><div class="connection-icon">N</div><div><strong>Nutrition imports</strong><span>MyFitnessPal/Cronometer or Zero2Fit logger</span></div><span>Planned</span></article>
+          <article class="connection-card connected"><div class="connection-icon">✎</div><div><strong>Manual / local</strong><span>Weight, steps, meals, tracked workouts</span></div><span>Active</span></article>
+          <article class="connection-card"><div class="connection-icon">A</div><div><strong>Amazfit Active 2 (Round)</strong><span>Zepp → Apple Health → future HealthKit bridge</span></div><span>Prepared</span></article>
+          <article class="connection-card"><div class="connection-icon">R</div><div><strong>RENPHO scale</strong><span>ES-20M reported; ES-CS20M label still to verify · CSV/Apple Health import</span></div><span>Prepared</span></article>
+          <article class="connection-card"><div class="connection-icon">♥</div><div><strong>Apple Health</strong><span>File import supported; automatic access requires native HealthKit companion</span></div><span>Bridge needed</span></article>
+          <article class="connection-card connected"><div class="connection-icon">DB</div><div><strong>IndexedDB</strong><span>Structured snapshots, events and import history</span></div><span id="indexedDbStatus">Starting…</span></article>
+          <article class="connection-card"><div class="connection-icon">S</div><div><strong>Supabase</strong><span id="cloudStatusDetail">Schema/RLS prepared; no project configured.</span></div><span id="cloudStatus">Not configured</span></article>
         </div>
+
+        <div class="content-grid two-col data-tools-grid">
+          <article class="card">
+            <div class="eyebrow">Device data</div><h2>Import measurements</h2>
+            <p class="muted compact">Use RENPHO Health CSV, an extracted Apple Health <code>export.xml</code>, or normalized JSON from a future HealthKit bridge.</p>
+            <form id="deviceImportForm" class="device-import-form">
+              <label for="deviceImportSource">Source format</label>
+              <select id="deviceImportSource">
+                <option value="renpho">RENPHO CSV</option>
+                <option value="apple_health">Apple Health export.xml</option>
+                <option value="normalized_json">Zero2Fit / HealthKit normalized JSON</option>
+              </select>
+              <label for="deviceImportFile">File</label>
+              <input id="deviceImportFile" type="file" accept=".csv,.xml,.json,text/csv,text/xml,application/xml,application/json" />
+              <button id="deviceImportButton" class="primary-button" type="submit">Import into local timeline</button>
+            </form>
+            <p class="data-warning" id="importWarning"></p>
+            <p class="muted compact" id="lastImportSummary">No device file imported yet.</p>
+          </article>
+
+          <article class="card">
+            <div class="eyebrow">Portability</div><h2>Backup local data</h2>
+            <p class="muted">Export current state, normalized events and import history before cloud sync is introduced.</p>
+            <button class="secondary-button full-width" id="exportBackup">Export JSON backup</button>
+            <div class="mini-stats">
+              <div><span>Events</span><strong id="normalizedEventCount">0</strong></div>
+              <div><span>Imports</span><strong id="importRunCount">0</strong></div>
+              <div><span>Saved</span><strong id="lastLocalSave">—</strong></div>
+            </div>
+          </article>
+        </div>
+
         <article class="card data-table-card">
-          <div class="eyebrow">Normalized record examples</div>
-          <h2>Provenance stays visible</h2>
+          <div class="eyebrow">Normalized record examples</div><h2>Provenance stays visible</h2>
           <div class="data-table">
             <div class="data-row head"><span>Metric</span><span>Value</span><span>Source</span><span>Status</span></div>
-            <div class="data-row"><span>Weight</span><span id="dataWeight">—</span><span>Manual</span><span>Observed</span></div>
-            <div class="data-row"><span>Steps</span><span id="dataSteps">0</span><span>Manual</span><span>Observed</span></div>
+            <div class="data-row"><span>Weight</span><span id="dataWeight">—</span><span id="weightSourceLabelTable">Current source</span><span>Observed/imported</span></div>
+            <div class="data-row"><span>Steps</span><span id="dataSteps">0</span><span>Current daily source</span><span>Observed/imported</span></div>
             <div class="data-row"><span>Momentum</span><span id="dataMomentum">0</span><span>Zero2Fit</span><span>Derived</span></div>
             <div class="data-row"><span>Level</span><span id="dataLevel">1</span><span>Zero2Fit</span><span>Derived</span></div>
           </div>
@@ -301,6 +281,9 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="./data/exercises.js"></script>
+  <script src="./storage.js"></script>
+  <script src="./ingestion.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
