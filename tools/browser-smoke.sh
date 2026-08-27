@@ -48,8 +48,8 @@ assert_dom '1111 MET activities'
 
 assert_dom 'Data architecture · Build 003'
 assert_dom 'Import measurements'
-assert_dom 'Amazfit Active 2 (Round)'
-assert_dom 'RENPHO scale'
+assert_dom 'Amazfit / Zepp → Apple Health'
+assert_dom 'RENPHO'
 assert_dom 'IndexedDB'
 assert_dom 'Export JSON backup'
 
