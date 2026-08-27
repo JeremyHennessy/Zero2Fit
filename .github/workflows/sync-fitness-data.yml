@@ -15,6 +15,7 @@ on:
       - 'tools/browser-smoke.sh'
       - 'tools/sync-fitness-data.mjs'
       - 'tools/build-training-catalog.mjs'
+      - 'tools/normalize-generated-metadata.mjs'
       - 'tools/validate-fitness-data.mjs'
       - 'tools/test-training-planner.mjs'
       - 'data/location_profiles.json'
@@ -22,6 +23,10 @@ on:
       - 'data/programming_rules.json'
       - 'data/substitution_rules.json'
       - '.github/workflows/sync-fitness-data.yml'
+
+concurrency:
+  group: fitness-data-sync-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -49,6 +54,9 @@ jobs:
       - name: Derive apparatus-aware training catalog
         run: node tools/build-training-catalog.mjs
 
+      - name: Remove volatile generated metadata
+        run: node tools/normalize-generated-metadata.mjs
+
       - name: Validate generated fitness data
         run: node tools/validate-fitness-data.mjs
 
@@ -65,8 +73,15 @@ jobs:
             echo 'Generated catalogs are already current.'
             exit 0
           fi
+
+          git fetch origin "${GITHUB_REF_NAME}"
+          if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/${GITHUB_REF_NAME})" ]; then
+            echo 'Branch advanced while this refresh was running; a newer workflow run owns the refresh.'
+            exit 0
+          fi
+
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add data/generated
           git commit -m 'Data sync: refresh exercise and MET catalogs [skip ci]'
-          git push origin HEAD:${{ github.ref_name }}
+          git push origin HEAD:${GITHUB_REF_NAME}
