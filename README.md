@@ -1,157 +1,173 @@
 # Zero2Fit
 
-Personal fitness, nutrition, workout and RPG-style progression tracker hosted on GitHub Pages.
+Personal fitness, nutrition, workout and RPG-style progression system hosted on GitHub Pages.
 
-Zero2Fit is intentionally a **one-person app**. It is built around one rule: routine fitness decisions should be automated when reliable data exists, while the underlying source and assumptions remain inspectable.
+Zero2Fit is intentionally a **one-person app**. Routine fitness decisions should be automated when reliable data exists, while observed values, derived values, source provenance and assumptions remain inspectable.
 
 ## Current capabilities
 
-- responsive dark/high-contrast **Today / Adventure / Train / Fuel / Progress / Devices** interface
-- recoverable Momentum score, XP, character attributes, milestones and boss objectives
+- approved responsive dark/high-contrast/lime mobile + desktop UI
+- Today / Adventure / Train / Fuel / Progress / Devices experience
+- Momentum, permanent Fitness XP, character attributes, milestones and boss objectives
+- automatic Adventure combat/progression with enemies, loot, equipment and progression stalls driven by real fitness-derived capability
 - Quick / Standard / Full workout modes
-- automatic Full Body A/B workout generation
+- automatic Full Body A/B generation
 - location-aware workouts for **Home / Apartment Gym / Full Gym**
-- automatic same-location exercise substitutions based on training intent, muscle group, movement pattern and available equipment
+- photo/user-evidence-based Apartment Gym profile, including the confirmed full dumbbell set
+- same-location exercise substitutions by training intent, muscle group, movement pattern and available equipment
 - set-by-set workout tracking
-- automatic workout-duration and MET-based calorie estimates when a body weight is available
+- MET-based energy estimates with observed device workout energy preserved separately
 - manual weight/steps/food entry
-- structured IndexedDB snapshots/events/import history alongside the existing local app state
-- RENPHO CSV, Apple Health XML and normalized HealthKit-bridge JSON import paths
-- source-aware device reconciliation for steps, workouts, sleep, resting HR, HRV and RENPHO body-composition trends
-- conservative verified-device XP rules with duplicate and historical-import protection
-- portable local JSON backup
-- Progress and Devices/provenance views
-- GitHub Pages deployment
+- localStorage active state + structured IndexedDB events/imports/progress photos
+- RENPHO CSV, Apple Health XML and normalized HealthKit JSON import paths
+- source-aware reconciliation for steps, workouts, sleep, resting HR, HRV and body-composition trends
+- duplicate/historical-import protections around device progression
+- local progress-photo capture/alignment/ghosting workflow
+- authenticated private Supabase event sync with Row Level Security
+- native iPhone HealthKit companion source under `ios/Zero2FitHealthBridge`
+- exact HealthKit source-bundle observation + explicit Zepp/RENPHO source verification
+- portable JSON backup without raw progress-photo blobs
+- GitHub Pages deployment and automated browser/data/iOS validation
 
-## Build 003 — storage + device ingestion
+## Device path — Build 008
 
-Build 003 is intentionally additive to Build 002. It is based on `1318e8f84806c8d3ad23b27dc14d13347ef9f1ca` and does not replace the researched workout engine.
+### Amazfit Active 2 (Round)
 
-### Local storage architecture
+```text
+Amazfit Active 2
+  → Zepp
+  → Apple Health / HealthKit
+  → Zero2FitHealthBridge
+  → private Supabase event store
+  → Zero2Fit browser reconciliation
+```
 
-The existing application continues to use `localStorage` for its active state so the approved Build 002 runtime is not rewritten during this integration. Build 003 adds IndexedDB stores for:
+### RENPHO
 
-- state snapshots
-- normalized health/fitness events
-- import history
-- future device connection records
-- future progress-photo metadata
+```text
+RENPHO scale
+  → RENPHO Health
+  → Apple Health / HealthKit
+  → Zero2FitHealthBridge
+  → private Zero2Fit store
+```
 
-Later local app-state changes are mirrored into IndexedDB and new manual weight/step/workout activity is normalized into structured events when detected.
+Historical RENPHO CSV and Apple Health `export.xml` imports remain supported.
 
-### Device paths
+The native bridge deliberately does **not** guess vendor bundle identifiers. It captures exact HealthKit source names/bundle IDs from the physical iPhone into `device_source_observations`. The Devices page requires explicit verification of the matching bundle before the source can participate in permanent device Fitness XP.
 
-**Amazfit Active 2 (Round)**
-
-`Amazfit → Zepp → Apple Health → future native HealthKit companion → Zero2Fit`
-
-**RENPHO scale**
-
-`RENPHO → RENPHO Health → Apple Health → future HealthKit companion → Zero2Fit`
-
-and for history/import:
-
-`RENPHO Health CSV → Zero2Fit normalized event import`
-
-The user reports the scale as ES-20M. RENPHO documentation reviewed for this work lists ES-CS20M in the relevant family; the underside model label remains pending verification.
-
-Build 003 also accepts an extracted Apple Health `export.xml`. This is a migration/diagnostic path, not a substitute for a native HealthKit companion.
-
-Raw Apple Health StepCount events are stored but do not overwrite the daily step total unless a future bridge explicitly marks the event as an aggregated `daily_total`. Imported workouts also do not award Fitness XP yet; deduplication and verification must exist first.
-
-### Future private cloud target
-
-`supabase/schema.sql` defines the planned authenticated/RLS-protected schema and private progress-photo bucket. **No Supabase project, cloud account or private credential is connected by Build 003.**
+An Apple Health import whose `sourceName` merely contains `Zepp`, `Amazfit`, `Apple Watch` or `iPhone` is **not** trusted for permanent progression.
 
 See:
 
-- [`docs/DATA_STORAGE_ARCHITECTURE.md`](docs/DATA_STORAGE_ARCHITECTURE.md)
 - [`docs/DEVICE_INGESTION.md`](docs/DEVICE_INGESTION.md)
-- [`docs/BUILD_003.md`](docs/BUILD_003.md)
+- [`docs/DATA_STORAGE_ARCHITECTURE.md`](docs/DATA_STORAGE_ARCHITECTURE.md)
+- [`docs/BUILD_008_DEVICE_SYNC.md`](docs/BUILD_008_DEVICE_SYNC.md)
+- [`ios/Zero2FitHealthBridge/README.md`](ios/Zero2FitHealthBridge/README.md)
+
+## Private storage
+
+The connected Supabase project uses authenticated Row Level Security. Application tables are user-owned; anon has no application-table privileges; the browser/iOS clients contain only the public Supabase publishable client key, never a service-role/secret key.
+
+Build 008 adds:
+
+- normalized events
+- source observations
+- source verifications
+- import runs
+- workout sessions/sets
+- RPG state/XP ledger
+- progress-photo metadata
+- private `progress-photos` bucket
+
+The live Supabase security advisor reports no security lints. At implementation time the project contains zero auth users, so a personal account must be explicitly created/sign-in completed before private sync writes data.
 
 ## Researched fitness reference data
-
-Build 002 maintains reproducible reference catalogs in the repository rather than requiring a manual exercise or calorie-burn library.
 
 ### Exercise intelligence
 
 Source: [`yuhonas/free-exercise-db`](https://github.com/yuhonas/free-exercise-db), Unlicense/public domain.
 
-Current generated catalog:
+Current canonical source catalog:
 
 - **873 exercises**
-- **188** upstream entries marked bodyweight/body-only
-- **147 confirmed Home-compatible exercises** after Zero2Fit resolves hidden apparatus requirements
-- **873 Full Gym-compatible exercises**
+- **188** source entries marked bodyweight/body-only
+- **147** confirmed Home-compatible exercises after hidden apparatus requirements are resolved
+- **402** Apartment Gym-compatible exercises after the confirmed dumbbell set plus photo-verified stations are applied
+- **873** Full Gym-compatible exercises
 
-The 188 and 147 counts are intentionally different. An upstream exercise can say `body only` while still requiring a pull-up bar, dip station, bench, chair, box, low bar, anchor or similar apparatus. `data/generated/training_exercises.json` stores those derived requirements explicitly, and the location-aware planner uses that apparatus-resolved catalog.
+Home intentionally assumes only bodyweight, yoga mat and ordinary wall. It does not silently invent a chair, bench, pull-up bar, band, weight or anchor.
+
+Apartment Gym currently includes:
+
+- confirmed full dumbbell set
+- HOIST Mi7Smith / cable functional trainer / Smith bar
+- pull-up and dip stations
+- adjustable bench
+- selectorized lat pulldown / low row
+- Life Fitness leg extension / seated leg curl
+- Life Fitness shoulder press
+- Life Fitness pec fly / rear delt
+- Concept2 rower
+- treadmills / elliptical trainers
+- stability balls
+
+Generic `machine` exercises remain capability-filtered so the presence of several machines does not unlock every machine exercise in the source catalog.
 
 ### Energy / calorie estimates
 
 Source: **2024 Adult Compendium of Physical Activities**.
 
-Current canonical catalog:
+- **1,111 identifiable official activity codes** from the canonical downloadable PDF
+- current official website reconciled by five-digit code
+- discrepancies preserved explicitly rather than silently overwritten
 
-- **1,111 identifiable official activity codes** from the downloadable 2024 Compendium PDF
-- current official website reconciled against the PDF by five-digit activity code
-- one current PDF-vs-website MET disagreement preserved explicitly rather than silently resolved
-
-For standard adult MET values Zero2Fit estimates gross workout energy as:
+Standard gross estimate:
 
 `MET × body mass (kg) × duration (minutes) / 60`
 
-Workout calories are always labeled as estimates. A connected-device energy measurement should later be preserved separately as an observed value rather than overwritten by the estimate.
+Device-observed workout energy remains a separate observed field and is preferred for presentation when available; the MET estimate remains the fallback/reference.
 
-See [`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md) for exact source versions, reconciliation, formulas and validation rules.
+See [`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md).
 
-## Training locations
+## Training behavior
 
-### Home
+Workout templates specify training intent rather than hard-coded exercise names. A slot such as `vertical_pull_lats` is resolved against the selected location and available equipment.
 
-Confirmed equipment profile:
+Automatic strength selections must be **good match or better**. Unsupported slots are shown as unavailable rather than filled with unrelated exercises. The **Substitute** action returns other valid same-location matches.
 
-- bodyweight
-- yoga mat
-- ordinary wall
+## RPG integrity
 
-Zero2Fit does not assume a chair, bench, pull-up bar, band, anchor or weights. The current researched catalog therefore has **no good-or-better true horizontal-pull or lat-pull strength substitute at Home**. Those slots are shown as unavailable instead of being replaced with an unrelated exercise or stretch.
+Real fitness activity is the authority for permanent Fitness XP/attributes. Adventure progression can award game gear/materials but cannot fabricate Fitness XP.
 
-### Apartment Gym
+Device-based permanent progression requires a verified native source mapping and continues to use date/duration/deduplication/per-day safeguards. Historical imports do not retroactively create game progression.
 
-Equipment profile status: **photo-verified inventory captured in the repository**.
+## Progress photos
 
-The planner now uses the equipment identified from the supplied Apartment Gym photos rather than inheriting the conservative Home profile. Exercise availability and substitutions continue to be derived from the repository equipment profile, so the user does not need to maintain a manual machine list.
+Raw progress photos remain outside the public repository. Current browser storage keeps raw blobs locally in IndexedDB; JSON backups include metadata only. The Supabase schema contains a private `progress-photos` bucket for authenticated cloud photo storage, but raw-photo cloud upload remains a separate activation/verification step.
 
-### Full Gym
+## Verification automation
 
-Uses a generic standard full-gym inventory including free weights, machines, cable stations and common training apparatus. The profile can later be narrowed to a specific gym without changing workout-history records.
+`.github/workflows/validate.yml` checks:
 
-## Automatic workout selection
+- JavaScript syntax
+- credential-pattern rejection
+- reference-data integrity
+- Home/Apartment/Full Gym workout generation
+- device ingestion/reconciliation and permanent-XP trust gates
+- private-sync contract
+- Adventure engine
+- progress-photo helpers
+- UI compatibility contract
+- headless-browser smoke behavior
 
-Workout templates describe **training intent**, not hard-coded exercise names. For example, a slot can request `vertical_pull_lats`; the planner then selects the best available exercise for the current location.
+`.github/workflows/sync-fitness-data.yml` refreshes the research catalogs monthly/manual and commits normalized changes only when source content changes.
 
-Automatic strength selections must be **good match or better**. A partial/fallback match is not silently inserted. If the selected location cannot support the movement, the app says so and excludes the unavailable slot from workout-completion scoring.
+`.github/workflows/validate-healthkit-bridge.yml` generates the iOS project with XcodeGen and compiles the HealthKit companion against the iOS simulator.
 
-Users can still tap **Substitute** to choose among other good/direct same-location matches without managing equipment metadata themselves.
+## Run web app locally
 
-## Data refresh and verification
-
-`.github/workflows/sync-fitness-data.yml` can be run manually and also refreshes the reference catalogs monthly. It:
-
-1. fetches and normalizes the exercise source;
-2. downloads/parses the official 2024 Adult Compendium PDF;
-3. reconciles the current Compendium webpages;
-4. derives hidden apparatus requirements and location compatibility;
-5. removes volatile generated metadata;
-6. validates catalog integrity;
-7. tests real generated Home/Apartment/Full Gym workouts;
-8. runs the static app in headless Chrome and checks that researched workout data actually renders.
-
-Generated data is committed only when normalized source content changes.
-
-## Run locally
-
-No package install or build step is required.
+No package installation or frontend build step is required.
 
 ```bash
 python -m http.server 8080
@@ -161,14 +177,20 @@ Open `http://localhost:8080`.
 
 ## Deployment
 
-GitHub Pages is configured to publish the repository root from `main` using GitHub's branch-based **pages build and deployment** workflow. The repository intentionally does not maintain a second custom Pages deployment workflow.
+GitHub Pages publishes the repository root from `main` using GitHub's branch-based Pages workflow.
 
 Expected URL:
 
 `https://jeremyhennessy.github.io/Zero2Fit/`
 
-## Data/privacy architecture
+## Physical-device verification still required
 
-Health measurements, device exports, backups and future progress photos must remain outside the public repository. Browser-local data is currently active; future cloud sync must use authenticated private storage and Row Level Security without embedding service-role credentials in GitHub Pages.
+Software implementation and simulator/browser validation cannot establish the real HealthKit contents of the user's iPhone. Before verified native data is allowed to drive permanent progression, the physical device must establish:
 
-See [`docs/PRODUCT_SPEC.md`](docs/PRODUCT_SPEC.md), [`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md), [`docs/DATA_STORAGE_ARCHITECTURE.md`](docs/DATA_STORAGE_ARCHITECTURE.md), and [`docs/DEVICE_INGESTION.md`](docs/DEVICE_INGESTION.md).
+1. the exact Zepp HealthKit source name/bundle ID and categories actually written;
+2. the exact RENPHO Health source name/bundle ID and categories actually written;
+3. representative value agreement against Zepp, RENPHO Health and Apple Health;
+4. physical-device HealthKit background delivery;
+5. the RENPHO underside model label.
+
+Until those checks occur, native/imported data can inform trends and reconciliation but the unverified source cannot earn permanent device XP.

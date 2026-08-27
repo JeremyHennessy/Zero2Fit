@@ -219,14 +219,15 @@
 
   function remoteStatus() {
     const config = window.ZERO2FIT_CONFIG || {};
-    const configured = Boolean(config.supabaseUrl && config.supabaseAnonKey);
+    const configured = Boolean(config.supabaseUrl && (config.supabasePublishableKey || config.supabaseAnonKey));
+    const remote = window.Zero2FitRemoteSync?.status?.();
     return {
       configured,
-      active:false,
-      mode: configured ? 'credentials-present-auth-not-enabled' : 'not-configured',
-      note: configured
-        ? 'Supabase values are present, but remote sync remains disabled until authenticated RLS access is tested.'
-        : 'Local structured storage is active. No Supabase project credentials are embedded in this build.'
+      active:Boolean(remote?.signed_in),
+      mode: remote?.signed_in ? 'authenticated-private-sync' : (configured ? 'configured-sign-in-required' : 'not-configured'),
+      note: remote?.signed_in
+        ? 'Authenticated Supabase sync is active with per-user RLS.'
+        : (configured ? 'Private storage is configured. Sign in on Devices to sync.' : 'Local structured storage is active. No remote project is configured.')
     };
   }
 

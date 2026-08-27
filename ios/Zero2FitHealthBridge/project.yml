@@ -1,0 +1,35 @@
+name: Zero2FitHealthBridge
+options:
+  bundleIdPrefix: com.jeremyhennessy.zero2fit
+  deploymentTarget:
+    iOS: "17.0"
+targets:
+  Zero2FitHealthBridge:
+    type: application
+    platform: iOS
+    sources:
+      - Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.jeremyhennessy.zero2fit.healthbridge
+        PRODUCT_NAME: Zero2FitHealthBridge
+        SWIFT_VERSION: "5.0"
+        CODE_SIGN_ENTITLEMENTS: Zero2FitHealthBridge.entitlements
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Zero2Fit Bridge
+        INFOPLIST_KEY_NSHealthShareUsageDescription: Zero2Fit reads your fitness and recovery data so the private personal dashboard can update without manual entry.
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+    entitlements:
+      path: Zero2FitHealthBridge.entitlements
+    dependencies:
+      - sdk: HealthKit.framework
+      - sdk: Security.framework
+schemes:
+  Zero2FitHealthBridge:
+    build:
+      targets:
+        Zero2FitHealthBridge: all
+    run:
+      config: Debug

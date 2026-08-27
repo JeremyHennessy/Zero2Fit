@@ -1,5 +1,6 @@
--- Zero2Fit Build 003 target Supabase schema.
--- This prepares a future private project. No URL, service-role key or private credential belongs in this repository.
+-- Zero2Fit Build 008 private Supabase schema.
+-- Public clients may use only a Supabase publishable/legacy anon client key plus an authenticated user JWT.
+-- Never place a service-role/secret key in GitHub Pages, the iOS client, repository files, or browser storage.
 
 create extension if not exists pgcrypto;
 
@@ -29,6 +30,34 @@ create table if not exists public.device_connections (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   primary key (user_id, connection_id)
+);
+
+-- Raw observation is not authorization. The HealthKit bridge records every exact source bundle/metric here first.
+create table if not exists public.device_source_observations (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  source_bundle_id text not null,
+  source_name text,
+  metric_type text not null,
+  sample_count bigint not null default 0,
+  first_observed_at timestamptz,
+  last_observed_at timestamptz,
+  last_sync_at timestamptz not null default now(),
+  metadata jsonb not null default '{}'::jsonb,
+  primary key (user_id, source_bundle_id, metric_type)
+);
+
+-- Only explicit source verification may allow HealthKit bridge records to drive permanent device XP.
+create table if not exists public.device_source_verifications (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  verification_id uuid not null default gen_random_uuid(),
+  provider text not null,
+  source_bundle_id text not null,
+  source_name text,
+  metric_types text[] not null default '{}'::text[],
+  verified_at timestamptz not null default now(),
+  evidence jsonb not null default '{}'::jsonb,
+  primary key (user_id, verification_id),
+  unique (user_id, provider, source_bundle_id)
 );
 
 create table if not exists public.normalized_events (
@@ -99,6 +128,7 @@ create table if not exists public.workout_sets (
   primary key (user_id, set_id),
   foreign key (user_id, session_id) references public.workout_sessions(user_id, session_id) on delete cascade
 );
+create index if not exists workout_sets_user_session_idx on public.workout_sets (user_id, session_id);
 
 create table if not exists public.fitness_xp_ledger (
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -148,10 +178,13 @@ create table if not exists public.progress_photo_assets (
   primary key (user_id, photo_id),
   foreign key (user_id, session_id) references public.progress_photo_sessions(user_id, session_id) on delete cascade
 );
+create index if not exists progress_photo_assets_user_session_idx on public.progress_photo_assets (user_id, session_id);
 
 alter table public.profiles enable row level security;
 alter table public.user_preferences enable row level security;
 alter table public.device_connections enable row level security;
+alter table public.device_source_observations enable row level security;
+alter table public.device_source_verifications enable row level security;
 alter table public.normalized_events enable row level security;
 alter table public.import_runs enable row level security;
 alter table public.workout_sessions enable row level security;
@@ -165,20 +198,32 @@ do $$
 declare table_name text;
 begin
   foreach table_name in array array[
-    'profiles','user_preferences','device_connections','normalized_events','import_runs','workout_sessions',
-    'workout_sets','fitness_xp_ledger','rpg_state','progress_photo_sessions','progress_photo_assets'
+    'profiles','user_preferences','device_connections','device_source_observations','device_source_verifications',
+    'normalized_events','import_runs','workout_sessions','workout_sets','fitness_xp_ledger','rpg_state',
+    'progress_photo_sessions','progress_photo_assets'
   ]
   loop
     execute format('drop policy if exists "own rows select" on public.%I', table_name);
     execute format('drop policy if exists "own rows insert" on public.%I', table_name);
     execute format('drop policy if exists "own rows update" on public.%I', table_name);
     execute format('drop policy if exists "own rows delete" on public.%I', table_name);
-    execute format('create policy "own rows select" on public.%I for select using (auth.uid() = user_id)', table_name);
-    execute format('create policy "own rows insert" on public.%I for insert with check (auth.uid() = user_id)', table_name);
-    execute format('create policy "own rows update" on public.%I for update using (auth.uid() = user_id) with check (auth.uid() = user_id)', table_name);
-    execute format('create policy "own rows delete" on public.%I for delete using (auth.uid() = user_id)', table_name);
+    execute format('create policy "own rows select" on public.%I for select to authenticated using ((select auth.uid()) = user_id)', table_name);
+    execute format('create policy "own rows insert" on public.%I for insert to authenticated with check ((select auth.uid()) = user_id)', table_name);
+    execute format('create policy "own rows update" on public.%I for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id)', table_name);
+    execute format('create policy "own rows delete" on public.%I for delete to authenticated using ((select auth.uid()) = user_id)', table_name);
   end loop;
 end $$;
+
+-- Explicitly keep the Data API surface authenticated-only and least-privilege.
+grant usage on schema public to authenticated;
+revoke all privileges on table public.profiles, public.user_preferences, public.device_connections,
+  public.device_source_observations, public.device_source_verifications, public.normalized_events,
+  public.import_runs, public.workout_sessions, public.workout_sets, public.fitness_xp_ledger,
+  public.rpg_state, public.progress_photo_sessions, public.progress_photo_assets from anon, authenticated;
+grant select, insert, update, delete on table public.profiles, public.user_preferences, public.device_connections,
+  public.device_source_observations, public.device_source_verifications, public.normalized_events,
+  public.import_runs, public.workout_sessions, public.workout_sets, public.fitness_xp_ledger,
+  public.rpg_state, public.progress_photo_sessions, public.progress_photo_assets to authenticated;
 
 insert into storage.buckets (id, name, public)
 values ('progress-photos', 'progress-photos', false)
@@ -189,20 +234,17 @@ drop policy if exists "own progress photos insert" on storage.objects;
 drop policy if exists "own progress photos update" on storage.objects;
 drop policy if exists "own progress photos delete" on storage.objects;
 
-create policy "own progress photos select" on storage.objects for select using (
-  bucket_id = 'progress-photos' and (storage.foldername(name))[1] = auth.uid()::text
+create policy "own progress photos select" on storage.objects for select to authenticated using (
+  bucket_id = 'progress-photos' and (storage.foldername(name))[1] = (select auth.uid())::text
 );
-create policy "own progress photos insert" on storage.objects for insert with check (
-  bucket_id = 'progress-photos' and (storage.foldername(name))[1] = auth.uid()::text
+create policy "own progress photos insert" on storage.objects for insert to authenticated with check (
+  bucket_id = 'progress-photos' and (storage.foldername(name))[1] = (select auth.uid())::text
 );
-create policy "own progress photos update" on storage.objects for update using (
-  bucket_id = 'progress-photos' and (storage.foldername(name))[1] = auth.uid()::text
+create policy "own progress photos update" on storage.objects for update to authenticated using (
+  bucket_id = 'progress-photos' and (storage.foldername(name))[1] = (select auth.uid())::text
 ) with check (
-  bucket_id = 'progress-photos' and (storage.foldername(name))[1] = auth.uid()::text
+  bucket_id = 'progress-photos' and (storage.foldername(name))[1] = (select auth.uid())::text
 );
-create policy "own progress photos delete" on storage.objects for delete using (
-  bucket_id = 'progress-photos' and (storage.foldername(name))[1] = auth.uid()::text
+create policy "own progress photos delete" on storage.objects for delete to authenticated using (
+  bucket_id = 'progress-photos' and (storage.foldername(name))[1] = (select auth.uid())::text
 );
-
--- Browser rule: only a public anon key may be used client-side, and only with authenticated RLS.
--- Never place a Supabase service-role key in GitHub Pages, repository files or client JavaScript.

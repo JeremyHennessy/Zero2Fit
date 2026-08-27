@@ -41,9 +41,13 @@ export function sourcePriority(event = {}) {
 }
 
 export function isTrustedDeviceEvent(event = {}) {
-  if (event?.metadata?.verified === true && event.source_provider === 'healthkit_bridge') return true;
-  const text = sourceText(event).toLowerCase();
-  return /zepp|amazfit|apple watch|iphone/.test(text) && event.source_provider === 'apple_health';
+  const metadata = event?.metadata || {};
+  return event?.source_provider === 'healthkit_bridge'
+    && metadata.bridge_transport_verified === true
+    && metadata.verified === true
+    && metadata.source_verification_status === 'verified'
+    && Boolean(metadata.source_bundle_id)
+    && Boolean(metadata.source_verification_id);
 }
 
 export function durationMinutes(event = {}) {
