@@ -270,8 +270,8 @@
         </div>
         <div class="connection-grid">
           <article class="connection-card connected"><div class="connection-icon">✎</div><div><strong>Manual / local</strong><span>Weight, steps, meals, workouts</span></div><span>Active</span></article>
-          <article class="connection-card"><div class="connection-icon">♥</div><div><strong>Apple Health</strong><span>Requires companion/sync integration</span></div><span>Planned</span></article>
-          <article class="connection-card"><div class="connection-icon">W</div><div><strong>Withings</strong><span>Scale and body composition</span></div><span>Planned</span></article>
+          <article class="connection-card connected"><div class="connection-icon">♥</div><div><strong>Amazfit / Zepp → Apple Health</strong><span>HealthKit companion source capture + private sync</span></div><span>Bridge ready</span></article>
+          <article class="connection-card connected"><div class="connection-icon">R</div><div><strong>RENPHO</strong><span>CSV import + Apple Health bridge path</span></div><span>Bridge ready</span></article>
           <article class="connection-card"><div class="connection-icon">G</div><div><strong>Garmin / Fitbit</strong><span>Activity, HR, sleep, workouts</span></div><span>Planned</span></article>
           <article class="connection-card"><div class="connection-icon">N</div><div><strong>Nutrition imports</strong><span>MyFitnessPal/Cronometer or Zero2Fit logger</span></div><span>Planned</span></article>
         </div>
@@ -291,12 +291,15 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="./zero2fit-config.js"></script>
   <script src="./storage.js"></script>
+  <script src="./remote-sync.js"></script>
   <script src="./ingestion.js"></script>
   <script src="./app.js"></script>
   <script src="./build003-integration.js"></script>
   <script src="./build004-integration.js"></script>
   <script src="./build007-adventure.js"></script>
   <script src="./build008-photos.js"></script>
+  <script src="./build008-device-sync.js"></script>
 </body>
 </html>
