@@ -10,6 +10,7 @@ on:
       - agent/build-002-location-exercise-substitutions
     paths:
       - 'tools/sync-fitness-data.mjs'
+      - 'tools/build-training-catalog.mjs'
       - 'tools/validate-fitness-data.mjs'
       - 'data/location_profiles.json'
       - 'data/energy_model.json'
@@ -34,6 +35,9 @@ jobs:
 
       - name: Fetch and normalize exercise + MET catalogs
         run: node tools/sync-fitness-data.mjs
+
+      - name: Derive apparatus-aware training catalog
+        run: node tools/build-training-catalog.mjs
 
       - name: Validate generated fitness data
         run: node tools/validate-fitness-data.mjs
