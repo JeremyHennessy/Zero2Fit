@@ -10,6 +10,7 @@ const DEFAULT_WEIGHTS = {
 };
 
 const LEVEL_ORDER = { beginner: 0, intermediate: 1, expert: 2 };
+const DEFAULT_PLANNER_MIN_SCORE = 55;
 
 function unique(values) {
   return [...new Set(values.filter(Boolean))];
@@ -83,8 +84,10 @@ export function scoreExerciseForSlot(exercise, slot, options = {}) {
 }
 
 export function rankCandidates(exercises, slot, locationKey, options = {}) {
+  const allowedCategories = options.allowedCategories || null;
   return exercises
     .filter(exercise => locationCompatible(exercise, locationKey))
+    .filter(exercise => !allowedCategories || allowedCategories.includes(exercise.category))
     .map(exercise => ({ exercise, ...scoreExerciseForSlot(exercise, slot, options) }))
     .filter(item => item.score > 0)
     .sort((a, b) => b.score - a.score || a.exercise.name.localeCompare(b.exercise.name));
@@ -127,6 +130,7 @@ export function rankSubstitutes(exercises, currentExercise, slot, locationKey, s
   };
   return exercises
     .filter(candidate => candidate.id !== currentExercise.id && locationCompatible(candidate, locationKey))
+    .filter(candidate => !currentExercise.category || candidate.category === currentExercise.category)
     .map(candidate => ({
       exercise: candidate,
       ...scoreSubstitute(candidate, currentExercise, slot, options)
@@ -148,25 +152,53 @@ function modeSettings(programmingRules, mode) {
   };
 }
 
+function unavailableReason(slot, locationKey) {
+  const isPull = slot.intent === 'horizontal_pull' || slot.intent === 'vertical_pull_lats' || slot.preferredPatterns?.some(pattern => pattern.includes('pull'));
+  if (isPull && (locationKey === 'home' || locationKey === 'apartmentGym')) {
+    return 'No true pulling-resistance exercise is available with the confirmed equipment at this location.';
+  }
+  return `No sufficiently close strength exercise is available for ${slot.intent} with the confirmed equipment.`;
+}
+
 export function generateWorkout({ exercises, template, locationKey, mode = 'standard', previousSelections = {}, programmingRules = {}, substitutionRules = {} }) {
   if (!template?.slots?.length) return { slots: [], targetMinutes: 0, warnings: ['Workout template has no slots.'] };
   const settings = modeSettings(programmingRules, mode);
   const selectedIds = new Set();
   const warnings = [];
+  const minimumScore = Number(substitutionRules.plannerMinimumScore || DEFAULT_PLANNER_MIN_SCORE);
   const slots = template.slots.slice(0, settings.slotLimit).map(slot => {
-    const ranked = rankCandidates(exercises, slot, locationKey, { preferSimpleEquipment: locationKey !== 'fullGym' });
+    const ranked = rankCandidates(exercises, slot, locationKey, {
+      preferSimpleEquipment: locationKey !== 'fullGym',
+      allowedCategories: slot.allowedCategories || ['strength']
+    });
     const previousId = previousSelections[slot.intent];
-    let chosen = previousId ? ranked.find(item => item.exercise.id === previousId) : null;
-    if (!chosen || selectedIds.has(chosen.exercise.id)) chosen = ranked.find(item => !selectedIds.has(item.exercise.id));
+    let chosen = previousId ? ranked.find(item => item.exercise.id === previousId && item.score >= minimumScore) : null;
+    if (!chosen || selectedIds.has(chosen.exercise.id)) chosen = ranked.find(item => !selectedIds.has(item.exercise.id) && item.score >= minimumScore);
+
     if (!chosen) {
-      warnings.push(`No compatible exercise found for ${slot.intent}.`);
-      return { slot, exercise: null, score: 0, quality: 'unavailable', reasons: [], sets: settings.defaultSetsPerExercise };
+      const fallback = ranked.find(item => !selectedIds.has(item.exercise.id)) || null;
+      const reason = unavailableReason(slot, locationKey);
+      warnings.push(reason);
+      return {
+        slot,
+        exercise: null,
+        score: 0,
+        quality: 'unavailable',
+        reasons: [],
+        sets: 0,
+        repRange: slot.repRange || [8, 12],
+        fallback: fallback ? {
+          exercise: fallback.exercise,
+          score: fallback.score,
+          quality: qualityBand(fallback.score, substitutionRules.qualityBands),
+          reasons: fallback.reasons
+        } : null,
+        unavailableReason: reason
+      };
     }
+
     selectedIds.add(chosen.exercise.id);
     const quality = qualityBand(chosen.score, substitutionRules.qualityBands);
-    if ((slot.intent === 'vertical_pull_lats' || slot.primaryMuscles?.includes('lats')) && locationKey !== 'fullGym' && quality === 'fallback_only') {
-      warnings.push('No true loaded lat pull is available with the confirmed equipment; the selected movement is pattern practice only.');
-    }
     return {
       slot,
       exercise: chosen.exercise,
@@ -174,11 +206,13 @@ export function generateWorkout({ exercises, template, locationKey, mode = 'stan
       quality,
       reasons: chosen.reasons,
       sets: settings.defaultSetsPerExercise,
-      repRange: slot.repRange || [8, 12]
+      repRange: slot.repRange || [8, 12],
+      fallback: null,
+      unavailableReason: null
     };
   });
 
-  return { slots, targetMinutes: settings.targetMinutes, warnings };
+  return { slots, targetMinutes: settings.targetMinutes, warnings: unique(warnings) };
 }
 
 export function estimateEnergy({ met, weightLb, durationMinutes }) {
