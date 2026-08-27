@@ -1,0 +1,194 @@
+/* Build 006 — approved mockup visual baseline
+   Dark, high-contrast fitness dashboard with lime-green accents. */
+body.build004 {
+  --z4-bg: #070b09;
+  --z4-surface: #101612;
+  --z4-surface-2: #151d18;
+  --z4-ink: #f4f8f5;
+  --z4-muted: #8d9b92;
+  --z4-line: #253129;
+  --z4-green: #b7f34a;
+  --z4-green-dark: #9fe033;
+  --z4-green-soft: rgba(183, 243, 74, .12);
+  --z4-violet: #9486ff;
+  --z4-violet-soft: rgba(148, 134, 255, .13);
+  --z4-bronze: #e2ae62;
+  --z4-bronze-soft: rgba(226, 174, 98, .13);
+  --z4-shadow: 0 18px 55px rgba(0,0,0,.34);
+  color: var(--z4-ink);
+  background:
+    radial-gradient(circle at 86% -8%, rgba(183,243,74,.11), transparent 30rem),
+    radial-gradient(circle at 18% 108%, rgba(148,134,255,.09), transparent 34rem),
+    #070b09;
+}
+
+body.build004 .sidebar {
+  border-right-color: #202b24;
+  background: rgba(9,14,11,.94);
+  box-shadow: 12px 0 38px rgba(0,0,0,.15);
+}
+body.build004 .brand-mark {
+  color:#0b100d;
+  background: linear-gradient(145deg,#caff5c,#91d82f);
+  box-shadow: 0 12px 34px rgba(183,243,74,.16);
+}
+body.build004 .brand-name { color:#f6faf7; }
+body.build004 .brand-subtitle,
+body.build004 .sidebar-note span,
+body.build004 .z4-page-subtitle { color:#839188; }
+body.build004 .sidebar-note { color:#e8f0eb; border-color:#253129; background:#0e1511; }
+body.build004 .nav-item { color:#7f8c84; }
+body.build004 .nav-item:hover { background:#121b15; color:#dce6df; }
+body.build004 .nav-item.active { color:#c8ff5a; background:rgba(183,243,74,.09); }
+body.build004 .z4-nav-icon { background:#111914; border-color:#26332b; color:#9eaca3; }
+body.build004 .nav-item.active .z4-nav-icon { color:#0b100d; background:#b7f34a; box-shadow:0 4px 16px rgba(183,243,74,.15); }
+
+body.build004 .topbar h1,
+body.build004 .card h2,
+body.build004 .metric-value span { color:#f5f8f6; }
+body.build004 .topbar .eyebrow,
+body.build004 .eyebrow { color:#aeea42; }
+body.build004 .sync-pill,
+body.build004 .small-tag,
+body.build004 .source-label,
+body.build004 .icon-button {
+  color:#9aa79f;
+  background:#101712;
+  border-color:#27342c;
+  box-shadow:none;
+}
+body.build004 .sync-dot { background:#b7f34a; box-shadow:0 0 0 4px rgba(183,243,74,.10); }
+body.build004 .icon-button:hover { color:#c8ff5a; border-color:#3b4b40; }
+
+body.build004 .card,
+body.build004 .z4-sensor,
+body.build004 .z4-body-metric,
+body.build004 .connection-card,
+body.build004 .exercise-card,
+body.build004 .training-context-card {
+  color:#eef4f0;
+  background:linear-gradient(180deg,#121914 0%,#0e1410 100%);
+  border-color:#253129;
+  box-shadow:0 18px 45px rgba(0,0,0,.25);
+}
+body.build004 .muted,
+body.build004 .exercise-meta,
+body.build004 .z4-device-line { color:#8c9a91; }
+body.build004 .progress-track { background:#253027; }
+body.build004 .progress-fill { background:linear-gradient(90deg,#93d92f,#c9ff5b); box-shadow:0 0 18px rgba(183,243,74,.14); }
+body.build004 .primary-button {
+  color:#0a0f0c;
+  background:linear-gradient(135deg,#a5e63a,#c9ff5b);
+  border:1px solid rgba(213,255,130,.55);
+  box-shadow:0 12px 28px rgba(183,243,74,.15);
+}
+body.build004 .primary-button:hover { filter:brightness(1.05); transform:translateY(-1px); }
+body.build004 .z4-secondary,
+body.build004 .secondary-button,
+body.build004 .text-button {
+  color:#dbe6df;
+  background:#151d18;
+  border-color:#2b3830;
+}
+body.build004 input,
+body.build004 select {
+  color:#eef5f0 !important;
+  background:#0c120e !important;
+  border-color:#2b3830 !important;
+}
+body.build004 input::placeholder { color:#66736b; }
+
+/* Today */
+body.build004 .character-summary {
+  background:
+    radial-gradient(circle at 10% 20%,rgba(183,243,74,.12),transparent 22rem),
+    radial-gradient(circle at 94% 5%,rgba(148,134,255,.12),transparent 22rem),
+    linear-gradient(140deg,#121a14,#0c120f 66%,#111019);
+  border-color:#31402f;
+}
+body.build004 .character-summary::after { background:radial-gradient(circle,rgba(183,243,74,.10),transparent 68%); }
+body.build004 .avatar-halo { background:linear-gradient(145deg,rgba(183,243,74,.19),rgba(148,134,255,.16)); border:1px solid rgba(183,243,74,.15); }
+body.build004 .avatar-body { background:linear-gradient(150deg,#2b3e30,#151e18); box-shadow:0 18px 40px rgba(0,0,0,.35); }
+body.build004 .avatar-head { border-color:#62736a; background:#0e1511; }
+body.build004 .avatar-emblem { color:#c9ff5b; border-color:#8fca31; background:#172013; }
+body.build004 .level-badge { color:#0a0f0c; background:#b7f34a; }
+body.build004 .momentum-card,
+body.build004 .z4-manual-card { background:linear-gradient(180deg,#121914,#0d130f); }
+body.build004 .momentum-ring { background:conic-gradient(#b7f34a calc(var(--p)*1%),#273129 0); }
+body.build004 .momentum-ring::after { background:#111813; }
+body.build004 .mini-stats div { background:#151d18; border-color:#253129; }
+body.build004 .z4-sensor-icon { color:#c8ff5a; background:rgba(183,243,74,.10); border:1px solid rgba(183,243,74,.12); }
+body.build004 .z4-sensor span { color:#7f8e85; }
+body.build004 .z4-sensor small { color:#6f7d74; }
+body.build004 .z4-feature-card::before { background:linear-gradient(#c8ff5a,#86cc2b); }
+body.build004 .mode-button { color:#b9c5be; background:#111813; border-color:#2a362e; }
+body.build004 .mode-button.selected { color:#c8ff5a; background:rgba(183,243,74,.10); border-color:#526c38; }
+body.build004 .quest-item { color:#dce6df; background:#111813; border-color:#253129; }
+body.build004 .quest-item.done { background:rgba(183,243,74,.075); border-color:#435733; }
+body.build004 .quest-item.done .quest-check { color:#0a0f0c; background:#b7f34a; border-color:#b7f34a; }
+body.build004 .quest-xp { color:#e3ae61; }
+
+/* Adventure */
+body.build004 .character-stage {
+  background:
+    radial-gradient(circle at 50% 10%,rgba(183,243,74,.09),transparent 30%),
+    radial-gradient(circle at 80% 70%,rgba(148,134,255,.10),transparent 38%),
+    linear-gradient(160deg,#121b15,#0c120f 64%,#111018);
+  border-color:#26332b;
+}
+body.build004 .title-ribbon { color:#c8ff5a; background:#080d0a; border:1px solid #2d3a31; }
+body.build004 .attribute-card { background:linear-gradient(180deg,#121914,#0e1410); }
+body.build004 .z4-frontier-card {
+  background:
+    radial-gradient(circle at 90% 10%,rgba(183,243,74,.20),transparent 26rem),
+    linear-gradient(135deg,#172218,#0d140f 72%);
+  border:1px solid #35452f;
+  box-shadow:0 24px 64px rgba(0,0,0,.34);
+}
+body.build004 .z4-frontier-card .eyebrow { color:#b7f34a; }
+body.build004 .z4-frontier-card h2 { color:#f6faf7; }
+body.build004 .z4-frontier-card p { color:#94a39a; }
+body.build004 .z4-frontier-tags span,
+body.build004 .z4-frontier-stats div { background:rgba(255,255,255,.035); border-color:#30402f; }
+body.build004 .z4-frontier-stats span { color:#8f9e95; }
+body.build004 .boss-card { border-top-color:#9486ff; }
+body.build004 .achievement-icon { color:#e2ae62; background:rgba(226,174,98,.11); }
+
+/* Train / Fuel / Progress */
+body.build004 .train-header { background:linear-gradient(135deg,#121914,#0d1510); }
+body.build004 .workout-score { color:#c8ff5a; background:rgba(183,243,74,.10); }
+body.build004 .location-button { color:#aab7af !important; background:#101712 !important; border-color:#2b3830 !important; }
+body.build004 .location-button.selected { color:#c8ff5a !important; background:rgba(183,243,74,.10) !important; border-color:#526c38 !important; }
+body.build004 .nutrition-summary { background:linear-gradient(140deg,#17160f,#101511); border-color:#383426; }
+body.build004 .nutrition-numbers > div { border-color:#383426; }
+body.build004 .z4-progress-hero { background:linear-gradient(135deg,#121a14,#0d130f 54%,#111019); }
+body.build004 .z4-body-metric > span { color:#829087; }
+body.build004 .z4-body-metric > small,
+body.build004 .z4-body-metric strong small { color:#758278; }
+body.build004 .z4-photo-frames { background:linear-gradient(135deg,#111914,#121019); }
+body.build004 .z4-photo-frames span { color:#7f8e85; background:rgba(255,255,255,.025); border-color:#3a493f; }
+body.build004 .z4-status-chip { color:#b4aaff; background:rgba(148,134,255,.12); border:1px solid rgba(148,134,255,.20); }
+
+/* Devices */
+body.build004 .z4-devices-hero { background:linear-gradient(135deg,#121b15,#0c120f); }
+body.build004 .connected .connection-icon,
+body.build004 .build003-connected .connection-icon { color:#c8ff5a; background:rgba(183,243,74,.10); }
+body.build004 .data-row { border-color:#243028; }
+body.build004 .data-row.head { color:#8f9d94; background:#151d18; }
+body.build004 .week-dot { color:#7d8a82; background:#151d18; }
+body.build004 .week-dot.active { color:#0a0f0c; background:#b7f34a; }
+body.build004 .weight-bar { background:linear-gradient(180deg,#c8ff5a,#83c729); }
+body.build004 .xp-log-row span { color:#e2ae62; }
+body.build004 .toast { color:#f5f8f6; background:#151d18; border:1px solid #2d3b32; }
+
+@media (max-width:820px) {
+  body.build004 { background:#070b09; }
+  body.build004 .sidebar {
+    background:rgba(9,14,11,.96);
+    border-top-color:#26322a;
+    box-shadow:0 -14px 38px rgba(0,0,0,.32);
+  }
+  body.build004 .nav-item { background:transparent; }
+  body.build004 .nav-item.active .z4-nav-icon { color:#0a0f0c; background:#b7f34a; }
+  body.build004 .card { box-shadow:0 12px 34px rgba(0,0,0,.28); }
+}
