@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-27T15:09:38.412Z",
+  "generatedAt": "2026-08-27T15:19:54.083Z",
   "sources": {
     "exerciseCatalog": {
       "repository": "yuhonas/free-exercise-db",
@@ -9,7 +9,9 @@
     },
     "metCatalog": {
       "name": "2024 Adult Compendium of Physical Activities",
-      "sourceUrl": "https://pacompendium.com/adult-compendium/",
+      "canonical": "official PDF",
+      "sourceUrl": "https://pacompendium.com/wp-content/uploads/2025/02/1_2024-adult-compendium_1_2024.pdf",
+      "websiteIndex": "https://pacompendium.com/adult-compendium/",
       "edition": 2024
     }
   },
@@ -18,6 +20,15 @@
     "metActivities": 1111,
     "homeCompatibleExercises": 188,
     "fullGymCompatibleExercises": 873
+  },
+  "reconciliation": {
+    "publishedReportedTotal": 1114,
+    "publishedHeadingSum": 1113,
+    "officialPdfParsedRows": 1111,
+    "currentWebsiteParsedRows": 1111,
+    "pdfOnlyCount": 0,
+    "websiteOnlyCount": 0,
+    "metMismatchCount": 1
   },
   "byEquipment": {
     "bodyweight": 188,
