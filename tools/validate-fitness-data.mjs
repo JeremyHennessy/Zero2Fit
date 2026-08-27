@@ -86,15 +86,17 @@ for (const requiredLocation of ['home', 'apartmentGym', 'fullGym']) {
   if (!locations[requiredLocation]) fail(`Missing location profile ${requiredLocation}`);
 }
 
-if (locations.apartmentGym.inventoryStatus !== 'verified_from_photos') fail('Apartment gym must be marked photo-verified after the equipment review');
-for (const requiredEquipment of ['cable_machine', 'machine', 'bench', 'pullup_bar', 'dip_station', 'stability_ball']) {
-  if (!apartmentInventory.has(requiredEquipment)) fail(`Apartment gym is missing verified equipment ${requiredEquipment}`);
+if (locations.apartmentGym.inventoryStatus !== 'verified_from_photos') fail('Apartment gym must retain the verified inventory baseline');
+for (const requiredEquipment of ['dumbbell', 'cable_machine', 'machine', 'bench', 'pullup_bar', 'dip_station', 'stability_ball']) {
+  if (!apartmentInventory.has(requiredEquipment)) fail(`Apartment gym is missing confirmed equipment ${requiredEquipment}`);
 }
-if (apartmentInventory.has('dumbbell') || apartmentInventory.has('barbell') || apartmentInventory.has('kettlebell')) {
-  fail('Apartment gym must not infer unpictured free weights');
+if (apartmentInventory.has('barbell') || apartmentInventory.has('kettlebell') || apartmentInventory.has('resistance_band') || apartmentInventory.has('box') || apartmentInventory.has('roman_chair') || apartmentInventory.has('sled')) {
+  fail('Apartment gym must not infer unsupported equipment beyond the confirmed dumbbell set');
 }
+const confirmedDumbbells = locations.apartmentGym.verifiedStations?.find(station => station.id === 'dumbbell_set');
+if (confirmedDumbbells?.identificationConfidence !== 'user_confirmed') fail('Apartment dumbbell provenance must remain explicitly user-confirmed');
 if (!Array.isArray(apartmentMachineKeywords) || apartmentMachineKeywords.length < 5) fail('Apartment machine capability filter is missing');
-if (!Array.isArray(locations.apartmentGym.verifiedStations) || locations.apartmentGym.verifiedStations.length < 8) fail('Apartment photo inventory is incomplete');
+if (!Array.isArray(locations.apartmentGym.verifiedStations) || locations.apartmentGym.verifiedStations.length < 9) fail('Apartment inventory evidence is incomplete');
 
 const smithSquat = trainingExercises.find(x => x.name === 'Smith Machine Squat');
 if (!smithSquat?.locationCompatibility.apartmentGym) fail('Verified Smith station did not unlock Smith Machine Squat');
@@ -107,6 +109,6 @@ if (summary.reconciliation?.officialPdfParsedRows !== activities.length) fail('C
 
 console.log(`Validated ${exercises.length} source exercises and ${trainingExercises.length} apparatus-aware training exercises.`);
 console.log(`Home-safe after apparatus resolution: ${trainingSummary.homeCompatibleCount} of ${trainingSummary.sourceBodyweightCount} source bodyweight exercises.`);
-console.log(`Apartment-compatible after photo verification: ${trainingSummary.apartmentCompatibleCount}; generic-machine entries: ${trainingSummary.apartmentCompatibleMachineCount}.`);
+console.log(`Apartment-compatible after confirmed equipment resolution: ${trainingSummary.apartmentCompatibleCount}; generic-machine entries: ${trainingSummary.apartmentCompatibleMachineCount}.`);
 console.log(`Validated ${activities.length} official-PDF MET activities; website reconciliation rows: ${reconciliation.currentWebsiteParsedRows}.`);
 console.log(`PDF-only codes: ${reconciliation.pdfOnlyCodes.length}; website-only codes: ${reconciliation.websiteOnlyCodes.length}; MET mismatches: ${reconciliation.metMismatches.length}.`);

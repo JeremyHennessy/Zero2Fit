@@ -70,6 +70,44 @@ if (!apartmentLatPull.exercise.primaryMuscles.includes('lats') && apartmentLatPu
   fail(`Apartment lat slot did not resolve to a lat/vertical-pull exercise: ${apartmentLatPull.exercise.name}`);
 }
 
+const apartmentInventory = new Set(locationProfiles.apartmentGym.equipment || []);
+if (!apartmentInventory.has('dumbbell')) fail('Apartment Gym must include the user-confirmed full dumbbell set');
+if ((locationProfiles.apartmentGym.notVerified || []).includes('free dumbbells')) fail('Confirmed Apartment Gym dumbbells must not remain in notVerified');
+
+for (const exercise of exercises.filter(exercise => exercise.locationCompatibility.apartmentGym)) {
+  const unavailable = exercise.requiredEquipment.filter(requirement => !apartmentInventory.has(requirement));
+  if (unavailable.length) fail(`Apartment compatibility leak: ${exercise.name} requires ${unavailable.join(', ')}`);
+}
+
+const dumbbellCoverage = [
+  ['row', /row/i],
+  ['press', /press/i],
+  ['curl', /curl/i],
+  ['raise', /raise/i],
+  ['squat', /squat/i],
+  ['lunge', /lunge/i]
+];
+for (const [label, pattern] of dumbbellCoverage) {
+  const match = exercises.find(exercise =>
+    exercise.equipment === 'dumbbell'
+    && exercise.locationCompatibility.apartmentGym
+    && pattern.test(exercise.name)
+  );
+  if (!match) fail(`Apartment Gym is missing a compatible dumbbell ${label} exercise`);
+  const unavailable = match.requiredEquipment.filter(requirement => !apartmentInventory.has(requirement));
+  if (unavailable.length) fail(`Apartment dumbbell ${label} unexpectedly requires ${unavailable.join(', ')}: ${match.name}`);
+  console.log(`Apartment dumbbell ${label}: ${match.name} equipment=${match.requiredEquipment.join('+') || 'none'}`);
+}
+
+const unsupportedEquipment = ['barbell', 'kettlebell', 'resistance_band', 'box', 'roman_chair', 'sled'];
+for (const unsupported of unsupportedEquipment) {
+  const leaked = exercises.find(exercise =>
+    exercise.locationCompatibility.apartmentGym
+    && exercise.requiredEquipment.includes(unsupported)
+  );
+  if (leaked) fail(`Apartment Gym incorrectly unlocked unsupported ${unsupported}: ${leaked.name}`);
+}
+
 const chairStretch = exercises.find(exercise => exercise.name === 'Chair Lower Back Stretch');
 if (chairStretch && !chairStretch.requiredEquipment.includes('chair')) fail('Chair Lower Back Stretch must resolve a chair requirement');
 if (chairStretch?.locationCompatibility.home) fail('Chair Lower Back Stretch must not be Home-compatible when no chair is assumed');
