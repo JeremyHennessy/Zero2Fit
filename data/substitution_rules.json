@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "purpose": "Automatically rank exercise substitutes without requiring manual exercise or equipment entry.",
+  "plannerMinimumScore": 55,
+  "hardFilters": [
+    "exercise equipment must be available at the selected location",
+    "exercise must not be excluded by a later user-specific restriction",
+    "automatic strength-workout selections must come from the strength category",
+    "automatic planner selections must score at least good_substitute; partial/fallback matches stay informational only"
+  ],
+  "scoreWeights": {
+    "sameMovementPattern": 40,
+    "preferredMovementPattern": 28,
+    "samePrimaryMuscle": 22,
+    "primaryMuscleOverlapPerMuscle": 10,
+    "sameForce": 8,
+    "sameMechanic": 5,
+    "sameDifficulty": 4,
+    "oneDifficultyStepAway": 2
+  },
+  "qualityBands": {
+    "80": "direct_substitute",
+    "55": "good_substitute",
+    "35": "partial_substitute",
+    "0": "fallback_only"
+  },
+  "rules": {
+    "preserveIntentBeforeExerciseName": true,
+    "preservePrimaryMuscleBeforeEquipmentPreference": true,
+    "preferSameMovementPattern": true,
+    "preferSimilarDifficulty": true,
+    "allowDifferentEquipmentAtSameLocation": true,
+    "neverAssumeUnavailableEquipment": true,
+    "doNotClaimEquivalentWhenQualityIsPartialOrFallback": true,
+    "leaveSlotUnavailableRatherThanInventExercise": true
+  },
+  "homePullingLimitation": {
+    "appliesWhen": "selected location has only bodyweight, yoga_mat and wall",
+    "message": "The researched catalog contains no good-or-better strength substitute for horizontal pulling or lat pulling with the confirmed Home equipment. Zero2Fit must show the pull slot as unavailable rather than substituting a stretch or unrelated exercise."
+  }
+}

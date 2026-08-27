@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "method": "2024 Adult Compendium MET estimate",
+  "source": {
+    "name": "2024 Adult Compendium of Physical Activities",
+    "url": "https://pacompendium.com/adult-compendium/",
+    "citation": "Herrmann SD, Willis EA, Ainsworth BE, et al. 2024 Adult Compendium of Physical Activities: A third update of the energy costs of human activities. Journal of Sport and Health Science. 2024;13(1):6-12.",
+    "notes": "The Compendium defines standard adult MET values and documents kcal conversion using body mass and activity duration."
+  },
+  "formulas": {
+    "grossKcal": "met * weightKg * durationMinutes / 60",
+    "activeKcal": "Math.max(0, (met - 1) * weightKg * durationMinutes / 60)"
+  },
+  "displayRules": {
+    "label": "Estimated workout energy",
+    "neverLabelAsExact": true,
+    "showMethod": true,
+    "showMet": true,
+    "preferDeviceEnergyWhenAvailable": true,
+    "deviceEnergyLabel": "Recorded by connected device",
+    "metEnergyLabel": "Estimated from activity intensity, body mass and duration",
+    "strengthEstimateUnit": "session_or_timed_segment",
+    "strengthNote": "Do not pretend that a single set or named lift has a fixed calorie value. Resistance-training energy depends on load, pace, work/rest ratio and session structure; estimate timed sessions or segments instead."
+  },
+  "referenceProfiles": {
+    "bodyweight_general": { "code": "02056", "met": 3.0, "description": "Body weight resistance exercises, general" },
+    "bodyweight_high_intensity": { "code": "02057", "met": 6.5, "description": "Body weight resistance exercises, high intensity" },
+    "calisthenics_moderate": { "code": "02022", "met": 3.8, "description": "Calisthenics, moderate effort" },
+    "calisthenics_vigorous": { "code": "02020", "met": 7.5, "description": "Calisthenics, vigorous effort" },
+    "resistance_general": { "code": "02054", "met": 3.5, "description": "Resistance training, multiple exercises, 8-15 reps at varied resistance" },
+    "resistance_squat_deadlift": { "code": "02052", "met": 5.0, "description": "Resistance training, squats/deadlift, slow or explosive effort" },
+    "resistance_vigorous": { "code": "02050", "met": 6.0, "description": "Resistance/free-weight or machine training, power lifting/body building, vigorous effort" },
+    "circuit_light": { "code": "02034", "met": 3.5, "description": "Circuit training, light effort" },
+    "circuit_moderate": { "code": "02035", "met": 5.0, "description": "Circuit training, moderate effort" },
+    "circuit_bodyweight": { "code": "02032", "met": 6.0, "description": "Circuit training, body weight exercises" },
+    "circuit_kettlebell_vigorous": { "code": "02040", "met": 7.5, "description": "Circuit training including kettlebells, minimal rest, vigorous intensity" },
+    "home_exercise_general": { "code": "02064", "met": 3.8, "description": "Home exercise, general" },
+    "stretching_mild": { "code": "02101", "met": 2.3, "description": "Stretching, mild" },
+    "pilates_mat": { "code": "02103", "met": 1.8, "description": "Pilates, traditional, mat" },
+    "yoga_hatha": { "code": "02150", "met": 2.3, "description": "Yoga, Hatha" },
+    "yoga_general": { "code": "02175", "met": 2.3, "description": "Yoga, general" },
+    "yoga_vinyasa": { "code": "02185", "met": 2.7, "description": "Yoga, Vinyasa" },
+    "yoga_power": { "code": "02160", "met": 4.0, "description": "Yoga, Power" },
+    "walk_slow": { "code": "17152", "met": 2.8, "description": "Walking 2.0-2.4 mph, level, slow pace" },
+    "walk_moderate": { "code": "17190", "met": 3.8, "description": "Walking 2.8-3.4 mph, level, moderate pace" },
+    "walk_brisk": { "code": "17200", "met": 4.8, "description": "Walking 3.5-3.9 mph, level, brisk pace" }
+  }
+}

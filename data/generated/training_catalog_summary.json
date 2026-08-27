@@ -1,0 +1,29 @@
+{
+  "sourceExerciseCount": 873,
+  "trainingExerciseCount": 873,
+  "sourceBodyweightCount": 188,
+  "homeCompatibleCount": 147,
+  "apartmentCompatibleCount": 147,
+  "fullGymCompatibleCount": 873,
+  "bodyweightRequiringImplicitApparatus": 42,
+  "implicitEquipmentCounts": {
+    "partner": 33,
+    "pullup_bar": 51,
+    "step_platform": 8,
+    "sled": 4,
+    "bench": 11,
+    "box": 13,
+    "chair": 9,
+    "dip_station": 23,
+    "anchor_or_ghd": 3,
+    "wall": 1,
+    "roman_chair": 4,
+    "low_bar": 2,
+    "climbing_rope": 2
+  },
+  "policy": {
+    "home": "Bodyweight/yoga-mat/wall only; no bar, bench, chair, box, anchor or other apparatus is assumed.",
+    "apartmentGym": "Uses the same conservative safe set as Home until photo inventory is verified.",
+    "fullGym": "Generic full-gym profile includes standard apparatus categories plus inferred bodyweight apparatus."
+  }
+}
