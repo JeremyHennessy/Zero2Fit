@@ -22,10 +22,14 @@ jobs:
           node --check storage.js
           node --check ingestion.js
           node --check build003-integration.js
+          node --check device-core.mjs
+          node --check build004-integration.js
           node --check tools/build-training-catalog.mjs
           node --check tools/validate-fitness-data.mjs
           node --check tools/test-training-planner.mjs
           node --check tools/test-device-ingestion.mjs
+          node --check tools/test-device-driven-progress.mjs
+          node --check tools/check-index-contract.mjs
 
       - name: Check required static and reference files
         run: |
@@ -33,11 +37,14 @@ jobs:
           test -s styles.css
           test -s build002.css
           test -s build003.css
+          test -s build004.css
           test -s app.js
           test -s training-core.mjs
           test -s storage.js
           test -s ingestion.js
           test -s build003-integration.js
+          test -s device-core.mjs
+          test -s build004-integration.js
           test -s supabase/schema.sql
           test -s data/generated/training_exercises.json
           test -s data/generated/met_activities.json
@@ -51,6 +58,7 @@ jobs:
           grep -q './ingestion.js' index.html
           grep -q './app.js' index.html
           grep -q './build003-integration.js' index.html
+          grep -q './build004-integration.js' index.html
 
       - name: Reject embedded private credential patterns
         run: |
@@ -67,6 +75,12 @@ jobs:
 
       - name: Test device ingestion
         run: node tools/test-device-ingestion.mjs
+
+      - name: Test device-driven progress
+        run: node tools/test-device-driven-progress.mjs
+
+      - name: Check UI compatibility contract
+        run: node tools/check-index-contract.mjs
 
       - name: Browser smoke test
         run: bash tools/browser-smoke.sh
