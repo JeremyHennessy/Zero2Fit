@@ -3,7 +3,11 @@
     "id": "home",
     "label": "Home",
     "inventoryStatus": "confirmed",
-    "equipment": ["bodyweight", "yoga_mat", "wall"],
+    "equipment": [
+      "bodyweight",
+      "yoga_mat",
+      "wall"
+    ],
     "selectionRule": "Recommend only movements requiring no apparatus beyond bodyweight, a yoga mat, or an ordinary wall.",
     "notes": "Confirmed user context: bodyweight-focused home training with a yoga mat. No pull-up bar, dip station, bench, chair, box, step platform, door/furniture anchor, bands, weights or other apparatus are assumed."
   },
@@ -12,11 +16,12 @@
     "label": "Apartment Gym",
     "inventoryStatus": "verified_from_photos",
     "verifiedDate": "2026-08-27",
-    "verificationMethod": "Four user-provided gym photos reviewed visually; model-level claims are separated from function-level observations.",
+    "verificationMethod": "Four user-provided gym photos reviewed visually; a full dumbbell set was additionally confirmed directly by the user. Model-level claims are separated from function-level observations.",
     "equipment": [
       "bodyweight",
       "yoga_mat",
       "wall",
+      "dumbbell",
       "cable_machine",
       "machine",
       "stability_ball",
@@ -56,6 +61,13 @@
         "identificationConfidence": "high",
         "basis": "Bench is clearly visible in use inside the Smith station.",
         "functions": ["bench_support"]
+      },
+      {
+        "id": "dumbbell_set",
+        "label": "Full dumbbell set",
+        "identificationConfidence": "user_confirmed",
+        "basis": "The user explicitly confirmed that the Apartment Gym has a full dumbbell set after the photo-based inventory was captured. Brand, exact weight range and increments remain unverified.",
+        "functions": ["dumbbell_strength_training"]
       },
       {
         "id": "lat_pulldown_low_row",
@@ -115,7 +127,6 @@
       }
     ],
     "notVerified": [
-      "free dumbbells",
       "free barbell",
       "kettlebells",
       "resistance bands",
@@ -123,8 +134,8 @@
       "GHD/roman chair",
       "sled"
     ],
-    "selectionRule": "Use the verified cable trainer, Smith system, pull-up/dip stations, bench and stability balls. Generic machine exercises require a verified machine-function keyword so the presence of one selectorized machine does not falsely unlock every machine exercise in the catalog.",
-    "notes": "The apartment profile is now photo-verified. Do not infer unpictured free weights or machine types. Additional photos can expand this profile without changing prior workout history."
+    "selectionRule": "Use the confirmed dumbbells plus the verified cable trainer, Smith system, pull-up/dip stations, bench and stability balls. Generic machine exercises require a verified machine-function keyword so the presence of one selectorized machine does not falsely unlock every machine exercise in the catalog.",
+    "notes": "The apartment profile combines photo-verified stations with the user's explicit confirmation of a full dumbbell set. Do not infer other unverified free weights, accessories or machine types. Additional evidence can expand this profile without changing prior workout history."
   },
   "fullGym": {
     "id": "fullGym",
