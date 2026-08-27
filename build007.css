@@ -1,0 +1,154 @@
+/* Build 007/008: adventure gameplay + private progress-photo system. Extends approved dark/lime baseline. */
+
+/* Adventure */
+body.build004 .z7-adventure-card { display:block; padding:24px; color:#eef5f0; }
+body.build004 .z7-adventure-header { display:flex; align-items:flex-start; justify-content:space-between; gap:22px; }
+body.build004 .z7-adventure-header h2 { margin:3px 0 8px; font-size:30px; }
+body.build004 .z7-adventure-header p { color:#91a097; max-width:720px; margin:0; line-height:1.5; }
+body.build004 .z7-adventure-kpis { display:grid; grid-template-columns:repeat(3,minmax(82px,1fr)); gap:8px; }
+body.build004 .z7-adventure-kpis div { min-width:90px; padding:12px 14px; border-radius:15px; border:1px solid #30402f; background:#0b120d; }
+body.build004 .z7-adventure-kpis span,.z7-panel-heading span,.z7-section-title span,.z7-timeline-head span { display:block; color:#77877d; font-size:9px; text-transform:uppercase; letter-spacing:.09em; font-weight:800; }
+body.build004 .z7-adventure-kpis strong { display:block; margin-top:4px; font-size:22px; color:#c8ff5a; }
+body.build004 .z7-zone-list { display:flex; gap:8px; overflow-x:auto; padding:15px 0 2px; scrollbar-width:none; }
+body.build004 .z7-zone-list::-webkit-scrollbar { display:none; }
+body.build004 .z7-zone { flex:0 0 185px; min-height:76px; text-align:left; border:1px solid #28352c; border-radius:16px; padding:11px 13px; color:#c1cec6; background:#101712; cursor:pointer; }
+body.build004 .z7-zone span { color:#77877d; font-size:9px; text-transform:uppercase; letter-spacing:.08em; }
+body.build004 .z7-zone strong { display:block; margin:4px 0; }
+body.build004 .z7-zone small { color:#6f7f75; }
+body.build004 .z7-zone.selected { border-color:#6b8a42; background:rgba(183,243,74,.08); box-shadow:inset 0 0 0 1px rgba(183,243,74,.06); }
+body.build004 .z7-zone.selected strong { color:#c8ff5a; }
+body.build004 .z7-zone.locked { opacity:.45; cursor:not-allowed; }
+body.build004 .z7-adventure-grid { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(280px,.75fr); gap:12px; margin-top:12px; }
+body.build004 .z7-expedition-panel,.z7-auto-panel { border:1px solid #26332a; border-radius:18px; background:#0b110d; padding:17px; }
+body.build004 .z7-panel-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+body.build004 .z7-panel-heading strong { display:block; margin-top:3px; font-size:22px; }
+body.build004 .z7-panel-heading > span { color:#c8ff5a; border:1px solid #405234; border-radius:999px; padding:6px 9px; }
+body.build004 .z7-subtle { color:#809087; font-size:12px; line-height:1.5; }
+body.build004 .z7-encounter { min-height:120px; margin:13px 0; padding:14px; border-radius:16px; background:linear-gradient(135deg,#101913,#111019); border:1px solid #27352c; }
+body.build004 .z7-encounter-title { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+body.build004 .z7-encounter-title span { color:#9aab9f; font-size:10px; text-transform:uppercase; letter-spacing:.08em; }
+body.build004 .z7-encounter-title strong { color:#f2f7f4; }
+body.build004 .z7-health-row { display:grid; grid-template-columns:48px 1fr 40px; gap:8px; align-items:center; margin:8px 0; font-size:10px; color:#91a097; }
+body.build004 .z7-health-row > div { height:8px; border-radius:99px; background:#273229; overflow:hidden; }
+body.build004 .z7-health-row i { display:block; height:100%; background:linear-gradient(90deg,#83c92b,#c8ff5a); }
+body.build004 .z7-health-row.enemy i { background:linear-gradient(90deg,#7c4752,#d86b77); }
+body.build004 .z7-health-row b { text-align:right; color:#dce6df; }
+body.build004 .z7-result-rewards { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+body.build004 .z7-result-rewards span { padding:5px 8px; border-radius:999px; background:#171f19; border:1px solid #2b382f; color:#98a69d; font-size:9px; }
+body.build004 .z7-expedition-actions,.z7-button-row { display:flex; flex-wrap:wrap; gap:8px; }
+body.build004 .z7-expedition-actions button { flex:1 1 170px; }
+body.build004 .z7-auto-panel { display:grid; align-content:start; gap:13px; }
+body.build004 .z7-auto-status { display:flex; gap:10px; align-items:center; }
+body.build004 .z7-auto-status strong { display:block; }
+body.build004 .z7-auto-status small { display:block; margin-top:3px; color:#74827a; line-height:1.35; }
+body.build004 .z7-orb { width:34px; height:34px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#e8ffb7,#b7f34a 34%,#5e8621 70%); box-shadow:0 0 24px rgba(183,243,74,.16); }
+body.build004 .z7-toggle { display:flex; align-items:center; gap:9px; cursor:pointer; }
+body.build004 .z7-toggle input { position:absolute; opacity:0; }
+body.build004 .z7-toggle > span { width:42px; height:24px; border-radius:99px; background:#29342c; position:relative; transition:.2s; }
+body.build004 .z7-toggle > span::after { content:""; position:absolute; width:18px; height:18px; left:3px; top:3px; border-radius:50%; background:#7d8b82; transition:.2s; }
+body.build004 .z7-toggle input:checked + span { background:rgba(183,243,74,.25); }
+body.build004 .z7-toggle input:checked + span::after { left:21px; background:#c8ff5a; }
+body.build004 .z7-rule-box { padding:11px 12px; border-radius:13px; background:#111813; border:1px solid #253229; }
+body.build004 .z7-rule-box strong { display:block; font-size:10px; color:#c0ccc4; }
+body.build004 .z7-rule-box span { display:block; margin-top:3px; color:#74827a; font-size:10px; }
+body.build004 .z7-gear-summary { display:grid; gap:6px; }
+body.build004 .z7-gear-summary > div { display:grid; grid-template-columns:55px 1fr auto; gap:8px; align-items:center; padding:8px 10px; border-bottom:1px solid #202b24; }
+body.build004 .z7-gear-summary span { color:#738078; font-size:9px; text-transform:uppercase; }
+body.build004 .z7-gear-summary strong { font-size:11px; }
+body.build004 .z7-gear-summary small { color:#c8ff5a; }
+body.build004 .z7-combat-rating { border-bottom:0 !important; border-top:1px solid #31402f; margin-top:3px; padding-top:11px !important; }
+body.build004 .z7-combat-rating strong { color:#c8ff5a; font-size:18px; }
+body.build004 .z7-lower-grid { display:grid; grid-template-columns:1fr 1.15fr; gap:12px; margin-top:12px; }
+body.build004 .z7-lower-grid > section { border:1px solid #26332a; border-radius:18px; background:#0b110d; padding:16px; min-width:0; }
+body.build004 .z7-section-title { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:9px; }
+body.build004 .z7-section-title h3,.z8-timeline-head h3 { margin:2px 0 0; font-size:18px; }
+body.build004 .z7-battle-log { display:grid; gap:7px; }
+body.build004 .z7-battle-row { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:10px 11px; border:1px solid #26332a; border-radius:13px; background:#101712; }
+body.build004 .z7-battle-row span { color:#718077; font-size:8px; text-transform:uppercase; letter-spacing:.08em; }
+body.build004 .z7-battle-row strong { display:block; margin-top:2px; }
+body.build004 .z7-battle-row > div:last-child { text-align:right; }
+body.build004 .z7-battle-row b { color:#c8ff5a; font-size:10px; }
+body.build004 .z7-battle-row.loss b { color:#e57c86; }
+body.build004 .z7-battle-row small { display:block; color:#718077; font-size:9px; margin-top:2px; }
+body.build004 .z7-inventory { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; max-height:410px; overflow:auto; }
+body.build004 .z7-loot { display:grid; grid-template-columns:34px 1fr auto; gap:8px; align-items:center; border:1px solid #27342c; border-radius:13px; background:#101712; padding:9px; min-width:0; }
+body.build004 .z7-loot.rare { border-color:#5867a4; }
+body.build004 .z7-loot.epic { border-color:#80569b; box-shadow:inset 0 0 20px rgba(148,86,180,.06); }
+body.build004 .z7-loot.equipped { border-color:#617c3e; background:rgba(183,243,74,.05); }
+body.build004 .z7-loot-icon { width:34px; height:34px; border-radius:10px; display:grid; place-items:center; background:#182019; color:#c8ff5a; }
+body.build004 .z7-loot-copy { min-width:0; }
+body.build004 .z7-loot-copy span { display:block; color:#75847a; font-size:8px; text-transform:uppercase; }
+body.build004 .z7-loot-copy strong { display:block; margin:2px 0; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+body.build004 .z7-loot-copy small { color:#c8ff5a; font-size:9px; }
+body.build004 .z7-equip { border:1px solid #344338; background:#141d17; color:#aebbb3; padding:6px 7px; border-radius:9px; font-size:9px; cursor:pointer; }
+body.build004 .z7-equip:disabled { color:#c8ff5a; opacity:.75; cursor:default; }
+body.build004 .z7-empty,.z8-empty { color:#718077; font-size:11px; line-height:1.5; padding:13px; border:1px dashed #2b3930; border-radius:13px; }
+
+/* Progress photos */
+body.build004 .z8-photo-module { margin-top:16px; display:block; }
+body.build004 .z8-photo-header { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; }
+body.build004 .z8-photo-header h2 { margin:3px 0 7px; }
+body.build004 .z8-photo-header p { color:#85938a; max-width:760px; margin:0; line-height:1.5; }
+body.build004 .z8-private-badge { padding:7px 10px; border:1px solid #405334; border-radius:999px; color:#c8ff5a; background:rgba(183,243,74,.07); font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; }
+body.build004 .z8-view-tabs { display:flex; gap:7px; margin:15px 0 10px; }
+body.build004 .z8-view-tabs button { flex:1; min-height:38px; border:1px solid #29362e; background:#101712; color:#8e9c93; border-radius:12px; font-weight:750; cursor:pointer; }
+body.build004 .z8-view-tabs button.active { color:#c8ff5a; border-color:#58723b; background:rgba(183,243,74,.08); }
+body.build004 .z8-photo-workspace { display:grid; grid-template-columns:minmax(300px,.9fr) minmax(300px,1fr); gap:14px; }
+body.build004 .z8-stage { position:relative; aspect-ratio:3/4; max-height:620px; overflow:hidden; border-radius:18px; border:1px solid #2b3930; background:linear-gradient(160deg,#0b110d,#111019); }
+body.build004 .z8-stage video,.z8-stage img { position:absolute; left:50%; top:50%; width:100%; height:100%; object-fit:cover; transform:translate(-50%,-50%); }
+body.build004 .z8-current { z-index:2; transform-origin:center; }
+body.build004 .z8-ghost { z-index:1; filter:saturate(.55) contrast(.95); }
+body.build004 .z8-guide { position:absolute; inset:5% 8%; width:84%; height:90%; z-index:3; pointer-events:none; }
+body.build004 .z8-guide line,.z8-guide circle,.z8-guide path { fill:none; stroke:rgba(200,255,90,.48); stroke-width:1.2; stroke-dasharray:5 5; }
+body.build004 .z8-stage-label { position:absolute; z-index:4; left:10px; right:10px; bottom:10px; display:flex; justify-content:space-between; gap:8px; padding:7px 9px; border-radius:11px; background:rgba(5,9,6,.72); backdrop-filter:blur(8px); }
+body.build004 .z8-stage-label span { color:#c8ff5a; font-weight:800; font-size:10px; }
+body.build004 .z8-stage-label small { color:#8a9990; font-size:9px; }
+body.build004 .z8-controls { display:grid; align-content:start; gap:10px; padding:3px 0; }
+body.build004 .z8-button-row { display:flex; gap:7px; flex-wrap:wrap; }
+body.build004 .z8-button-row button { flex:1 1 120px; }
+body.build004 .z8-button-row.compact button { min-height:34px; font-size:10px; }
+body.build004 .z8-controls label { display:grid; grid-template-columns:1fr auto; gap:5px 8px; color:#9aa79f; font-size:10px; font-weight:700; }
+body.build004 .z8-controls label input { grid-column:1/-1; width:100%; accent-color:#b7f34a; }
+body.build004 .z8-controls output { color:#c8ff5a; }
+body.build004 .z8-coverage { display:flex; gap:6px; flex-wrap:wrap; }
+body.build004 .z8-coverage span { padding:6px 8px; border-radius:999px; border:1px solid #2c3930; color:#748279; font-size:9px; text-transform:capitalize; }
+body.build004 .z8-coverage span.saved { color:#c8ff5a; border-color:#4a6038; background:rgba(183,243,74,.06); }
+body.build004 .z8-status { margin:0; color:#748279; font-size:10px; line-height:1.4; }
+body.build004 .z8-timeline-head { display:flex; justify-content:space-between; align-items:flex-end; margin:18px 0 8px; }
+body.build004 .z8-timeline-head > strong { color:#91a097; font-size:10px; }
+body.build004 .z8-timeline { display:grid; gap:9px; }
+body.build004 .z8-session { border:1px solid #26332a; border-radius:16px; background:#0b110d; padding:11px; }
+body.build004 .z8-session > header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+body.build004 .z8-session header span { color:#718077; font-size:8px; text-transform:uppercase; letter-spacing:.08em; }
+body.build004 .z8-session header strong { display:block; margin-top:2px; font-size:11px; }
+body.build004 .z8-session header small { color:#7c8b81; font-size:9px; }
+body.build004 .z8-session-photos { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
+body.build004 .z8-timeline-item { display:grid; grid-template-columns:48px 1fr auto; gap:8px; align-items:center; padding:7px; border:1px solid #253129; border-radius:12px; background:#101712; min-width:0; }
+body.build004 .z8-thumb { width:48px; height:62px; border-radius:8px; overflow:hidden; background:#171e19; display:grid; place-items:center; color:#6f7d74; font-size:8px; }
+body.build004 .z8-thumb img { width:100%; height:100%; object-fit:cover; }
+body.build004 .z8-timeline-item > div:nth-child(2) { min-width:0; }
+body.build004 .z8-timeline-item span { display:block; color:#748279; font-size:8px; text-transform:uppercase; }
+body.build004 .z8-timeline-item strong { display:block; margin:2px 0; font-size:10px; }
+body.build004 .z8-timeline-item small { display:block; color:#68766d; font-size:8px; }
+body.build004 .z8-timeline-item button { border:0; background:transparent; color:#9c6d75; font-size:9px; cursor:pointer; }
+
+@media (max-width:900px) {
+  body.build004 .z7-adventure-header { display:grid; }
+  body.build004 .z7-adventure-kpis { width:100%; }
+  body.build004 .z7-adventure-grid,.z7-lower-grid,.z8-photo-workspace { grid-template-columns:1fr; }
+  body.build004 .z7-inventory { grid-template-columns:1fr 1fr; max-height:none; }
+  body.build004 .z8-stage { max-height:none; }
+}
+
+@media (max-width:560px) {
+  body.build004 .z7-adventure-card { padding:17px; }
+  body.build004 .z7-adventure-header h2 { font-size:25px; }
+  body.build004 .z7-adventure-kpis div { min-width:0; padding:10px; }
+  body.build004 .z7-adventure-kpis strong { font-size:18px; }
+  body.build004 .z7-zone { flex-basis:158px; }
+  body.build004 .z7-inventory { grid-template-columns:1fr; }
+  body.build004 .z8-photo-header { display:grid; }
+  body.build004 .z8-private-badge { width:max-content; }
+  body.build004 .z8-session-photos { grid-template-columns:1fr; }
+  body.build004 .z8-stage-label { display:grid; }
+}
