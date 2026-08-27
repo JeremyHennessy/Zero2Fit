@@ -1,0 +1,41 @@
+name: Validate HealthKit Bridge
+
+on:
+  pull_request:
+    paths:
+      - 'ios/Zero2FitHealthBridge/**'
+      - '.github/workflows/validate-healthkit-bridge.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ios/Zero2FitHealthBridge/**'
+      - '.github/workflows/validate-healthkit-bridge.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-ios-simulator:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        working-directory: ios/Zero2FitHealthBridge
+        run: xcodegen generate
+
+      - name: Build iOS simulator target
+        working-directory: ios/Zero2FitHealthBridge
+        run: |
+          xcodebuild \
+            -project Zero2FitHealthBridge.xcodeproj \
+            -scheme Zero2FitHealthBridge \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath .derived-data \
+            CODE_SIGNING_ALLOWED=NO \
+            build
