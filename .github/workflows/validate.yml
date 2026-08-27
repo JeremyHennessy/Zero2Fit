@@ -19,17 +19,26 @@ jobs:
         run: |
           node --check app.js
           node --check training-core.mjs
+          node --check storage.js
+          node --check ingestion.js
+          node --check build003-integration.js
           node --check tools/build-training-catalog.mjs
           node --check tools/validate-fitness-data.mjs
           node --check tools/test-training-planner.mjs
+          node --check tools/test-device-ingestion.mjs
 
       - name: Check required static and reference files
         run: |
           test -s index.html
           test -s styles.css
           test -s build002.css
+          test -s build003.css
           test -s app.js
           test -s training-core.mjs
+          test -s storage.js
+          test -s ingestion.js
+          test -s build003-integration.js
+          test -s supabase/schema.sql
           test -s data/generated/training_exercises.json
           test -s data/generated/met_activities.json
           test -s data/generated/met_reconciliation.json
@@ -38,13 +47,26 @@ jobs:
           test -s data/substitution_rules.json
           test -s data/energy_model.json
           grep -q './styles.css' index.html
+          grep -q './storage.js' index.html
+          grep -q './ingestion.js' index.html
           grep -q './app.js' index.html
+          grep -q './build003-integration.js' index.html
+
+      - name: Reject embedded private credential patterns
+        run: |
+          if grep -RniE --exclude='validate.yml' --exclude-dir='.git' '(sk-[A-Za-z0-9_-]{20,}|SUPABASE_SERVICE_ROLE_KEY[[:space:]]*[:=][[:space:]]*[A-Za-z0-9._-]{20,})' .; then
+            echo 'Potential private credential value found.'
+            exit 1
+          fi
 
       - name: Validate generated fitness data
         run: node tools/validate-fitness-data.mjs
 
       - name: Test automatic workout planner
         run: node tools/test-training-planner.mjs
+
+      - name: Test device ingestion
+        run: node tools/test-device-ingestion.mjs
 
       - name: Browser smoke test
         run: bash tools/browser-smoke.sh

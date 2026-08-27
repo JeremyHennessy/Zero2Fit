@@ -27,7 +27,7 @@ fi
   --no-sandbox \
   --disable-gpu \
   --disable-dev-shm-usage \
-  --virtual-time-budget=6000 \
+  --virtual-time-budget=7000 \
   --dump-dom "http://127.0.0.1:${PORT}/" >"$DOM_FILE"
 
 grep -q 'Use what is actually available' "$DOM_FILE"
@@ -37,9 +37,21 @@ grep -q '873 exercises' "$DOM_FILE"
 grep -q '1111 MET activities' "$DOM_FILE"
 grep -q 'Photo inventory pending' "$DOM_FILE"
 
+grep -q 'Data architecture · Build 003' "$DOM_FILE"
+grep -q 'Import measurements' "$DOM_FILE"
+grep -q 'Amazfit Active 2 (Round)' "$DOM_FILE"
+grep -q 'RENPHO scale' "$DOM_FILE"
+grep -q 'IndexedDB' "$DOM_FILE"
+grep -q 'Export JSON backup' "$DOM_FILE"
+
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then
   echo 'Workout catalog load failed in browser.' >&2
   exit 1
 fi
 
-echo 'Browser smoke passed: researched catalog loaded, Home workout rendered, unavailable pull slot preserved, and location controls are present.'
+if grep -q 'Structured storage or ingestion module failed to load' "$DOM_FILE"; then
+  echo 'Build 003 storage/device modules failed to load in browser.' >&2
+  exit 1
+fi
+
+echo 'Browser smoke passed: Build 002 workout intelligence and Build 003 storage/device UI both rendered.'
