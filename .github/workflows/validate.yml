@@ -19,9 +19,11 @@ jobs:
         run: |
           node --check app.js
           node --check training-core.mjs
+          node --check ingestion-core.mjs
           node --check tools/build-training-catalog.mjs
           node --check tools/validate-fitness-data.mjs
           node --check tools/test-training-planner.mjs
+          node --check tools/test-ingestion.mjs
 
       - name: Check required static and reference files
         run: |
@@ -30,6 +32,7 @@ jobs:
           test -s build002.css
           test -s app.js
           test -s training-core.mjs
+          test -s ingestion-core.mjs
           test -s data/generated/training_exercises.json
           test -s data/generated/met_activities.json
           test -s data/generated/met_reconciliation.json
@@ -37,6 +40,8 @@ jobs:
           test -s data/programming_rules.json
           test -s data/substitution_rules.json
           test -s data/energy_model.json
+          test -s docs/DATA_ARCHITECTURE.md
+          test -s supabase/migrations/001_private_data_foundation.sql
           grep -q './styles.css' index.html
           grep -q './app.js' index.html
 
@@ -45,6 +50,9 @@ jobs:
 
       - name: Test automatic workout planner
         run: node tools/test-training-planner.mjs
+
+      - name: Test device ingestion
+        run: node tools/test-ingestion.mjs
 
       - name: Browser smoke test
         run: bash tools/browser-smoke.sh
