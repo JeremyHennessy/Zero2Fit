@@ -30,36 +30,46 @@ fi
   --virtual-time-budget=15000 \
   --dump-dom "http://127.0.0.1:${PORT}/" >"$DOM_FILE"
 
-grep -q 'Use what is actually available' "$DOM_FILE"
-grep -q 'Bodyweight Squat' "$DOM_FILE"
-grep -q 'No true substitute here' "$DOM_FILE"
-grep -q '873 exercises' "$DOM_FILE"
-grep -q '1111 MET activities' "$DOM_FILE"
+assert_dom() {
+  local needle="$1"
+  local label="${2:-$1}"
+  if ! grep -Fq "$needle" "$DOM_FILE"; then
+    echo "Browser smoke missing expected DOM marker: $label" >&2
+    echo "Expected literal: $needle" >&2
+    exit 1
+  fi
+}
 
-grep -q 'Data architecture · Build 003' "$DOM_FILE"
-grep -q 'Import measurements' "$DOM_FILE"
-grep -q 'Amazfit Active 2 (Round)' "$DOM_FILE"
-grep -q 'RENPHO scale' "$DOM_FILE"
-grep -q 'IndexedDB' "$DOM_FILE"
-grep -q 'Export JSON backup' "$DOM_FILE"
+assert_dom 'Use what is actually available'
+assert_dom 'Bodyweight Squat'
+assert_dom 'No true substitute here'
+assert_dom '873 exercises'
+assert_dom '1111 MET activities'
 
-grep -q 'Train outside. Advance inside.' "$DOM_FILE"
-grep -q 'Latest body snapshot' "$DOM_FILE"
-grep -q 'Your devices, one private timeline' "$DOM_FILE"
-grep -q 'z4SensorStrip' "$DOM_FILE"
-grep -q './build006.css' "$DOM_FILE"
-grep -q './build007.css' "$DOM_FILE"
+assert_dom 'Data architecture · Build 003'
+assert_dom 'Import measurements'
+assert_dom 'Amazfit Active 2 (Round)'
+assert_dom 'RENPHO scale'
+assert_dom 'IndexedDB'
+assert_dom 'Export JSON backup'
 
-grep -q 'Frontier expedition' "$DOM_FILE"
-grep -q 'Offline auto-adventure' "$DOM_FILE"
-grep -q 'Real fitness creates Adventure Energy' "$DOM_FILE"
-grep -q 'Loot &amp; equipment' "$DOM_FILE"
-grep -q 'Foundation Trail' "$DOM_FILE"
-grep -q 'Private aligned visual timeline' "$DOM_FILE"
-grep -q 'Use camera' "$DOM_FILE"
-grep -q 'Save aligned photo' "$DOM_FILE"
-grep -q 'Local only' "$DOM_FILE"
-grep -q 'id="z8Stage"' "$DOM_FILE"
+assert_dom 'Train outside. Advance inside.'
+assert_dom 'Latest body snapshot'
+assert_dom 'Your devices, one private timeline'
+assert_dom 'z4SensorStrip'
+assert_dom './build006.css'
+assert_dom './build007.css'
+
+assert_dom 'Frontier expedition'
+assert_dom 'Offline auto-adventure'
+assert_dom 'Real fitness creates Adventure Energy'
+assert_dom 'Loot &amp; equipment'
+assert_dom 'Foundation Trail'
+assert_dom 'Private aligned visual timeline'
+assert_dom 'Use camera'
+assert_dom 'Save aligned photo'
+assert_dom 'Local only'
+assert_dom 'id="z8Stage"'
 
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then
   echo 'Workout catalog load failed in browser.' >&2
@@ -86,4 +96,4 @@ if grep -q 'Zero2Fit Build 008 photos failed' "$DOM_FILE"; then
   exit 1
 fi
 
-echo 'Browser smoke passed: training, devices, approved UI, RPG adventure, and progress-photo modules rendered.'
+echo 'Browser smoke passed: training, devices, approved UI, RPG adventure, progress-photo modules, and private-sync shell rendered.'
