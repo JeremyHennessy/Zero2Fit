@@ -25,6 +25,8 @@ for (const exercise of exercises) {
   if (!exercise.equipment || !exercise.movementPattern) fail(`Exercise ${exercise.id} missing normalized equipment/pattern`);
 }
 
+const apartmentInventory = new Set(locations.apartmentGym?.equipment || []);
+const apartmentMachineKeywords = locations.apartmentGym?.machineExerciseNameKeywords || [];
 const trainingIds = new Set();
 for (const exercise of trainingExercises) {
   if (!exerciseIds.has(exercise.id)) fail(`Training exercise ${exercise.id} is absent from source catalog`);
@@ -37,6 +39,16 @@ for (const exercise of trainingExercises) {
     const unavailable = exercise.requiredEquipment.filter(item => !allowed.has(item));
     if (unavailable.length) fail(`Home-compatible exercise ${exercise.id} still requires ${unavailable.join(', ')}`);
   }
+  if (exercise.locationCompatibility.apartmentGym) {
+    const unavailable = exercise.requiredEquipment.filter(item => !apartmentInventory.has(item));
+    if (unavailable.length) fail(`Apartment-compatible exercise ${exercise.id} still requires ${unavailable.join(', ')}`);
+    if (exercise.requiredEquipment.includes('machine') && apartmentMachineKeywords.length) {
+      const lowerName = exercise.name.toLowerCase();
+      if (!apartmentMachineKeywords.some(keyword => lowerName.includes(String(keyword).toLowerCase()))) {
+        fail(`Apartment generic-machine filter leaked unverified machine exercise ${exercise.name}`);
+      }
+    }
+  }
 }
 
 const pullupLike = trainingExercises.filter(x => /(pull[- ]?ups?|chin[- ]?ups?|hanging)/i.test([x.name, ...(x.instructions || [])].join(' ')));
@@ -46,6 +58,8 @@ if (pullupLike.some(x => x.locationCompatibility.home && !x.requiredEquipment.in
 if (trainingSummary.sourceExerciseCount !== exercises.length || trainingSummary.trainingExerciseCount !== trainingExercises.length) fail('Training summary count mismatch');
 if (!(trainingSummary.bodyweightRequiringImplicitApparatus > 0)) fail('Expected at least one bodyweight exercise with inferred apparatus');
 if (!(trainingSummary.homeCompatibleCount < trainingSummary.sourceBodyweightCount)) fail('Apparatus resolution should reduce the naive bodyweight Home set');
+if (!(trainingSummary.apartmentCompatibleCount > trainingSummary.homeCompatibleCount)) fail('Verified apartment equipment should expand the training catalog beyond Home');
+if (!(trainingSummary.apartmentCompatibleMachineCount > 0)) fail('Expected verified apartment machine exercises after capability filtering');
 
 const metCodes = new Set();
 for (const activity of activities) {
@@ -71,12 +85,28 @@ if (!Array.isArray(reconciliation.metMismatches)) fail('Reconciliation MET misma
 for (const requiredLocation of ['home', 'apartmentGym', 'fullGym']) {
   if (!locations[requiredLocation]) fail(`Missing location profile ${requiredLocation}`);
 }
-if (locations.apartmentGym.inventoryStatus !== 'pending_photos') fail('Apartment gym must remain pending until photo inventory is verified');
+
+if (locations.apartmentGym.inventoryStatus !== 'verified_from_photos') fail('Apartment gym must be marked photo-verified after the equipment review');
+for (const requiredEquipment of ['cable_machine', 'machine', 'bench', 'pullup_bar', 'dip_station', 'stability_ball']) {
+  if (!apartmentInventory.has(requiredEquipment)) fail(`Apartment gym is missing verified equipment ${requiredEquipment}`);
+}
+if (apartmentInventory.has('dumbbell') || apartmentInventory.has('barbell') || apartmentInventory.has('kettlebell')) {
+  fail('Apartment gym must not infer unpictured free weights');
+}
+if (!Array.isArray(apartmentMachineKeywords) || apartmentMachineKeywords.length < 5) fail('Apartment machine capability filter is missing');
+if (!Array.isArray(locations.apartmentGym.verifiedStations) || locations.apartmentGym.verifiedStations.length < 8) fail('Apartment photo inventory is incomplete');
+
+const smithSquat = trainingExercises.find(x => x.name === 'Smith Machine Squat');
+if (!smithSquat?.locationCompatibility.apartmentGym) fail('Verified Smith station did not unlock Smith Machine Squat');
+const genericLegPress = trainingExercises.find(x => /leg press/i.test(x.name) && x.equipment === 'machine' && !/smith/i.test(x.name));
+if (genericLegPress?.locationCompatibility.apartmentGym) fail(`Unpictured generic leg-press machine was incorrectly unlocked: ${genericLegPress.name}`);
+
 if (!energy.formulas?.grossKcal || !energy.formulas?.activeKcal) fail('Energy model formulas missing');
 if (summary.counts.exercises !== exercises.length || summary.counts.metActivities !== activities.length) fail('Catalog summary counts do not match generated data');
 if (summary.reconciliation?.officialPdfParsedRows !== activities.length) fail('Catalog summary reconciliation count mismatch');
 
 console.log(`Validated ${exercises.length} source exercises and ${trainingExercises.length} apparatus-aware training exercises.`);
 console.log(`Home-safe after apparatus resolution: ${trainingSummary.homeCompatibleCount} of ${trainingSummary.sourceBodyweightCount} source bodyweight exercises.`);
+console.log(`Apartment-compatible after photo verification: ${trainingSummary.apartmentCompatibleCount}; generic-machine entries: ${trainingSummary.apartmentCompatibleMachineCount}.`);
 console.log(`Validated ${activities.length} official-PDF MET activities; website reconciliation rows: ${reconciliation.currentWebsiteParsedRows}.`);
 console.log(`PDF-only codes: ${reconciliation.pdfOnlyCodes.length}; website-only codes: ${reconciliation.websiteOnlyCodes.length}; MET mismatches: ${reconciliation.metMismatches.length}.`);
