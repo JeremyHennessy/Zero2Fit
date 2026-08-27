@@ -55,7 +55,7 @@ final class HealthKitBridge {
             }
         }
 
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             healthStore.requestAuthorization(toShare: [], read: readTypes) { success, error in
                 if let error {
                     continuation.resume(throwing: error)
@@ -119,7 +119,7 @@ final class HealthKitBridge {
     }
 
     private func enableBackgroundDelivery(for type: HKObjectType) async throws {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             healthStore.enableBackgroundDelivery(for: type, frequency: .hourly) { success, error in
                 if let error {
                     continuation.resume(throwing: error)
