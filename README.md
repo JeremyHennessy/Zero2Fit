@@ -6,7 +6,7 @@ Zero2Fit is intentionally a **one-person app**. It is built around one rule: rou
 
 ## Current capabilities
 
-- responsive Today dashboard
+- responsive dark/high-contrast **Today / Adventure / Train / Fuel / Progress / Devices** interface
 - recoverable Momentum score, XP, character attributes, milestones and boss objectives
 - Quick / Standard / Full workout modes
 - automatic Full Body A/B workout generation
@@ -17,8 +17,10 @@ Zero2Fit is intentionally a **one-person app**. It is built around one rule: rou
 - manual weight/steps/food entry
 - structured IndexedDB snapshots/events/import history alongside the existing local app state
 - RENPHO CSV, Apple Health XML and normalized HealthKit-bridge JSON import paths
+- source-aware device reconciliation for steps, workouts, sleep, resting HR, HRV and RENPHO body-composition trends
+- conservative verified-device XP rules with duplicate and historical-import protection
 - portable local JSON backup
-- Journey and data/provenance views
+- Progress and Devices/provenance views
 - GitHub Pages deployment
 
 ## Build 003 — storage + device ingestion
@@ -116,9 +118,9 @@ Zero2Fit does not assume a chair, bench, pull-up bar, band, anchor or weights. T
 
 ### Apartment Gym
 
-Equipment profile status: **pending photos**.
+Equipment profile status: **photo-verified inventory captured in the repository**.
 
-Until the gym is visually inventoried, Zero2Fit deliberately inherits the conservative Home-safe equipment profile. Equipment will be identified from the user's photos and added to the repository profile; the user should not need to type a machine list.
+The planner now uses the equipment identified from the supplied Apartment Gym photos rather than inheriting the conservative Home profile. Exercise availability and substitutions continue to be derived from the repository equipment profile, so the user does not need to maintain a manual machine list.
 
 ### Full Gym
 
@@ -159,7 +161,7 @@ Open `http://localhost:8080`.
 
 ## Deployment
 
-`.github/workflows/pages.yml` deploys the repository root to GitHub Pages after pushes to `main`.
+GitHub Pages is configured to publish the repository root from `main` using GitHub's branch-based **pages build and deployment** workflow. The repository intentionally does not maintain a second custom Pages deployment workflow.
 
 Expected URL:
 
