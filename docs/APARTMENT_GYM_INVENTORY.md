@@ -2,7 +2,7 @@
 
 Verification date: **2026-08-27**
 
-Evidence basis: **four user-provided photos reviewed visually in ChatGPT**. The photos themselves are intentionally **not** committed to this public repository. This document records only the equipment/functions that can be supported from those images. Model-level identification is separated from function-level identification.
+Evidence basis: **four user-provided photos reviewed visually in ChatGPT, plus the user's explicit confirmation that the gym has a full dumbbell set**. The photos themselves are intentionally **not** committed to this public repository. This document records equipment/functions with their evidence basis and keeps photo-observed claims separate from user-confirmed additions. Model-level identification is separated from function-level identification.
 
 ## Confirmed / high-confidence equipment
 
@@ -23,6 +23,21 @@ Manufacturer reference:
 - https://www.hoistfitness.com/products/mi7smith-functional-training-system
 
 The manufacturer describes the Mi7Smith as the MiSmith Dual Action Smith combined with the Mi7 Functional Trainer, with dual rotating cable columns, pull-up grips and dip grips. This reference is used to confirm functions of the visually identified system, not to infer unrelated accessories elsewhere in the room.
+
+### Full dumbbell set
+
+Evidence confidence: **user-confirmed**.
+
+The user explicitly confirmed that the Apartment Gym has a full dumbbell set after the photo-based inventory was captured. Zero2Fit therefore marks `dumbbell` available for location-aware exercise selection.
+
+What is **not** inferred from that confirmation:
+
+- dumbbell brand;
+- exact minimum/maximum weight;
+- weight increments;
+- presence of kettlebells, free barbells or other free-weight equipment.
+
+Enabled training includes dumbbell rows, presses, curls, raises, squats, lunges and other catalog movements whose complete equipment requirements are satisfied by the Apartment Gym profile.
 
 ### Selectorized lat pulldown / low-row station
 
@@ -97,9 +112,8 @@ These cardio items are stored as verified station metadata. The current strength
 
 ## Equipment deliberately NOT marked available
 
-The photos do not verify the following, so they remain unavailable in the Apartment Gym profile unless later photos establish them:
+The current evidence does not verify the following, so they remain unavailable in the Apartment Gym profile until later evidence establishes them:
 
-- free dumbbells;
 - free barbell;
 - kettlebells;
 - resistance bands;
@@ -108,6 +122,8 @@ The photos do not verify the following, so they remain unavailable in the Apartm
 - sled.
 
 The Smith machine is **not** treated as a free barbell. Zero2Fit enables Smith-named machine exercises through the verified generic-machine capability filter instead of adding `barbell` to the apartment inventory.
+
+The confirmed dumbbell set similarly unlocks only exercises whose catalog equipment requirements are satisfied by `dumbbell` plus other already-confirmed Apartment Gym equipment. It does not imply the presence of any of the unsupported equipment above.
 
 ## Generic-machine safety rule
 
@@ -128,8 +144,8 @@ The adjustable cable trainer is handled separately as `cable_machine`, because i
 
 ## Future updates
 
-Additional apartment-gym photos can expand this inventory. The rule remains:
+Additional apartment-gym evidence can expand this inventory. The rule remains:
 
-**observed equipment/function first → normalized equipment capability → workout selection**.
+**observed or explicitly confirmed equipment/function → normalized equipment capability → workout selection**.
 
-Do not manually add a machine category simply because a similar exercise would be convenient.
+Do not manually add a machine or equipment category simply because a similar exercise would be convenient.
