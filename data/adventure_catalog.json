@@ -1,56 +1,74 @@
 {
-  "version": 1,
+  "version": 2,
   "energyXpPerCharge": 25,
   "autoIntervalMinutes": 120,
   "maxOfflineRuns": 6,
-  "expeditionEncounters": 3,
+  "expeditionEncounters": 5,
+  "stageCount": 4,
+  "stageVictories": 2,
   "zones": [
     {
       "id": "foundation_trail",
       "name": "Foundation Trail",
       "tier": 1,
       "minFitnessLevel": 1,
+      "stageCount": 4,
+      "stageVictories": 2,
+      "clearVictories": 8,
       "description": "A low-risk proving ground where the Rebuilder learns to turn real-world momentum into field power.",
       "enemyIds": ["moss_rat", "bramble_sprite", "stonebeak"],
       "bossId": "gatewarden_boar",
       "bossEveryVictories": 8,
-      "lootItemIds": ["ashwood_club", "trailguard_vest", "moss_charm"]
+      "lootItemIds": ["ashwood_club", "trailguard_vest", "moss_charm"],
+      "materialIds": ["trail_fiber", "moss_shard"]
     },
     {
       "id": "briar_hollow",
       "name": "Briar Hollow",
       "tier": 2,
       "minFitnessLevel": 3,
-      "requires": {"zoneId": "foundation_trail", "victories": 5},
-      "description": "Twisted roots, denser enemies and better salvage. Unlocks once the real-world character has enough foundation and field wins.",
+      "requires": {"zoneId": "foundation_trail", "victories": 8},
+      "stageCount": 4,
+      "stageVictories": 2,
+      "clearVictories": 8,
+      "description": "Twisted roots, denser enemies and better salvage. Unlocks after the Foundation boss is cleared and the real-world fitness level reaches the gate.",
       "enemyIds": ["thorn_hound", "hollow_wisp", "rootguard"],
       "bossId": "briar_stag",
       "bossEveryVictories": 8,
-      "lootItemIds": ["briar_blade", "rootmail", "ember_seed"]
+      "lootItemIds": ["briar_blade", "rootmail", "ember_seed"],
+      "materialIds": ["briar_resin", "ember_fragment"]
     },
     {
       "id": "ironwood_pass",
       "name": "Ironwood Pass",
       "tier": 3,
       "minFitnessLevel": 5,
-      "requires": {"zoneId": "briar_hollow", "victories": 7},
+      "requires": {"zoneId": "briar_hollow", "victories": 8},
+      "stageCount": 4,
+      "stageVictories": 2,
+      "clearVictories": 8,
       "description": "Cold stone and armored creatures reward a balanced build instead of raw Strength alone.",
       "enemyIds": ["ironback", "pass_raider", "frost_moth"],
       "bossId": "ironwood_colossus",
       "bossEveryVictories": 8,
-      "lootItemIds": ["ironwood_axe", "passwarden_plate", "frostglass_token"]
+      "lootItemIds": ["ironwood_axe", "passwarden_plate", "frostglass_token"],
+      "materialIds": ["ironwood_ore", "frostglass_shard"]
     },
     {
       "id": "ember_ridge",
       "name": "Ember Ridge",
       "tier": 4,
       "minFitnessLevel": 8,
-      "requires": {"zoneId": "ironwood_pass", "victories": 9},
+      "requires": {"zoneId": "ironwood_pass", "victories": 8},
+      "stageCount": 4,
+      "stageVictories": 2,
+      "clearVictories": 8,
       "description": "The first high-tier frontier. Real-world consistency matters here because adventure gear alone cannot carry a weak base character.",
       "enemyIds": ["cinder_fox", "ash_knight", "ridge_drake"],
       "bossId": "ember_crowned_warden",
       "bossEveryVictories": 8,
-      "lootItemIds": ["emberbrand", "ridgeguard_shell", "sunstone_sigil"]
+      "lootItemIds": ["emberbrand", "ridgeguard_shell", "sunstone_sigil"],
+      "materialIds": ["cinder_core", "sunstone_dust"]
     }
   ],
   "enemies": [
@@ -84,5 +102,15 @@
     {"id":"emberbrand","name":"Emberbrand","slot":"weapon","basePower":13,"icon":"⚔","description":"High-tier weapon forged from Ridge salvage."},
     {"id":"ridgeguard_shell","name":"Ridgeguard Shell","slot":"armor","basePower":13,"icon":"⬟","description":"Dense armor built for Ember Ridge pressure."},
     {"id":"sunstone_sigil","name":"Sunstone Sigil","slot":"charm","basePower":12,"icon":"◆","description":"A bright endgame charm for the first frontier arc."}
+  ],
+  "materials": [
+    {"id":"trail_fiber","name":"Trail Fiber","icon":"⌁","description":"Foundation salvage gathered from the outer trail."},
+    {"id":"moss_shard","name":"Moss Shard","icon":"◇","description":"A mineralized shard found among moss-covered enemies."},
+    {"id":"briar_resin","name":"Briar Resin","icon":"◈","description":"Dense resin collected deeper in Briar Hollow."},
+    {"id":"ember_fragment","name":"Ember Fragment","icon":"✦","description":"Warm fragments carried by creatures in the Hollow."},
+    {"id":"ironwood_ore","name":"Ironwood Ore","icon":"⬢","description":"Heavy ore recovered from Ironwood Pass."},
+    {"id":"frostglass_shard","name":"Frostglass Shard","icon":"◇","description":"Cold translucent salvage from the upper pass."},
+    {"id":"cinder_core","name":"Cinder Core","icon":"◆","description":"High-tier material left by Ember Ridge enemies."},
+    {"id":"sunstone_dust","name":"Sunstone Dust","icon":"✧","description":"Rare bright dust from the deepest current frontier."}
   ]
 }
