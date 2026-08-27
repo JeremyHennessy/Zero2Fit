@@ -1,0 +1,49 @@
+name: Sync fitness reference data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 8 1 * *'
+  push:
+    branches:
+      - main
+      - agent/build-002-location-exercise-substitutions
+    paths:
+      - 'tools/sync-fitness-data.mjs'
+      - 'tools/validate-fitness-data.mjs'
+      - 'data/location_profiles.json'
+      - 'data/energy_model.json'
+      - 'data/programming_rules.json'
+      - 'data/substitution_rules.json'
+      - '.github/workflows/sync-fitness-data.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Fetch and normalize exercise + MET catalogs
+        run: node tools/sync-fitness-data.mjs
+
+      - name: Validate generated fitness data
+        run: node tools/validate-fitness-data.mjs
+
+      - name: Commit refreshed catalogs when changed
+        shell: bash
+        run: |
+          if git diff --quiet -- data/generated; then
+            echo 'Generated catalogs are already current.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/generated
+          git commit -m 'Data sync: refresh exercise and MET catalogs [skip ci]'
+          git push origin HEAD:${{ github.ref_name }}
