@@ -3,8 +3,9 @@
   "trainingExerciseCount": 873,
   "sourceBodyweightCount": 188,
   "homeCompatibleCount": 147,
-  "apartmentCompatibleCount": 147,
+  "apartmentCompatibleCount": 281,
   "fullGymCompatibleCount": 873,
+  "apartmentCompatibleMachineCount": 24,
   "bodyweightRequiringImplicitApparatus": 42,
   "implicitEquipmentCounts": {
     "partner": 33,
@@ -21,9 +22,26 @@
     "low_bar": 2,
     "climbing_rope": 2
   },
+  "apartmentMachineCapabilityKeywords": [
+    "smith",
+    "leg extension",
+    "seated leg curl",
+    "shoulder press",
+    "pectoral fly",
+    "pec fly",
+    "pec deck",
+    "butterfly",
+    "rear delt",
+    "rear deltoid",
+    "reverse fly",
+    "lat pulldown",
+    "lat pull-down",
+    "low row",
+    "seated row"
+  ],
   "policy": {
     "home": "Bodyweight/yoga-mat/wall only; no bar, bench, chair, box, anchor or other apparatus is assumed.",
-    "apartmentGym": "Uses the same conservative safe set as Home until photo inventory is verified.",
+    "apartmentGym": "Photo-verified cable/Smith/machine profile. Generic machine exercises are limited to explicitly observed machine functions; the cable trainer remains broadly usable.",
     "fullGym": "Generic full-gym profile includes standard apparatus categories plus inferred bodyweight apparatus."
   }
 }
