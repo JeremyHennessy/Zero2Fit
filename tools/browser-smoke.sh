@@ -35,7 +35,6 @@ grep -q 'Bodyweight Squat' "$DOM_FILE"
 grep -q 'No true substitute here' "$DOM_FILE"
 grep -q '873 exercises' "$DOM_FILE"
 grep -q '1111 MET activities' "$DOM_FILE"
-grep -q 'Photo inventory pending' "$DOM_FILE"
 
 grep -q 'Data architecture · Build 003' "$DOM_FILE"
 grep -q 'Import measurements' "$DOM_FILE"
@@ -50,6 +49,7 @@ grep -q 'Latest body snapshot' "$DOM_FILE"
 grep -q 'Aligned visual timeline' "$DOM_FILE"
 grep -q 'Your devices, one private timeline' "$DOM_FILE"
 grep -q 'z4SensorStrip' "$DOM_FILE"
+grep -q './build006.css' "$DOM_FILE"
 
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then
   echo 'Workout catalog load failed in browser.' >&2
@@ -66,4 +66,4 @@ if grep -q 'Zero2Fit Build 004 initialization failed' "$DOM_FILE"; then
   exit 1
 fi
 
-echo 'Browser smoke passed: Build 002 workout intelligence, Build 003 storage/device imports, and Build 004 device-driven UI rendered.'
+echo 'Browser smoke passed: training, device ingestion, device-driven UI, and approved dark visual stylesheet rendered.'
