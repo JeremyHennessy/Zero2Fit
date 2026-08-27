@@ -457,11 +457,13 @@ export function simulateExpedition({ appState = {}, adventure: rawAdventure = {}
     }
 
     profile = fitnessProfile(appState, adventure, catalog);
-    const heal = i < maxEncounters - 1 ? Math.round(profile.maxHp * profile.betweenBattleHealFraction) : 0;
+    const clearedAfterBattle = zoneStageStatus(zone, adventure, catalog).cleared;
+    const heal = !clearedAfterBattle && i < maxEncounters - 1 ? Math.round(profile.maxHp * profile.betweenBattleHealFraction) : 0;
     battle.recoveryHeal = heal;
     currentHp = Math.min(profile.maxHp, battle.playerHp + heal);
     battle.postRecoveryHp = currentHp;
     battles.push(battle);
+    if (clearedAfterBattle) break;
   }
 
   adventure.coins += coinsEarned;
