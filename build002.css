@@ -1,0 +1,105 @@
+.today-training-context {
+  display: grid;
+  gap: 3px;
+  margin: -2px 0 15px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #f5f3ed;
+}
+.today-training-context strong { color: var(--accent-strong); font-size: 13px; }
+.today-training-context span { color: var(--muted); font-size: 11px; line-height: 1.4; }
+
+.training-context-card { margin-bottom: 14px; }
+.training-context-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
+.training-context-top h2 { margin-bottom: 3px; }
+.location-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin: 17px 0 11px; }
+.location-button {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel-strong);
+  padding: 12px;
+  text-align: left;
+  display: grid;
+  gap: 4px;
+  cursor: pointer;
+}
+.location-button strong { font-size: 13px; }
+.location-button span { color: var(--muted); font-size: 10px; line-height: 1.35; }
+.location-button:hover { border-color: #b9c5b8; }
+.location-button.selected { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong); }
+.energy-estimate {
+  min-width: 210px;
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  padding: 11px 13px;
+  background: #f2f0e9;
+  border-radius: 14px;
+}
+.energy-estimate span { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .07em; }
+.energy-estimate strong { font-size: 22px; letter-spacing: -.03em; }
+.energy-estimate small { color: var(--muted); font-size: 10px; text-align: right; max-width: 250px; line-height: 1.35; }
+.workout-warnings { display: grid; gap: 7px; margin-top: 12px; }
+.training-warning {
+  padding: 10px 12px;
+  border-radius: 11px;
+  background: #f7eee7;
+  border: 1px solid #ead8c9;
+  color: #745b4d;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.exercise-guidance { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 12px 0 8px; color: var(--muted); font-size: 12px; }
+.exercise-guidance .text-button { white-space: nowrap; }
+.exercise-instructions { margin-top: 11px; padding-top: 10px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+.exercise-instructions summary { cursor: pointer; font-weight: 700; color: var(--accent-strong); }
+.exercise-instructions p { margin-bottom: 0; line-height: 1.5; }
+.bodyweight-load {
+  min-height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f3f1eb;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+.unavailable-card { border-style: dashed; box-shadow: none; background: rgba(247, 244, 237, .78); }
+.unavailable-card h3 { color: #5b625c; }
+.unavailable-tag { background: #f7eee7; color: #865f50; border-color: #ead8c9; }
+.location-unlock { margin-top: 13px; padding: 10px 12px; border-radius: 11px; background: var(--accent-soft); color: var(--accent-strong); font-size: 11px; }
+
+.substitute-panel { margin: 10px 0 12px; padding: 11px; border: 1px solid var(--line); border-radius: 13px; background: #f6f4ee; display: grid; gap: 7px; }
+.substitute-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 11px; }
+.substitute-option {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: white;
+  padding: 9px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 11px;
+}
+.substitute-option:hover { border-color: var(--accent); }
+.substitute-option > span:first-child { display: grid; gap: 2px; }
+.substitute-option small { color: var(--muted); font-size: 9px; }
+.substitute-option > span:last-child { color: var(--accent-strong); font-weight: 750; white-space: nowrap; }
+.fitness-catalog-card { grid-column: span 2; }
+
+@media (max-width: 760px) {
+  .training-context-top { display: grid; }
+  .energy-estimate { width: 100%; min-width: 0; justify-items: start; }
+  .energy-estimate small { text-align: left; }
+  .location-grid { grid-template-columns: 1fr; }
+  .exercise-guidance { align-items: flex-start; }
+  .fitness-catalog-card { grid-column: auto; }
+}
