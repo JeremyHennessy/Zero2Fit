@@ -36,6 +36,7 @@ jobs:
           node --check build008-device-sync.js
           node --check build009-adaptive.js
           node --check build010-intelligence.js
+          node --check build011-adventure.js
           node --check tools/build-training-catalog.mjs
           node --check tools/validate-fitness-data.mjs
           node --check tools/test-training-planner.mjs
@@ -76,6 +77,7 @@ jobs:
           test -s build008-device-sync.js
           test -s build009-adaptive.js
           test -s build010-intelligence.js
+          test -s build011-adventure.js
           test -s ios/Zero2FitHealthBridge/project.yml
           test -s ios/Zero2FitHealthBridge/Zero2FitHealthBridge.entitlements
           test -s ios/Zero2FitHealthBridge/Sources/HealthKitBridge.swift
@@ -104,6 +106,7 @@ jobs:
           grep -q './build008-device-sync.js' index.html
           grep -q 'build009-adaptive.js' build008-device-sync.js
           grep -q 'build010-intelligence.js' build009-adaptive.js
+          grep -q 'build011-adventure.js' build010-intelligence.js
           grep -q '#070b09' build006.css
           grep -q '#b7f34a' build006.css
           grep -q 'progress_photos' storage.js
@@ -111,6 +114,8 @@ jobs:
           grep -q 'device_source_observations' supabase/schema.sql
           grep -q 'device_source_verifications' supabase/schema.sql
           grep -q 'source_verification_id' device-core.mjs
+          grep -q '"version": 2' data/adventure_catalog.json
+          grep -q '"materials"' data/adventure_catalog.json
 
       - name: Reject embedded private credential patterns
         run: |
@@ -140,7 +145,7 @@ jobs:
       - name: Test private sync contract
         run: node tools/test-remote-sync.mjs
 
-      - name: Test RPG adventure engine
+      - name: Test full RPG adventure engine
         run: node tools/test-adventure-core.mjs
 
       - name: Test progress-photo helpers
