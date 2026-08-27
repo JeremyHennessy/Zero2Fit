@@ -13,13 +13,13 @@ Primary source: **yuhonas/free-exercise-db**
 - Zero2Fit separately resolves hidden apparatus requirements from exercise names/instructions. After that equipment-resolution step, **147** exercises are compatible with the confirmed Home profile (bodyweight + yoga mat + ordinary wall; no chair, bench, bar, anchor, band or weights assumed).
 - Scope: name, difficulty, force, mechanic, equipment, primary/secondary muscles, instructions and category.
 - License: **Unlicense / public domain**. The upstream license permits copying, modification and redistribution.
-- Zero2Fit does not vendor the upstream exercise images in Build 002. The normalized catalog keeps exercise metadata and instructions while avoiding a large media payload.
+- Zero2Fit does not vendor the upstream exercise images. The normalized catalog keeps exercise metadata and instructions while avoiding a large media payload.
 
-The sync script records the exact upstream Git commit used for each generated catalog. Build 002 currently records upstream commit `b0eed061e1c832b3ed815fbaa4b45b3cdc14df49`.
+The sync script records the exact upstream Git commit used for each generated catalog. The current catalog records upstream commit `b0eed061e1c832b3ed815fbaa4b45b3cdc14df49`.
 
 ### Hidden-apparatus resolution
 
-A source exercise marked `body only` is not automatically considered mat-only. Build 002 derives common apparatus requirements such as pull-up bars, dip stations, low bars, benches, chairs, boxes, steps, GHD/anchors, Roman chairs, climbing ropes and sleds from the exercise name/instructions. The derived requirements are stored in `data/generated/training_exercises.json` as `implicitEquipment` and `requiredEquipment`.
+A source exercise marked `body only` is not automatically considered mat-only. Zero2Fit derives common apparatus requirements such as pull-up bars, dip stations, low bars, benches, chairs, boxes, steps, GHD/anchors, Roman chairs, climbing ropes and sleds from the exercise name/instructions. The derived requirements are stored in `data/generated/training_exercises.json` as `implicitEquipment` and `requiredEquipment`.
 
 This currently removes 41 source bodyweight/body-only entries from the confirmed Home-compatible set. The count is validation-controlled and can change only when the upstream catalog or equipment-resolution rules change.
 
@@ -62,6 +62,8 @@ These values are estimates. When a connected device supplies workout energy, Zer
 
 For resistance training, Zero2Fit estimates a timed workout/session or timed segment. It does not assign a fake fixed calorie value to an individual rep, set or named lift.
 
+Home standard/full resistance sessions use the bodyweight-resistance reference profile. The photo-verified Apartment Gym now uses the general multi-exercise resistance-training reference profile because it has cable, Smith and selectorized resistance equipment.
+
 ## 3. Workout-generation evidence
 
 ### ACSM 2026 resistance-training position stand
@@ -81,26 +83,51 @@ These public-health targets are reference points, not rigid daily pass/fail stre
 ## 4. Location inventory policy
 
 - **Home** is confirmed as bodyweight + yoga mat + ordinary wall. No other apparatus is assumed.
-- **Apartment Gym** remains unverified until user-provided photos are reviewed. The app must not invent equipment. Until verified, it inherits only the conservative Home-safe catalog.
-- **Full Gym** is treated as a generic all-equipment environment. It can later be refined to a specific facility without changing workout-history records.
+- **Apartment Gym** was verified from four user-provided photos on **2026-08-27**. The photos are not committed to the public repository. The structured inventory is in `data/location_profiles.json`, with evidence notes in [`APARTMENT_GYM_INVENTORY.md`](APARTMENT_GYM_INVENTORY.md).
+- **Full Gym** remains a generic all-equipment environment. It can later be refined to a specific facility without changing workout-history records.
 
-When apartment-gym photos arrive, equipment identification should be written into `data/location_profiles.json` from the photo review. The user should not have to type a machine inventory manually.
+### Apartment Gym verified capabilities
+
+The current Apartment Gym profile supports:
+
+- HOIST Mi7Smith functional trainer / Smith system;
+- adjustable cable training;
+- Smith-machine exercises;
+- pull-up and dip stations;
+- bench-supported exercises;
+- selectorized lat pulldown / low row;
+- selectorized leg extension / seated leg curl;
+- selectorized shoulder press;
+- selectorized pectoral fly / rear deltoid;
+- stability-ball training;
+- Concept2 rowing, treadmills and elliptical/cross-trainer cardio as station metadata.
+
+The photos do **not** verify free dumbbells, a free barbell, kettlebells, resistance bands, a plyometric box, GHD/Roman chair or sled, so Zero2Fit does not add those categories.
+
+### Apartment generic-machine guardrail
+
+The source catalog uses the coarse equipment class `machine`. The presence of one selectorized machine must not unlock every machine exercise.
+
+For Apartment Gym only, a generic `machine` exercise must also match a verified machine-function keyword (for example `smith`, `leg extension`, `seated leg curl`, `shoulder press`, `pectoral fly`, `rear delt`, `lat pulldown`, `low row` or `seated row`). The adjustable functional trainer is handled separately as `cable_machine`, because a functional trainer is designed for a broad range of cable movements.
 
 ## 5. Automatic workout and substitution policy
 
 Workout slots describe **training intent** (for example horizontal pull/back or vertical pull/lats), not a hard-coded exercise name. The planner filters and ranks candidates by:
 
 1. equipment actually available at the selected location;
-2. strength-category suitability for strength sessions;
-3. movement pattern;
-4. primary muscle overlap;
-5. push/pull/static force;
-6. compound/isolation mechanic;
-7. difficulty proximity.
+2. verified machine-function capability where a location has only specific machines;
+3. strength-category suitability for strength sessions;
+4. movement pattern;
+5. primary muscle overlap;
+6. push/pull/static force;
+7. compound/isolation mechanic;
+8. difficulty proximity.
 
 Automatic selections must score **good match or better**. Partial/fallback matches are never silently inserted into the workout.
 
-This matters at Home: the researched catalog currently contains no good-or-better strength substitute for a true horizontal pull or lat pull using only the confirmed Home equipment. Zero2Fit therefore renders that workout slot as **Unavailable at this location**, excludes it from the completion denominator, and can show what a Full Gym would unlock. A stretch or unrelated abdominal exercise is not allowed to masquerade as back/lat strength work.
+At Home, the researched catalog currently contains no good-or-better strength substitute for a true horizontal pull or lat pull using only the confirmed Home equipment. Zero2Fit therefore renders that workout slot as **Unavailable at this location**, excludes it from the completion denominator, and can show what a better-equipped location would unlock. A stretch or unrelated abdominal exercise is not allowed to masquerade as back/lat strength work.
+
+At Apartment Gym, the verified cable/pulldown/row equipment removes that Home pulling limitation. Lat and horizontal-pull slots must resolve to true pull/back exercises or the validation suite fails.
 
 For available exercises, the app can rank same-location substitutes automatically. The user can change the exercise with one tap without needing to know the equipment taxonomy or manually recreate the workout.
 
@@ -117,7 +144,7 @@ The sync process:
 5. fetches all current Compendium category webpages;
 6. reconciles PDF and website records by five-digit activity code;
 7. writes normalized source data into `data/generated/`;
-8. derives hidden apparatus and location compatibility with `tools/build-training-catalog.mjs`;
+8. derives hidden apparatus, location compatibility and Apartment machine-capability filtering with `tools/build-training-catalog.mjs`;
 9. removes volatile timestamps from committed generated metadata so unchanged sources do not create meaningless commits.
 
 `node tools/validate-fitness-data.mjs`
@@ -127,16 +154,20 @@ Validation fails if:
 - the exercise catalog falls below 800 exercises;
 - the canonical PDF extraction falls below 1,100 activities;
 - exercise or MET IDs are duplicated;
-- hidden-apparatus resolution leaves an unavailable requirement on a Home-compatible exercise;
+- hidden-apparatus resolution leaves an unavailable requirement on a Home- or Apartment-compatible exercise;
 - pull-up/hanging exercises become Home-compatible without a pull-up bar;
+- the Apartment profile loses a verified cable/machine/bench/pull-up/dip/stability-ball capability;
+- an unverified generic machine exercise leaks into Apartment compatibility;
+- an unpictured free-weight category is accidentally added to Apartment Gym;
+- verified Smith exercises fail to become Apartment-compatible;
+- an unpictured generic leg-press machine becomes Apartment-compatible;
 - required resistance/bodyweight/yoga/walking reference codes disappear;
 - PDF provenance is missing;
-- the publication-count reconciliation metadata changes unexpectedly;
-- generated summary counts disagree with the catalogs; or
-- the apartment-gym profile is accidentally treated as verified before its photo inventory exists.
+- the publication-count reconciliation metadata changes unexpectedly; or
+- generated summary counts disagree with the catalogs.
 
-`node tools/test-training-planner.mjs` verifies real generated workouts across Home, Apartment Gym and Full Gym, including the intentional Home pulling limitation, substitution quality, equipment compatibility and the MET energy formula.
+`node tools/test-training-planner.mjs` verifies real generated workouts across Home, Apartment Gym and Full Gym, including the intentional Home pulling limitation, the now-available Apartment horizontal/vertical pulling slots, substitute quality, equipment compatibility and the MET energy formula.
 
-`bash tools/browser-smoke.sh` serves the actual static app over HTTP in headless Chrome and verifies that the researched catalog loads, the Home workout renders, the unavailable pull slot remains visible, the location controls appear and catalog counts reach the UI.
+`bash tools/browser-smoke.sh` serves the actual static app over HTTP in headless Chrome and verifies that the researched catalog loads, the workout renders, location controls appear and catalog counts reach the UI.
 
-The GitHub Actions workflow refreshes the catalogs monthly and can also be run manually. Refreshes are serialized per branch, and the workflow commits generated data only when the normalized source content actually changes.
+The GitHub Actions fitness-data workflow refreshes the catalogs monthly and can also run on isolated `build-*` / `agent/build-*` branches when relevant training data or rules change. Refreshes are serialized per branch, and the workflow commits generated data only when the normalized source content actually changes.
