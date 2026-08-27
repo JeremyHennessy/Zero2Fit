@@ -14,10 +14,58 @@ Zero2Fit is intentionally a **one-person app**. It is built around one rule: rou
 - automatic same-location exercise substitutions based on training intent, muscle group, movement pattern and available equipment
 - set-by-set workout tracking
 - automatic workout-duration and MET-based calorie estimates when a body weight is available
-- manual weight/steps/food entry until device sync is added
+- manual weight/steps/food entry
+- structured IndexedDB snapshots/events/import history alongside the existing local app state
+- RENPHO CSV, Apple Health XML and normalized HealthKit-bridge JSON import paths
+- portable local JSON backup
 - Journey and data/provenance views
-- browser `localStorage` persistence
 - GitHub Pages deployment
+
+## Build 003 — storage + device ingestion
+
+Build 003 is intentionally additive to Build 002. It is based on `1318e8f84806c8d3ad23b27dc14d13347ef9f1ca` and does not replace the researched workout engine.
+
+### Local storage architecture
+
+The existing application continues to use `localStorage` for its active state so the approved Build 002 runtime is not rewritten during this integration. Build 003 adds IndexedDB stores for:
+
+- state snapshots
+- normalized health/fitness events
+- import history
+- future device connection records
+- future progress-photo metadata
+
+Later local app-state changes are mirrored into IndexedDB and new manual weight/step/workout activity is normalized into structured events when detected.
+
+### Device paths
+
+**Amazfit Active 2 (Round)**
+
+`Amazfit → Zepp → Apple Health → future native HealthKit companion → Zero2Fit`
+
+**RENPHO scale**
+
+`RENPHO → RENPHO Health → Apple Health → future HealthKit companion → Zero2Fit`
+
+and for history/import:
+
+`RENPHO Health CSV → Zero2Fit normalized event import`
+
+The user reports the scale as ES-20M. RENPHO documentation reviewed for this work lists ES-CS20M in the relevant family; the underside model label remains pending verification.
+
+Build 003 also accepts an extracted Apple Health `export.xml`. This is a migration/diagnostic path, not a substitute for a native HealthKit companion.
+
+Raw Apple Health StepCount events are stored but do not overwrite the daily step total unless a future bridge explicitly marks the event as an aggregated `daily_total`. Imported workouts also do not award Fitness XP yet; deduplication and verification must exist first.
+
+### Future private cloud target
+
+`supabase/schema.sql` defines the planned authenticated/RLS-protected schema and private progress-photo bucket. **No Supabase project, cloud account or private credential is connected by Build 003.**
+
+See:
+
+- [`docs/DATA_STORAGE_ARCHITECTURE.md`](docs/DATA_STORAGE_ARCHITECTURE.md)
+- [`docs/DEVICE_INGESTION.md`](docs/DEVICE_INGESTION.md)
+- [`docs/BUILD_003.md`](docs/BUILD_003.md)
 
 ## Researched fitness reference data
 
@@ -119,6 +167,6 @@ Expected URL:
 
 ## Data/privacy architecture
 
-Current personal entries stay in browser `localStorage`. Future Apple Health, wearable, smart-scale or nutrition-app integrations must not place OAuth/client secrets or private health payloads directly in this public repository. Device sync will need an appropriate companion or secure backend layer while keeping source provenance visible in the app.
+Health measurements, device exports, backups and future progress photos must remain outside the public repository. Browser-local data is currently active; future cloud sync must use authenticated private storage and Row Level Security without embedding service-role credentials in GitHub Pages.
 
-See [`docs/PRODUCT_SPEC.md`](docs/PRODUCT_SPEC.md) for the broader personal-app design and [`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md) for the researched reference-data implementation.
+See [`docs/PRODUCT_SPEC.md`](docs/PRODUCT_SPEC.md), [`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md), [`docs/DATA_STORAGE_ARCHITECTURE.md`](docs/DATA_STORAGE_ARCHITECTURE.md), and [`docs/DEVICE_INGESTION.md`](docs/DEVICE_INGESTION.md).
