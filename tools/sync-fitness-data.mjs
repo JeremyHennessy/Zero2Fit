@@ -48,10 +48,16 @@ function stripHtml(value) {
 }
 
 async function fetchResponse(url, accept = '*/*') {
-  const response = await fetch(url, { headers: { 'user-agent': 'Zero2Fit-data-sync/1.0 (+https://github.com/JeremyHennessy/Zero2Fit)', accept } });
+  const response = await fetch(url, {
+    headers: {
+      'user-agent': 'Zero2Fit-data-sync/1.0 (+https://github.com/JeremyHennessy/Zero2Fit)',
+      accept
+    }
+  });
   if (!response.ok) throw new Error(`Fetch failed ${response.status} ${url}`);
   return response;
 }
+
 const fetchText = async url => (await fetchResponse(url, 'text/html,application/json;q=0.9,*/*;q=0.8')).text();
 const fetchBytes = async url => Buffer.from(await (await fetchResponse(url, 'application/pdf,*/*;q=0.8')).arrayBuffer());
 
@@ -102,12 +108,23 @@ function metProfileFor(exercise, normalizedEquipment) {
 function normalizeExercise(exercise) {
   const equipment = EQUIPMENT_MAP.get(exercise.equipment ?? null) || 'other';
   return {
-    id: exercise.id, name: exercise.name, category: exercise.category, level: exercise.level,
-    force: exercise.force ?? null, mechanic: exercise.mechanic ?? null, equipment,
-    sourceEquipment: exercise.equipment ?? null, primaryMuscles: exercise.primaryMuscles || [],
-    secondaryMuscles: exercise.secondaryMuscles || [], instructions: exercise.instructions || [],
+    id: exercise.id,
+    name: exercise.name,
+    category: exercise.category,
+    level: exercise.level,
+    force: exercise.force ?? null,
+    mechanic: exercise.mechanic ?? null,
+    equipment,
+    sourceEquipment: exercise.equipment ?? null,
+    primaryMuscles: exercise.primaryMuscles || [],
+    secondaryMuscles: exercise.secondaryMuscles || [],
+    instructions: exercise.instructions || [],
     movementPattern: inferMovementPattern(exercise),
-    locationCompatibility: { home: HOME_EQUIPMENT.has(equipment), apartmentGym: HOME_EQUIPMENT.has(equipment), fullGym: FULL_GYM_EQUIPMENT.has(equipment) },
+    locationCompatibility: {
+      home: HOME_EQUIPMENT.has(equipment),
+      apartmentGym: HOME_EQUIPMENT.has(equipment),
+      fullGym: FULL_GYM_EQUIPMENT.has(equipment)
+    },
     energyReference: metProfileFor(exercise, equipment),
     source: { dataset: 'yuhonas/free-exercise-db', id: exercise.id, license: 'Unlicense / public domain' }
   };
@@ -123,7 +140,10 @@ function parseCompendiumLinks(indexHtml) {
     if (url.hostname !== 'pacompendium.com') continue;
     if (!/^\d{2}$/.test((label.match(/\((\d{2})\)/) || [])[1] || '')) continue;
     url.hash = '';
-    if (!seen.has(url.toString())) { seen.add(url.toString()); links.push({ url: url.toString(), label }); }
+    if (!seen.has(url.toString())) {
+      seen.add(url.toString());
+      links.push({ url: url.toString(), label });
+    }
   }
   return links;
 }
@@ -131,7 +151,8 @@ function parseCompendiumLinks(indexHtml) {
 function findCompendiumPdfUrl(indexHtml) {
   const candidates = [...indexHtml.matchAll(/href=["']([^"']+\.pdf(?:\?[^"']*)?)["']/gi)]
     .map(match => { try { return new URL(match[1], COMPENDIUM_INDEX).toString(); } catch { return null; } })
-    .filter(Boolean).filter(url => /adult[-_ ]?compendium/i.test(url) && !/tracking|guide/i.test(url));
+    .filter(Boolean)
+    .filter(url => /adult[-_ ]?compendium/i.test(url) && !/tracking|guide/i.test(url));
   return candidates[0] || COMPENDIUM_PDF_FALLBACK;
 }
 
@@ -145,8 +166,15 @@ function parseCompendiumWebPage(html, pageMeta) {
     const met = Number(cells[1]);
     const description = cells.slice(2).join(' ').trim();
     if (!/^\d{5}$/.test(code) || !Number.isFinite(met) || !description) continue;
-    rows.push({ code, majorHeadingCode: code.slice(0, 2), majorHeading: HEADING_BY_CODE[code.slice(0, 2)] || pageMeta.label, met, description,
-      evidenceStatus: /(color\s*:\s*(red|#ff0000)|has-text-color[^>]*red)/i.test(rowHtml) ? 'estimated' : 'published_or_unspecified', sourcePage: pageMeta.url });
+    rows.push({
+      code,
+      majorHeadingCode: code.slice(0, 2),
+      majorHeading: HEADING_BY_CODE[code.slice(0, 2)] || pageMeta.label,
+      met,
+      description,
+      evidenceStatus: /(color\s*:\s*(red|#ff0000)|has-text-color[^>]*red)/i.test(rowHtml) ? 'estimated' : 'published_or_unspecified',
+      sourcePage: pageMeta.url
+    });
   }
   return rows;
 }
@@ -161,7 +189,8 @@ function isPdfNoise(line) {
 function parseCompendiumPdfText(text, pdfUrl) {
   const records = [];
   let current = null;
-  const rowRegex = /^\s*(.*?)\s+(\d{5})\s+(\d+(?:\.\d+)?)\s+(.+?)\s*$/;
+  const rowRegex = /^\s*(.*?)\s+(\d{5})\s+(\d+(?:\.\d+)?)(?:\s+(.*?))?\s*$/;
+
   for (const rawLine of text.split(/\r?\n/)) {
     const line = rawLine.replace(/\f/g, '');
     const match = line.match(rowRegex);
@@ -171,17 +200,26 @@ function parseCompendiumPdfText(text, pdfUrl) {
       if (!HEADING_BY_CODE[majorHeadingCode]) continue;
       const met = Number(match[3]);
       if (!Number.isFinite(met) || met <= 0) continue;
-      current = { code, majorHeadingCode, majorHeading: HEADING_BY_CODE[majorHeadingCode], met,
-        description: match[4].replace(/\s+/g, ' ').trim(), pdfPrintedHeading: match[1].replace(/\s+/g, ' ').trim() || null,
-        sourcePdf: pdfUrl, edition: 2024 };
+      current = {
+        code,
+        majorHeadingCode,
+        majorHeading: HEADING_BY_CODE[majorHeadingCode],
+        met,
+        description: (match[4] || '').replace(/\s+/g, ' ').trim(),
+        pdfPrintedHeading: match[1].replace(/\s+/g, ' ').trim() || null,
+        sourcePdf: pdfUrl,
+        edition: 2024
+      };
       records.push(current);
       continue;
     }
+
     if (!current || isPdfNoise(line) || !/^\s{2,}\S/.test(rawLine)) continue;
     const continuation = line.replace(/\s+/g, ' ').trim();
     if (continuation.length < 2 || /^https?:\/\//i.test(continuation)) continue;
     current.description = `${current.description} ${continuation}`.replace(/\s+/g, ' ').trim();
   }
+
   const unique = new Map();
   for (const row of records) if (!unique.has(row.code)) unique.set(row.code, row);
   return [...unique.values()].sort((a, b) => a.code.localeCompare(b.code));
@@ -195,18 +233,26 @@ async function extractCompendiumPdf(indexHtml) {
     await writeFile(pdfPath, await fetchBytes(pdfUrl));
     await execFileAsync('pdftotext', ['-layout', '-nopgbrk', pdfPath, textPath], { maxBuffer: 20 * 1024 * 1024 });
     const rows = parseCompendiumPdfText(await readFile(textPath, 'utf8'), pdfUrl);
-    if (rows.length < 1000) throw new Error(`Diagnostic PDF parse unexpectedly low: ${rows.length}`);
+    if (rows.length < 1100) throw new Error(`Expected >=1100 unique official PDF MET rows; parsed ${rows.length}`);
     return { pdfUrl, rows };
-  } finally { await Promise.allSettled([unlink(pdfPath), unlink(textPath)]); }
+  } finally {
+    await Promise.allSettled([unlink(pdfPath), unlink(textPath)]);
+  }
 }
 
 function mergePdfWithWebsite(pdfRows, websiteRows) {
   const websiteByCode = new Map(websiteRows.map(row => [row.code, row]));
   return pdfRows.map(pdf => {
     const web = websiteByCode.get(pdf.code);
-    return { ...pdf, description: web?.description || pdf.description, evidenceStatus: web?.evidenceStatus || 'not_available_from_current_web_table',
-      sourcePage: web?.sourcePage || null, currentWebsiteMatch: !!web, currentWebsiteMet: web?.met ?? null,
-      sourceAgreement: web ? (Math.abs(web.met - pdf.met) < 1e-9 ? 'met_match' : 'met_mismatch') : 'pdf_only' };
+    return {
+      ...pdf,
+      description: web?.description || pdf.description,
+      evidenceStatus: web?.evidenceStatus || 'not_available_from_current_web_table',
+      sourcePage: web?.sourcePage || null,
+      currentWebsiteMatch: !!web,
+      currentWebsiteMet: web?.met ?? null,
+      sourceAgreement: web ? (Math.abs(web.met - pdf.met) < 1e-9 ? 'met_match' : 'met_mismatch') : 'pdf_only'
+    };
   });
 }
 
@@ -227,12 +273,22 @@ function buildReconciliation(pdfRows, websiteRows, pdfUrl) {
     return web && Math.abs(web.met - pdf.met) > 1e-9 ? { code: pdf.code, pdfMet: pdf.met, websiteMet: web.met } : null;
   }).filter(Boolean);
   const publishedHeadingSum = Object.values(PUBLISHED_HEADING_COUNTS).reduce((sum, value) => sum + value, 0);
-  return { generatedAt: new Date().toISOString(), canonicalSource: 'official_2024_compendium_pdf', sourcePdf: pdfUrl,
-    publishedReportedTotal: 1114, publishedHeadingCounts: PUBLISHED_HEADING_COUNTS, publishedHeadingSum,
-    officialPdfParsedRows: pdfRows.length, currentWebsiteParsedRows: websiteRows.length,
-    pdfHeadingCounts: countByHeading(pdfRows), websiteHeadingCounts: countByHeading(websiteRows),
-    pdfOnlyCodes, websiteOnlyCodes, metMismatches,
-    note: 'The 2024 publication reports 1,114 activities, while the published per-heading counts sum to 1,113. Zero2Fit does not fabricate a missing record. The official downloadable PDF is canonical; the current website is retained as a reconciliation/enrichment source.' };
+  return {
+    generatedAt: new Date().toISOString(),
+    canonicalSource: 'official_2024_compendium_pdf',
+    sourcePdf: pdfUrl,
+    publishedReportedTotal: 1114,
+    publishedHeadingCounts: PUBLISHED_HEADING_COUNTS,
+    publishedHeadingSum,
+    officialPdfParsedRows: pdfRows.length,
+    currentWebsiteParsedRows: websiteRows.length,
+    pdfHeadingCounts: countByHeading(pdfRows),
+    websiteHeadingCounts: countByHeading(websiteRows),
+    pdfOnlyCodes,
+    websiteOnlyCodes,
+    metMismatches,
+    note: 'The 2024 publication reports 1,114 activities, while the published per-heading counts sum to 1,113. The current official PDF and website are reconciled by activity code. Zero2Fit does not fabricate missing records.'
+  };
 }
 
 function buildSummary(exercises, activities, exerciseCommit, reconciliation) {
@@ -243,17 +299,38 @@ function buildSummary(exercises, activities, exerciseCommit, reconciliation) {
     for (const muscle of exercise.primaryMuscles) byMuscle[muscle] = (byMuscle[muscle] || 0) + 1;
   }
   for (const activity of activities) byHeading[activity.majorHeading] = (byHeading[activity.majorHeading] || 0) + 1;
-  return { generatedAt: new Date().toISOString(),
-    sources: { exerciseCatalog: { repository: 'yuhonas/free-exercise-db', commit: exerciseCommit, license: 'Unlicense / public domain', sourceUrl: EXERCISE_SOURCE },
-      metCatalog: { name: '2024 Adult Compendium of Physical Activities', canonical: 'official PDF', sourceUrl: reconciliation.sourcePdf, websiteIndex: COMPENDIUM_INDEX, edition: 2024 } },
-    counts: { exercises: exercises.length, metActivities: activities.length,
+  return {
+    generatedAt: new Date().toISOString(),
+    sources: {
+      exerciseCatalog: {
+        repository: 'yuhonas/free-exercise-db', commit: exerciseCommit,
+        license: 'Unlicense / public domain', sourceUrl: EXERCISE_SOURCE
+      },
+      metCatalog: {
+        name: '2024 Adult Compendium of Physical Activities', canonical: 'official PDF',
+        sourceUrl: reconciliation.sourcePdf, websiteIndex: COMPENDIUM_INDEX, edition: 2024
+      }
+    },
+    counts: {
+      exercises: exercises.length,
+      metActivities: activities.length,
       homeCompatibleExercises: exercises.filter(x => x.locationCompatibility.home).length,
-      fullGymCompatibleExercises: exercises.filter(x => x.locationCompatibility.fullGym).length },
-    reconciliation: { publishedReportedTotal: reconciliation.publishedReportedTotal, publishedHeadingSum: reconciliation.publishedHeadingSum,
-      officialPdfParsedRows: reconciliation.officialPdfParsedRows, currentWebsiteParsedRows: reconciliation.currentWebsiteParsedRows,
-      pdfOnlyCount: reconciliation.pdfOnlyCodes.length, websiteOnlyCount: reconciliation.websiteOnlyCodes.length,
-      metMismatchCount: reconciliation.metMismatches.length },
-    byEquipment, byPrimaryMuscle: byMuscle, byMovementPattern: byPattern, byCompendiumHeading: byHeading };
+      fullGymCompatibleExercises: exercises.filter(x => x.locationCompatibility.fullGym).length
+    },
+    reconciliation: {
+      publishedReportedTotal: reconciliation.publishedReportedTotal,
+      publishedHeadingSum: reconciliation.publishedHeadingSum,
+      officialPdfParsedRows: reconciliation.officialPdfParsedRows,
+      currentWebsiteParsedRows: reconciliation.currentWebsiteParsedRows,
+      pdfOnlyCount: reconciliation.pdfOnlyCodes.length,
+      websiteOnlyCount: reconciliation.websiteOnlyCodes.length,
+      metMismatchCount: reconciliation.metMismatches.length
+    },
+    byEquipment,
+    byPrimaryMuscle: byMuscle,
+    byMovementPattern: byPattern,
+    byCompendiumHeading: byHeading
+  };
 }
 
 async function main() {
@@ -261,33 +338,37 @@ async function main() {
   const [exerciseRaw, exerciseCommitRaw, compendiumIndexHtml] = await Promise.all([
     fetchText(EXERCISE_SOURCE), fetchText(EXERCISE_REPO_API), fetchText(COMPENDIUM_INDEX)
   ]);
+
   const sourceExercises = JSON.parse(exerciseRaw);
   if (!Array.isArray(sourceExercises)) throw new Error('Exercise source did not return an array');
   const exerciseCommit = JSON.parse(exerciseCommitRaw).sha;
   const exercises = sourceExercises.map(normalizeExercise).sort((a, b) => a.name.localeCompare(b.name));
+
   const compendiumLinks = parseCompendiumLinks(compendiumIndexHtml);
   if (compendiumLinks.length < 20) throw new Error(`Expected about 22 Compendium headings; found ${compendiumLinks.length}`);
   const websiteActivities = [];
   for (const page of compendiumLinks) websiteActivities.push(...parseCompendiumWebPage(await fetchText(page.url), page));
   websiteActivities.sort((a, b) => a.code.localeCompare(b.code));
+
   const { pdfUrl, rows: pdfActivities } = await extractCompendiumPdf(compendiumIndexHtml);
   const reconciliation = buildReconciliation(pdfActivities, websiteActivities, pdfUrl);
-  console.log(`DIAGNOSTIC PDF rows: ${pdfActivities.length}`);
-  console.log(`DIAGNOSTIC website rows: ${websiteActivities.length}`);
-  console.log(`DIAGNOSTIC website-only codes: ${reconciliation.websiteOnlyCodes.join(', ') || 'none'}`);
-  console.log(`DIAGNOSTIC PDF-only codes: ${reconciliation.pdfOnlyCodes.join(', ') || 'none'}`);
-  console.log(`DIAGNOSTIC PDF heading counts: ${JSON.stringify(reconciliation.pdfHeadingCounts)}`);
   const activities = mergePdfWithWebsite(pdfActivities, websiteActivities);
   const summary = buildSummary(exercises, activities, exerciseCommit, reconciliation);
+
   await Promise.all([
     writeFile(new URL('exercises.json', OUT_DIR), JSON.stringify(exercises)),
     writeFile(new URL('met_activities.json', OUT_DIR), JSON.stringify(activities)),
     writeFile(new URL('catalog_summary.json', OUT_DIR), JSON.stringify(summary, null, 2) + '\n'),
     writeFile(new URL('met_reconciliation.json', OUT_DIR), JSON.stringify(reconciliation, null, 2) + '\n')
   ]);
+
   console.log(`Synced ${exercises.length} exercises from ${exerciseCommit.slice(0, 12)}`);
   console.log(`Canonical official PDF MET rows: ${activities.length}`);
   console.log(`Current website MET rows: ${websiteActivities.length}`);
+  console.log(`PDF-only codes: ${reconciliation.pdfOnlyCodes.join(', ') || 'none'}`);
+  console.log(`Website-only codes: ${reconciliation.websiteOnlyCodes.join(', ') || 'none'}`);
+  console.log(`MET mismatches: ${reconciliation.metMismatches.length}`);
+  console.log(`Home-compatible exercises: ${summary.counts.homeCompatibleExercises}`);
 }
 
 main().catch(error => { console.error(error); process.exitCode = 1; });
