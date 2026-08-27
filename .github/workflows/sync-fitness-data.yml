@@ -29,6 +29,9 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
+      - name: Install PDF text extraction dependency
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+
       - name: Fetch and normalize exercise + MET catalogs
         run: node tools/sync-fitness-data.mjs
 
