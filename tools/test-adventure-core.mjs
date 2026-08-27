@@ -37,4 +37,12 @@ adventure = setAutoAdventure(adventure, true, Date.parse('2026-08-27T08:00:00Z')
 const auto = processAutoAdventure({ appState: app, adventure, catalog, now: Date.parse('2026-08-27T14:30:00Z') });
 assert.equal(auto.runs.length, 3);
 assert.equal(auto.adventure.energySpent, adventure.energySpent + 3);
+
+const frequentOpen = setAutoAdventure(defaultAdventureState(catalog), true, Date.parse('2026-08-27T08:00:00Z'), catalog);
+const oneHour = processAutoAdventure({ appState: app, adventure: frequentOpen, catalog, now: Date.parse('2026-08-27T09:00:00Z') });
+assert.equal(oneHour.runs.length, 0);
+assert.equal(oneHour.adventure.autoLastProcessedAt, frequentOpen.autoLastProcessedAt, 'Opening before the interval must not reset the auto-adventure clock.');
+const twoHours = processAutoAdventure({ appState: app, adventure: oneHour.adventure, catalog, now: Date.parse('2026-08-27T10:00:00Z') });
+assert.equal(twoHours.runs.length, 1, 'Elapsed time must accumulate across frequent app opens.');
+
 console.log('Build 007 adventure tests passed.');
