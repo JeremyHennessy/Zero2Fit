@@ -7,7 +7,8 @@ on:
   push:
     branches:
       - main
-      - agent/build-002-location-exercise-substitutions
+      - 'build-*'
+      - 'agent/build-*'
     paths:
       - 'app.js'
       - 'build002.css'
