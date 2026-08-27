@@ -5,7 +5,7 @@
   const todayKey = () => new Date().toISOString().slice(0, 10);
 
   const defaultState = () => ({
-    version: 1,
+    version: 2,
     totalXp: 0,
     xpLog: [],
     attributes: {
@@ -20,7 +20,13 @@
     steps: {},
     meals: {},
     workoutMode: 'standard',
+    workoutLocation: 'home',
+    plannedTemplates: {},
+    workoutSelections: {},
     workoutSets: {},
+    workoutSessionStarts: {},
+    workoutHistory: [],
+    workoutEnergyLog: [],
     completedWorkouts: 0,
     workoutDates: [],
     awarded: {}
@@ -28,20 +34,11 @@
 
   const quests = [
     { id: 'move', label: 'Move on purpose', detail: 'Reach 7,000 steps or mark a purposeful walk', xp: 20, attr: 'endurance' },
-    { id: 'train', label: 'Training session', detail: 'Complete today\'s planned workout or Quick version', xp: 35, attr: 'strength' },
+    { id: 'train', label: 'Training session', detail: 'Complete today\'s generated workout or Quick version', xp: 35, attr: 'strength' },
     { id: 'nutrition', label: 'Log nutrition', detail: 'Record enough food to understand the day', xp: 15, attr: 'nutrition' },
     { id: 'recovery', label: 'Recovery check', detail: 'Acknowledge sleep/recovery before pushing intensity', xp: 10, attr: 'recovery' }
   ];
 
-  const exercises = [
-    { id: 'squat', name: 'Chair / Goblet Squat', cue: 'Controlled range · stop before form degrades', sets: 3, reps: 8 },
-    { id: 'push', name: 'Incline Push-up', cue: 'Use a height that keeps reps smooth', sets: 3, reps: 8 },
-    { id: 'row', name: 'Banded Row', cue: 'Pause briefly with shoulder blades back', sets: 3, reps: 10 },
-    { id: 'hinge', name: 'Hip Hinge', cue: 'Practice pattern first; load later', sets: 2, reps: 10 },
-    { id: 'core', name: 'Bird Dog', cue: 'Slow, stable and controlled', sets: 2, reps: 8 }
-  ];
-
-  const modeLimits = { quick: 3, standard: 4, full: 5 };
   const attributeMeta = {
     strength: ['Strength', 'Training progression'],
     endurance: ['Endurance', 'Walking & cardio'],
@@ -50,15 +47,56 @@
     nutrition: ['Nutrition', 'Food awareness']
   };
 
+  const intentLabels = {
+    knee_dominant: 'Knee-dominant legs',
+    horizontal_push: 'Horizontal push',
+    horizontal_pull: 'Horizontal pull / back',
+    hip_hinge: 'Hip hinge',
+    core_stability: 'Core stability',
+    single_leg: 'Single-leg legs',
+    vertical_push: 'Vertical push',
+    vertical_pull_lats: 'Vertical pull / lats',
+    posterior_chain: 'Posterior chain',
+    core: 'Core'
+  };
+
+  const equipmentLabels = {
+    bodyweight: 'Bodyweight', yoga_mat: 'Yoga mat', wall: 'Wall', resistance_band: 'Resistance band',
+    dumbbell: 'Dumbbell', barbell: 'Barbell', cable_machine: 'Cable machine', machine: 'Machine',
+    kettlebell: 'Kettlebell', stability_ball: 'Stability ball', medicine_ball: 'Medicine ball',
+    foam_roller: 'Foam roller', ez_bar: 'EZ bar', pullup_bar: 'Pull-up bar', low_bar: 'Low bar',
+    dip_station: 'Dip station', bench: 'Bench', box: 'Box', step_platform: 'Step/platform',
+    anchor_or_ghd: 'Anchor/GHD', roman_chair: 'Roman chair', climbing_rope: 'Climbing rope',
+    sled: 'Sled', partner: 'Partner', chair: 'Chair', other: 'Gym apparatus'
+  };
+
   let state = loadState();
   let toastTimer = null;
+  let trainingCore = null;
+  let trainingData = null;
+  let trainingError = null;
+  let openSubstituteIntent = null;
 
   function loadState() {
+    const defaults = defaultState();
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? { ...defaultState(), ...JSON.parse(raw) } : defaultState();
+      if (!raw) return defaults;
+      const parsed = JSON.parse(raw);
+      return {
+        ...defaults,
+        ...parsed,
+        version: 2,
+        attributes: { ...defaults.attributes, ...(parsed.attributes || {}) },
+        plannedTemplates: parsed.plannedTemplates || {},
+        workoutSelections: parsed.workoutSelections || {},
+        workoutSessionStarts: parsed.workoutSessionStarts || {},
+        workoutHistory: parsed.workoutHistory || [],
+        workoutEnergyLog: parsed.workoutEnergyLog || [],
+        workoutLocation: parsed.workoutLocation || 'home'
+      };
     } catch {
-      return defaultState();
+      return defaults;
     }
   }
 
@@ -238,90 +276,304 @@
     }).join('');
   }
 
-  function renderSteps() {
-    const steps = Number(state.steps[todayKey()] || 0);
-    setText('stepValue', steps.toLocaleString()); setText('dataSteps', steps.toLocaleString()); setWidth('stepBar', Math.min(100, steps / 70));
-    if (steps >= 7000 && !getDayBucket(state.quests).move) toggleQuest('move', true);
-  }
-
-  function renderWorkout() {
-    const limit = modeLimits[state.workoutMode] || 4;
-    setText('selectedModeLabel', state.workoutMode.charAt(0).toUpperCase() + state.workoutMode.slice(1));
-    document.querySelectorAll('[data-workout-mode]').forEach(b => b.classList.toggle('selected', b.dataset.workoutMode === state.workoutMode));
-    const selected = exercises.slice(0, limit);
-    const bucket = getDayBucket(state.workoutSets);
-    const html = selected.map((exercise, eIndex) => {
-      const sets = state.workoutMode === 'quick' ? Math.min(2, exercise.sets) : exercise.sets;
-      const rows = Array.from({length: sets}, (_, i) => {
-        const key = `${exercise.id}:${i}`; const saved = bucket[key] || {};
-        return `<div class="set-row"><span>Set ${i+1}</span><input data-set-key="${key}" data-field="reps" type="number" min="0" max="100" value="${saved.reps ?? exercise.reps}" aria-label="${exercise.name} set ${i+1} reps"><input data-set-key="${key}" data-field="load" type="number" min="0" max="1000" step="0.5" value="${saved.load ?? 0}" aria-label="${exercise.name} set ${i+1} load"><button class="set-check ${saved.done ? 'done' : ''}" data-set-check="${key}">${saved.done ? '✓' : '○'}</button></div>`;
-      }).join('');
-      return `<article class="exercise-card"><div class="exercise-top"><div><div class="eyebrow">Exercise ${eIndex+1}</div><h3>${escapeHtml(exercise.name)}</h3><div class="exercise-meta">${escapeHtml(exercise.cue)}</div></div><span class="small-tag">${sets} sets</span></div><div class="set-list">${rows}</div></article>`;
-    }).join('');
-    document.getElementById('exerciseList').innerHTML = html;
-    document.querySelectorAll('[data-set-key]').forEach(input => input.addEventListener('change', saveSetInput));
-    document.querySelectorAll('[data-set-check]').forEach(button => button.addEventListener('click', () => toggleSet(button.dataset.setCheck)));
-    updateWorkoutCompletion();
-  }
-
-  function saveSetInput(event) {
-    const bucket = getDayBucket(state.workoutSets); const key = event.target.dataset.setKey;
-    bucket[key] = bucket[key] || {}; bucket[key][event.target.dataset.field] = Number(event.target.value || 0); saveState();
-  }
-
-  function toggleSet(key) {
-    const bucket = getDayBucket(state.workoutSets); bucket[key] = bucket[key] || {}; bucket[key].done = !bucket[key].done; saveState(); renderWorkout();
-  }
-
-  function currentWorkoutKeys() {
-    const limit = modeLimits[state.workoutMode] || 4;
-    return exercises.slice(0, limit).flatMap(exercise => Array.from({ length: state.workoutMode === 'quick' ? Math.min(2, exercise.sets) : exercise.sets }, (_, i) => `${exercise.id}:${i}`));
-  }
-
-  function updateWorkoutCompletion() {
-    const keys = currentWorkoutKeys(); const bucket = getDayBucket(state.workoutSets); const done = keys.filter(k => bucket[k]?.done).length;
-    setText('workoutCompletion', `${keys.length ? Math.round(done / keys.length * 100) : 0}%`);
-  }
-
-  function finishWorkout() {
-    const keys = currentWorkoutKeys(); const bucket = getDayBucket(state.workoutSets); const done = keys.filter(k => bucket[k]?.done).length;
-    if (done < Math.ceil(keys.length * .6)) { showToast('Complete at least 60% of the selected workout first.'); return; }
-    const awardKey = `workout:${todayKey()}`;
-    if (state.awarded[awardKey]) { showToast('Today\'s workout is already recorded.'); return; }
-    state.completedWorkouts += 1; state.workoutDates.push(todayKey());
-    addXp(45, `Completed ${state.workoutMode} Full Body A`, 'strength', awardKey); state.attributes.consistency += 15;
-    getDayBucket(state.quests).train = true; state.awarded[`quest:${todayKey()}:train`] = true;
-    saveState(); renderAll(); showToast('+45 XP · Workout complete');
-  }
-
-  function renderMeals() {
-    const meals = state.meals[todayKey()] || [];
-    const calories = meals.reduce((s,m) => s + Number(m.calories || 0), 0);
-    const protein = meals.reduce((s,m) => s + Number(m.protein || 0), 0);
-    setText('calorieTotal', Math.round(calories).toLocaleString()); setText('proteinTotal', Math.round(protein));
-    const list = document.getElementById('mealList');
-    list.innerHTML = meals.length ? meals.map((m,i) => `<div class="meal-row"><strong>${escapeHtml(m.name)}</strong><span>${m.calories} kcal</span><span>${m.protein} g protein</span><button data-remove-meal="${i}">Remove</button></div>`).join('') : '<div class="empty-state">No food logged yet.</div>';
-    list.querySelectorAll('[data-remove-meal]').forEach(button => button.addEventListener('click', () => { meals.splice(Number(button.dataset.removeMeal),1); saveState(); renderAll(); }));
-    if (meals.length && !getDayBucket(state.quests).nutrition) toggleQuest('nutrition', true);
-  }
-
-  function renderJourney() {
-    setText('completedWorkouts', state.completedWorkouts);
-    const active = weekActiveDays(); const now = new Date();
-    document.getElementById('weekDots').innerHTML = Array.from({length:7}, (_,offset) => {
-      const d = new Date(now); d.setDate(now.getDate() - (6 - offset)); const key = d.toISOString().slice(0,10);
-      return `<div class="week-dot ${active.has(key) ? 'active' : ''}" title="${key}">${d.toLocaleDateString(undefined,{weekday:'narrow'})}</div>`;
-    }).join('');
-    document.getElementById('xpLog').innerHTML = state.xpLog.length ? state.xpLog.slice(0,8).map(x => `<div class="xp-log-row"><strong>${escapeHtml(x.reason)}</strong><span>+${x.amount} XP</span></div>`).join('') : '<div class="empty-state">Your XP history will appear here.</div>';
-  }
-
-  function renderAll() {
-    renderQuests(); renderSummary(); renderAttributes(); renderBossAndAchievements(); renderWeight(); renderStepsSafe(); renderWorkout(); renderMealsSafe(); renderJourney();
+  function latestWeight() {
+    if (!state.weights.length) return null;
+    return [...state.weights].sort((a,b) => a.date - b.date).at(-1)?.value ?? null;
   }
 
   function renderStepsSafe() {
     const steps = Number(state.steps[todayKey()] || 0);
     setText('stepValue', steps.toLocaleString()); setText('dataSteps', steps.toLocaleString()); setWidth('stepBar', Math.min(100, steps / 70));
+  }
+
+  function getTodayTemplateId() {
+    const day = todayKey();
+    if (!state.plannedTemplates[day]) {
+      state.plannedTemplates[day] = state.completedWorkouts % 2 === 0 ? 'full_body_a' : 'full_body_b';
+      saveState();
+    }
+    return state.plannedTemplates[day];
+  }
+
+  function getTemplate() {
+    const id = getTodayTemplateId();
+    return trainingData?.programmingRules?.templates?.find(template => template.id === id) || null;
+  }
+
+  function selectionContextKey() {
+    return `${state.workoutLocation}:${getTodayTemplateId()}`;
+  }
+
+  function previousSelections() {
+    return state.workoutSelections[selectionContextKey()] || {};
+  }
+
+  function getCurrentPlan() {
+    if (!trainingCore || !trainingData) return null;
+    return trainingCore.generateWorkout({
+      exercises: trainingData.exercises,
+      template: getTemplate(),
+      locationKey: state.workoutLocation,
+      mode: state.workoutMode,
+      previousSelections: previousSelections(),
+      programmingRules: trainingData.programmingRules,
+      substitutionRules: trainingData.substitutionRules
+    });
+  }
+
+  function workoutContextKey() {
+    return `${todayKey()}:${state.workoutLocation}:${getTodayTemplateId()}:${state.workoutMode}`;
+  }
+
+  function setKeyFor(item, setIndex) {
+    return `${state.workoutLocation}:${getTodayTemplateId()}:${item.slot.intent}:${item.exercise.id}:${setIndex}`;
+  }
+
+  function formatEquipment(exercise) {
+    if (!exercise?.requiredEquipment?.length) return 'Bodyweight / no apparatus';
+    return exercise.requiredEquipment.map(item => equipmentLabels[item] || item.replaceAll('_', ' ')).join(' + ');
+  }
+
+  function renderTrainingContext() {
+    const template = getTemplate();
+    const location = trainingData?.locations?.[state.workoutLocation];
+    setText('selectedModeLabel', state.workoutMode.charAt(0).toUpperCase() + state.workoutMode.slice(1));
+    setText('trainingTemplateName', template?.name || 'Loading workout…');
+    setText('todayWorkoutName', template?.name || 'Loading workout…');
+    setText('todayTrainingLocation', location?.label || 'Loading equipment profile…');
+    setText('trainingLocationStatus', location ? (location.inventoryStatus === 'pending_photos' ? 'Equipment profile pending photos · Home-safe fallback active' : location.notes) : 'Loading researched equipment data…');
+    document.querySelectorAll('[data-workout-location]').forEach(button => button.classList.toggle('selected', button.dataset.workoutLocation === state.workoutLocation));
+    document.querySelectorAll('[data-workout-mode]').forEach(button => button.classList.toggle('selected', button.dataset.workoutMode === state.workoutMode));
+  }
+
+  function energyPreview(plan) {
+    if (!trainingCore || !trainingData || !plan) return null;
+    const profile = trainingCore.sessionEnergyProfile({ locationKey: state.workoutLocation, mode: state.workoutMode, energyModel: trainingData.energyModel });
+    const start = Number(state.workoutSessionStarts[workoutContextKey()] || 0);
+    const elapsed = start ? Math.max(1, (Date.now() - start) / 60000) : plan.targetMinutes;
+    const weight = latestWeight();
+    const estimate = weight ? trainingCore.estimateEnergy({ met: profile.met, weightLb: weight, durationMinutes: elapsed }) : null;
+    return { profile, estimate, durationMinutes: elapsed, isLive: !!start, weight };
+  }
+
+  function renderEnergy(plan) {
+    const preview = energyPreview(plan);
+    if (!preview) {
+      setText('energyValue', '—');
+      setText('energyMeta', trainingError ? 'Reference data unavailable.' : 'Loading energy model…');
+      return;
+    }
+    if (!preview.estimate) {
+      setText('energyValue', '—');
+      setText('energyMeta', `${preview.profile.met} MET · latest body weight required for automatic estimate`);
+      setText('todayEnergyPreview', 'Energy estimate will calculate automatically once a weight is available.');
+      return;
+    }
+    setText('energyValue', `~${Math.round(preview.estimate.grossKcal)} kcal`);
+    setText('energyMeta', `${preview.isLive ? 'Session-to-now estimate' : 'Planned-session estimate'} · ${preview.profile.met} MET · ${Math.round(preview.durationMinutes)} min`);
+    setText('todayEnergyPreview', `~${Math.round(preview.estimate.grossKcal)} kcal planned · calculated automatically from ${preview.profile.met} MET, latest weight and ${Math.round(preview.durationMinutes)} min`);
+  }
+
+  function substituteHtml(item) {
+    if (!openSubstituteIntent || openSubstituteIntent !== item.slot.intent || !item.exercise || !trainingCore) return '';
+    const alternatives = trainingCore.rankSubstitutes(
+      trainingData.exercises,
+      item.exercise,
+      item.slot,
+      state.workoutLocation,
+      trainingData.substitutionRules
+    ).filter(option => ['direct_substitute', 'good_substitute'].includes(option.quality)).slice(0, 4);
+    const choices = alternatives.length ? alternatives.map(option => `
+      <button class="substitute-option" data-choose-substitute="${escapeHtml(option.exercise.id)}" data-substitute-intent="${escapeHtml(item.slot.intent)}">
+        <span><strong>${escapeHtml(option.exercise.name)}</strong><small>${escapeHtml(formatEquipment(option.exercise))}</small></span>
+        <span>${escapeHtml(trainingCore.formatQuality(option.quality))}</span>
+      </button>`).join('') : '<div class="empty-state compact">No other good-or-better match at this location.</div>';
+    return `<div class="substitute-panel"><div class="substitute-heading"><strong>Choose another good match</strong><button class="text-button" data-auto-substitute="${escapeHtml(item.slot.intent)}">Use automatic pick</button></div>${choices}</div>`;
+  }
+
+  function renderWorkout() {
+    renderTrainingContext();
+    const container = document.getElementById('exerciseList');
+    if (trainingError) {
+      container.innerHTML = `<article class="exercise-card unavailable-card"><h3>Workout reference data could not load</h3><p>${escapeHtml(trainingError)}</p></article>`;
+      setText('workoutCompletion', '—');
+      renderEnergy(null);
+      return;
+    }
+    const plan = getCurrentPlan();
+    if (!plan) {
+      container.innerHTML = '<article class="exercise-card"><div class="empty-state">Loading researched exercise catalog…</div></article>';
+      setText('workoutCompletion', '—');
+      renderEnergy(null);
+      return;
+    }
+
+    const bucket = getDayBucket(state.workoutSets);
+    const html = plan.slots.map((item, eIndex) => {
+      const intent = intentLabels[item.slot.intent] || item.slot.intent.replaceAll('_', ' ');
+      if (!item.exercise) {
+        const fullGymPlan = state.workoutLocation !== 'fullGym' ? trainingCore.generateWorkout({
+          exercises: trainingData.exercises,
+          template: getTemplate(),
+          locationKey: 'fullGym',
+          mode: state.workoutMode,
+          programmingRules: trainingData.programmingRules,
+          substitutionRules: trainingData.substitutionRules
+        }) : null;
+        const gymMatch = fullGymPlan?.slots?.find(slot => slot.slot.intent === item.slot.intent)?.exercise;
+        return `<article class="exercise-card unavailable-card">
+          <div class="exercise-top"><div><div class="eyebrow">Slot ${eIndex + 1} · ${escapeHtml(intent)}</div><h3>No true substitute here</h3></div><span class="small-tag unavailable-tag">Unavailable</span></div>
+          <p class="exercise-meta">${escapeHtml(item.unavailableReason)}</p>
+          ${gymMatch ? `<div class="location-unlock"><strong>Full Gym unlock:</strong> ${escapeHtml(gymMatch.name)} · ${escapeHtml(formatEquipment(gymMatch))}</div>` : ''}
+          <p class="muted compact">This slot is not counted against workout completion. Zero2Fit will not replace it with a stretch or unrelated exercise.</p>
+        </article>`;
+      }
+
+      const rows = Array.from({length: item.sets}, (_, i) => {
+        const key = setKeyFor(item, i);
+        const saved = bucket[key] || {};
+        const reps = saved.reps ?? item.repRange[0];
+        const loadInput = item.exercise.requiredEquipment.length
+          ? `<input data-set-key="${escapeHtml(key)}" data-field="load" type="number" min="0" max="1000" step="0.5" value="${saved.load ?? ''}" placeholder="lb" aria-label="${escapeHtml(item.exercise.name)} set ${i+1} load in pounds">`
+          : '<span class="bodyweight-load">Bodyweight</span>';
+        return `<div class="set-row"><span>Set ${i+1}</span><input data-set-key="${escapeHtml(key)}" data-field="reps" type="number" min="0" max="100" value="${reps}" aria-label="${escapeHtml(item.exercise.name)} set ${i+1} reps">${loadInput}<button class="set-check ${saved.done ? 'done' : ''}" data-set-check="${escapeHtml(key)}">${saved.done ? '✓' : '○'}</button></div>`;
+      }).join('');
+      const muscles = item.exercise.primaryMuscles.join(', ') || item.slot.primaryMuscles.join(', ');
+      return `<article class="exercise-card">
+        <div class="exercise-top"><div><div class="eyebrow">Slot ${eIndex+1} · ${escapeHtml(intent)}</div><h3>${escapeHtml(item.exercise.name)}</h3><div class="exercise-meta">${escapeHtml(muscles)} · ${escapeHtml(formatEquipment(item.exercise))}</div></div><span class="small-tag">${escapeHtml(trainingCore.formatQuality(item.quality))}</span></div>
+        <div class="exercise-guidance"><span>${item.sets} set${item.sets === 1 ? '' : 's'} · ${item.repRange[0]}–${item.repRange[1]} reps</span><button class="text-button" data-show-substitutes="${escapeHtml(item.slot.intent)}">Substitute</button></div>
+        ${substituteHtml(item)}
+        <div class="set-list">${rows}</div>
+        ${item.exercise.instructions?.[0] ? `<details class="exercise-instructions"><summary>How to do it</summary><p>${escapeHtml(item.exercise.instructions.slice(0,2).join(' '))}</p></details>` : ''}
+      </article>`;
+    }).join('');
+
+    container.innerHTML = html;
+    document.querySelectorAll('[data-set-key]').forEach(input => input.addEventListener('change', saveSetInput));
+    document.querySelectorAll('[data-set-check]').forEach(button => button.addEventListener('click', () => toggleSet(button.dataset.setCheck)));
+    document.querySelectorAll('[data-show-substitutes]').forEach(button => button.addEventListener('click', () => {
+      openSubstituteIntent = openSubstituteIntent === button.dataset.showSubstitutes ? null : button.dataset.showSubstitutes;
+      renderWorkout();
+    }));
+    document.querySelectorAll('[data-choose-substitute]').forEach(button => button.addEventListener('click', () => chooseSubstitute(button.dataset.substituteIntent, button.dataset.chooseSubstitute)));
+    document.querySelectorAll('[data-auto-substitute]').forEach(button => button.addEventListener('click', () => clearSubstitute(button.dataset.autoSubstitute)));
+    updateWorkoutCompletion(plan);
+    renderEnergy(plan);
+    renderWorkoutWarnings(plan);
+  }
+
+  function renderWorkoutWarnings(plan) {
+    const box = document.getElementById('workoutWarnings');
+    if (!box) return;
+    box.innerHTML = plan?.warnings?.length ? plan.warnings.map(warning => `<div class="training-warning">${escapeHtml(warning)}</div>`).join('') : '';
+  }
+
+  function chooseSubstitute(intent, exerciseId) {
+    const key = selectionContextKey();
+    state.workoutSelections[key] = state.workoutSelections[key] || {};
+    state.workoutSelections[key][intent] = exerciseId;
+    openSubstituteIntent = null;
+    saveState();
+    renderWorkout();
+    showToast('Exercise substitute selected.');
+  }
+
+  function clearSubstitute(intent) {
+    const key = selectionContextKey();
+    if (state.workoutSelections[key]) delete state.workoutSelections[key][intent];
+    openSubstituteIntent = null;
+    saveState();
+    renderWorkout();
+    showToast('Automatic exercise selection restored.');
+  }
+
+  function saveSetInput(event) {
+    const bucket = getDayBucket(state.workoutSets);
+    const key = event.target.dataset.setKey;
+    bucket[key] = bucket[key] || {};
+    bucket[key][event.target.dataset.field] = Number(event.target.value || 0);
+    saveState();
+  }
+
+  function toggleSet(key) {
+    const bucket = getDayBucket(state.workoutSets);
+    bucket[key] = bucket[key] || {};
+    const next = !bucket[key].done;
+    bucket[key].done = next;
+    const context = workoutContextKey();
+    if (next && !state.workoutSessionStarts[context]) state.workoutSessionStarts[context] = Date.now();
+    saveState();
+    renderWorkout();
+  }
+
+  function currentWorkoutKeys(plan = getCurrentPlan()) {
+    if (!plan) return [];
+    return plan.slots.filter(item => item.exercise).flatMap(item => Array.from({ length: item.sets }, (_, i) => setKeyFor(item, i)));
+  }
+
+  function updateWorkoutCompletion(plan = getCurrentPlan()) {
+    const keys = currentWorkoutKeys(plan);
+    const bucket = getDayBucket(state.workoutSets);
+    const done = keys.filter(k => bucket[k]?.done).length;
+    setText('workoutCompletion', `${keys.length ? Math.round(done / keys.length * 100) : 0}%`);
+  }
+
+  function finishWorkout() {
+    const plan = getCurrentPlan();
+    const keys = currentWorkoutKeys(plan);
+    const bucket = getDayBucket(state.workoutSets);
+    const done = keys.filter(k => bucket[k]?.done).length;
+    if (!keys.length) { showToast('No available exercises in this workout.'); return; }
+    if (done < Math.ceil(keys.length * .6)) { showToast('Complete at least 60% of the available workout first.'); return; }
+    const awardKey = `workout:${todayKey()}`;
+    if (state.awarded[awardKey]) { showToast('Today\'s workout is already recorded.'); return; }
+
+    const template = getTemplate();
+    const context = workoutContextKey();
+    const start = Number(state.workoutSessionStarts[context] || 0);
+    const durationMinutes = start ? Math.max(1, (Date.now() - start) / 60000) : plan.targetMinutes;
+    const preview = energyPreview(plan);
+    const completedExerciseIds = plan.slots.filter(item => item.exercise).map(item => item.exercise.id);
+    const unavailableIntents = plan.slots.filter(item => !item.exercise).map(item => item.slot.intent);
+
+    state.completedWorkouts += 1;
+    state.workoutDates.push(todayKey());
+    state.workoutHistory.unshift({
+      date: Date.now(),
+      day: todayKey(),
+      templateId: template?.id,
+      templateName: template?.name,
+      location: state.workoutLocation,
+      mode: state.workoutMode,
+      durationMinutes,
+      completedExerciseIds,
+      unavailableIntents
+    });
+    state.workoutHistory = state.workoutHistory.slice(0, 180);
+    if (preview?.estimate) {
+      state.workoutEnergyLog.unshift({
+        date: Date.now(),
+        day: todayKey(),
+        location: state.workoutLocation,
+        mode: state.workoutMode,
+        templateId: template?.id,
+        durationMinutes,
+        met: preview.profile.met,
+        compendiumCode: preview.profile.code,
+        grossKcal: preview.estimate.grossKcal,
+        activeKcal: preview.estimate.activeKcal,
+        method: '2024 Adult Compendium MET estimate'
+      });
+      state.workoutEnergyLog = state.workoutEnergyLog.slice(0, 180);
+    }
+    delete state.workoutSessionStarts[context];
+    addXp(45, `Completed ${state.workoutMode} ${template?.name || 'workout'} · ${trainingData.locations[state.workoutLocation].label}`, 'strength', awardKey);
+    state.attributes.consistency += 15;
+    getDayBucket(state.quests).train = true;
+    state.awarded[`quest:${todayKey()}:train`] = true;
+    saveState();
+    renderAll();
+    showToast('+45 XP · Workout complete');
   }
 
   function renderMealsSafe() {
@@ -334,11 +586,47 @@
     list.querySelectorAll('[data-remove-meal]').forEach(button => button.addEventListener('click', () => { meals.splice(Number(button.dataset.removeMeal),1); saveState(); renderAll(); }));
   }
 
+  function renderJourney() {
+    setText('completedWorkouts', state.completedWorkouts);
+    const active = weekActiveDays(); const now = new Date();
+    document.getElementById('weekDots').innerHTML = Array.from({length:7}, (_,offset) => {
+      const d = new Date(now); d.setDate(now.getDate() - (6 - offset)); const key = d.toISOString().slice(0,10);
+      return `<div class="week-dot ${active.has(key) ? 'active' : ''}" title="${key}">${d.toLocaleDateString(undefined,{weekday:'narrow'})}</div>`;
+    }).join('');
+    document.getElementById('xpLog').innerHTML = state.xpLog.length ? state.xpLog.slice(0,8).map(x => `<div class="xp-log-row"><strong>${escapeHtml(x.reason)}</strong><span>+${x.amount} XP</span></div>`).join('') : '<div class="empty-state">Your XP history will appear here.</div>';
+  }
+
+  function renderDataCatalog() {
+    if (!document.getElementById('fitnessCatalogStatus')) return;
+    if (!trainingData) {
+      setText('fitnessCatalogStatus', trainingError ? 'Unavailable' : 'Loading…');
+      setText('fitnessCatalogDetail', trainingError || 'Loading researched exercise and MET catalogs.');
+      return;
+    }
+    const summary = trainingData.catalogSummary;
+    const trainingSummary = trainingData.trainingCatalogSummary;
+    setText('fitnessCatalogStatus', 'Active');
+    setText('fitnessCatalogDetail', `${summary.counts.exercises} exercises · ${trainingSummary.homeCompatibleCount} confirmed Home-compatible · ${summary.counts.metActivities} MET activities · equipment-aware substitutions`);
+  }
+
+  function renderAll() {
+    renderQuests();
+    renderSummary();
+    renderAttributes();
+    renderBossAndAchievements();
+    renderWeight();
+    renderStepsSafe();
+    renderWorkout();
+    renderMealsSafe();
+    renderJourney();
+    renderDataCatalog();
+  }
+
   function bindForms() {
     document.getElementById('weightForm').addEventListener('submit', event => {
       event.preventDefault(); const input = document.getElementById('weightInput'); const value = Number(input.value);
       if (!Number.isFinite(value) || value <= 0) return;
-      state.weights.push({ date: Date.now(), value }); state.weights = state.weights.slice(-365); input.value = ''; saveState(); renderAll(); showToast('Weight logged.');
+      state.weights.push({ date: Date.now(), value, source: 'manual' }); state.weights = state.weights.slice(-365); input.value = ''; saveState(); renderAll(); showToast('Weight logged.');
     });
     document.getElementById('stepsForm').addEventListener('submit', event => {
       event.preventDefault(); const input = document.getElementById('stepsInput'); const value = Math.max(0, Number(input.value || 0)); state.steps[todayKey()] = value; input.value='';
@@ -353,20 +641,121 @@
     });
     document.getElementById('clearMeals').addEventListener('click', () => { state.meals[todayKey()] = []; saveState(); renderAll(); showToast('Today\'s food log cleared.'); });
     document.getElementById('finishWorkout').addEventListener('click', finishWorkout);
-    document.querySelectorAll('[data-workout-mode]').forEach(button => button.addEventListener('click', () => { state.workoutMode=button.dataset.workoutMode; saveState(); renderWorkout(); }));
+    document.querySelectorAll('[data-workout-mode]').forEach(button => button.addEventListener('click', () => {
+      state.workoutMode = button.dataset.workoutMode;
+      openSubstituteIntent = null;
+      saveState();
+      renderWorkout();
+    }));
+    document.querySelectorAll('[data-workout-location]').forEach(button => button.addEventListener('click', () => {
+      state.workoutLocation = button.dataset.workoutLocation;
+      openSubstituteIntent = null;
+      saveState();
+      renderWorkout();
+      showToast(`${button.textContent.trim()} workout loaded.`);
+    }));
     document.getElementById('resetDemo').addEventListener('click', () => {
       if (window.confirm('Reset all local Zero2Fit data in this browser?')) { state=defaultState(); saveState(); renderAll(); showToast('Local data reset.'); }
     });
   }
 
+  function ensureBuild002Ui() {
+    if (!document.querySelector('link[href="./build002.css"]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = './build002.css';
+      document.head.appendChild(link);
+    }
+
+    const todayCard = document.querySelector('.today-workout-card');
+    if (todayCard && !document.getElementById('todayTrainingContext')) {
+      const context = document.createElement('div');
+      context.id = 'todayTrainingContext';
+      context.className = 'today-training-context';
+      context.innerHTML = '<strong id="todayTrainingLocation">Home</strong><span id="todayEnergyPreview">Workout and energy estimate loading…</span>';
+      const heading = todayCard.querySelector('h2');
+      if (heading) heading.id = 'todayWorkoutName';
+      todayCard.querySelector('p')?.after(context);
+    }
+
+    const exerciseList = document.getElementById('exerciseList');
+    if (exerciseList && !document.getElementById('trainingContextCard')) {
+      const card = document.createElement('article');
+      card.id = 'trainingContextCard';
+      card.className = 'card training-context-card';
+      card.innerHTML = `
+        <div class="training-context-top">
+          <div><div class="eyebrow">Training location</div><h2>Use what is actually available</h2></div>
+          <div class="energy-estimate"><span>Estimated workout energy</span><strong id="energyValue">—</strong><small id="energyMeta">Loading energy model…</small></div>
+        </div>
+        <div class="location-grid">
+          <button class="location-button selected" data-workout-location="home"><strong>Home</strong><span>Bodyweight + yoga mat</span></button>
+          <button class="location-button" data-workout-location="apartmentGym"><strong>Apartment Gym</strong><span>Photo inventory pending</span></button>
+          <button class="location-button" data-workout-location="fullGym"><strong>Full Gym</strong><span>All standard equipment</span></button>
+        </div>
+        <p class="muted compact" id="trainingLocationStatus">Loading researched equipment profile…</p>
+        <div id="workoutWarnings" class="workout-warnings"></div>`;
+      exerciseList.before(card);
+    }
+
+    const trainHeader = document.querySelector('.train-header');
+    if (trainHeader) {
+      const heading = trainHeader.querySelector('h2');
+      if (heading) heading.id = 'trainingTemplateName';
+      const eyebrow = trainHeader.querySelector('.eyebrow');
+      if (eyebrow) eyebrow.textContent = 'Auto-generated workout';
+    }
+
+    const dataIntro = document.querySelector('.data-intro');
+    if (dataIntro && !document.getElementById('fitnessCatalogCard')) {
+      const card = document.createElement('article');
+      card.id = 'fitnessCatalogCard';
+      card.className = 'connection-card connected fitness-catalog-card';
+      card.innerHTML = '<div class="connection-icon">ƒ</div><div><strong>Exercise + MET intelligence</strong><span id="fitnessCatalogDetail">Loading researched catalogs…</span></div><span id="fitnessCatalogStatus">Loading…</span>';
+      document.querySelector('.connection-grid')?.prepend(card);
+    }
+  }
+
+  async function loadTrainingResources() {
+    try {
+      const [core, exercises, programmingRules, substitutionRules, locations, energyModel, catalogSummary, trainingCatalogSummary] = await Promise.all([
+        import('./training-core.mjs'),
+        fetch('./data/generated/training_exercises.json').then(requireOk).then(r => r.json()),
+        fetch('./data/programming_rules.json').then(requireOk).then(r => r.json()),
+        fetch('./data/substitution_rules.json').then(requireOk).then(r => r.json()),
+        fetch('./data/location_profiles.json').then(requireOk).then(r => r.json()),
+        fetch('./data/energy_model.json').then(requireOk).then(r => r.json()),
+        fetch('./data/generated/catalog_summary.json').then(requireOk).then(r => r.json()),
+        fetch('./data/generated/training_catalog_summary.json').then(requireOk).then(r => r.json())
+      ]);
+      trainingCore = core;
+      trainingData = { exercises, programmingRules, substitutionRules, locations, energyModel, catalogSummary, trainingCatalogSummary };
+      trainingError = null;
+    } catch (error) {
+      console.error('Zero2Fit training reference load failed', error);
+      trainingError = 'The researched workout catalog did not load. Workout completion is disabled until the reference files are available.';
+    }
+    renderAll();
+  }
+
+  function requireOk(response) {
+    if (!response.ok) throw new Error(`${response.status} ${response.url}`);
+    return response;
+  }
+
   function setText(id, value) { const el=document.getElementById(id); if (el) el.textContent=String(value); }
   function setWidth(id, pct) { const el=document.getElementById(id); if (el) el.style.width=`${Math.max(0,Math.min(100,Number(pct)||0))}%`; }
-  function escapeHtml(value) { return String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+  function escapeHtml(value) { return String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
   function showToast(message) { const el=document.getElementById('toast'); el.textContent=message; el.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),2300); }
 
   function init() {
     document.getElementById('todayDate').textContent = new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
-    renderNavigation(); bindForms(); renderAll();
+    ensureBuild002Ui();
+    renderNavigation();
+    bindForms();
+    renderAll();
+    loadTrainingResources();
   }
+
   init();
 })();
