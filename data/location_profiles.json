@@ -3,18 +3,18 @@
     "id": "home",
     "label": "Home",
     "inventoryStatus": "confirmed",
-    "equipment": ["bodyweight", "yoga_mat"],
-    "selectionRule": "Only recommend exercises that require bodyweight or a yoga mat.",
-    "notes": "Confirmed user context: bodyweight-focused home training with a yoga mat. No door anchors, furniture anchors, bands, dumbbells or other equipment are assumed."
+    "equipment": ["bodyweight", "yoga_mat", "wall"],
+    "selectionRule": "Recommend only movements requiring no apparatus beyond bodyweight, a yoga mat, or an ordinary wall.",
+    "notes": "Confirmed user context: bodyweight-focused home training with a yoga mat. No pull-up bar, dip station, bench, chair, box, step platform, door/furniture anchor, bands, weights or other apparatus are assumed."
   },
   "apartmentGym": {
     "id": "apartmentGym",
     "label": "Apartment Gym",
     "inventoryStatus": "pending_photos",
-    "equipment": ["bodyweight", "yoga_mat"],
+    "equipment": ["bodyweight", "yoga_mat", "wall"],
     "inheritsSafeFallbackFrom": "home",
-    "selectionRule": "Until equipment photos are reviewed, only recommend confirmed home-safe exercises. Add equipment automatically after visual inventory review.",
-    "notes": "Do not guess machines or weights. Equipment will be populated from user-provided photos."
+    "selectionRule": "Until equipment photos are reviewed, recommend only confirmed Home-safe movements. Add recognized equipment automatically after visual inventory review.",
+    "notes": "Do not guess machines, benches, cable stations or weights. Equipment will be populated from user-provided photos rather than manual user entry."
   },
   "fullGym": {
     "id": "fullGym",
@@ -23,6 +23,7 @@
     "equipment": [
       "bodyweight",
       "yoga_mat",
+      "wall",
       "resistance_band",
       "dumbbell",
       "barbell",
@@ -33,9 +34,21 @@
       "medicine_ball",
       "foam_roller",
       "ez_bar",
+      "pullup_bar",
+      "low_bar",
+      "dip_station",
+      "bench",
+      "box",
+      "step_platform",
+      "anchor_or_ghd",
+      "roman_chair",
+      "climbing_rope",
+      "sled",
+      "partner",
+      "chair",
       "other"
     ],
-    "selectionRule": "All normalized exercise equipment categories are available unless an exercise is later marked unavailable at the specific gym.",
-    "notes": "Generic all-equipment gym profile. Can be refined later without changing workout history."
+    "selectionRule": "Treat standard free weights, machines and common training apparatus as available unless a later specific-gym profile marks an item unavailable.",
+    "notes": "Generic all-equipment gym profile. Can be refined later without changing workout-history records."
   }
 }
