@@ -4,6 +4,8 @@ const readJson = async path => JSON.parse(await readFile(new URL(path, import.me
 const fail = message => { throw new Error(message); };
 
 const exercises = await readJson('../data/generated/exercises.json');
+const trainingExercises = await readJson('../data/generated/training_exercises.json');
+const trainingSummary = await readJson('../data/generated/training_catalog_summary.json');
 const activities = await readJson('../data/generated/met_activities.json');
 const summary = await readJson('../data/generated/catalog_summary.json');
 const reconciliation = await readJson('../data/generated/met_reconciliation.json');
@@ -11,6 +13,7 @@ const locations = await readJson('../data/location_profiles.json');
 const energy = await readJson('../data/energy_model.json');
 
 if (!Array.isArray(exercises) || exercises.length < 800) fail(`Expected >=800 exercises, found ${exercises.length}`);
+if (!Array.isArray(trainingExercises) || trainingExercises.length !== exercises.length) fail('Training catalog must preserve every source exercise');
 if (!Array.isArray(activities) || activities.length < 1100) fail(`Expected >=1100 official PDF MET activities, found ${activities.length}`);
 
 const exerciseIds = new Set();
@@ -20,8 +23,29 @@ for (const exercise of exercises) {
   exerciseIds.add(exercise.id);
   if (!Array.isArray(exercise.primaryMuscles)) fail(`Exercise ${exercise.id} missing primaryMuscles`);
   if (!exercise.equipment || !exercise.movementPattern) fail(`Exercise ${exercise.id} missing normalized equipment/pattern`);
-  if (!exercise.locationCompatibility || typeof exercise.locationCompatibility.home !== 'boolean') fail(`Exercise ${exercise.id} missing location compatibility`);
 }
+
+const trainingIds = new Set();
+for (const exercise of trainingExercises) {
+  if (!exerciseIds.has(exercise.id)) fail(`Training exercise ${exercise.id} is absent from source catalog`);
+  if (trainingIds.has(exercise.id)) fail(`Duplicate training exercise id ${exercise.id}`);
+  trainingIds.add(exercise.id);
+  if (!Array.isArray(exercise.requiredEquipment) || !Array.isArray(exercise.implicitEquipment)) fail(`Training exercise ${exercise.id} missing equipment resolution`);
+  if (!exercise.locationCompatibility || typeof exercise.locationCompatibility.home !== 'boolean') fail(`Training exercise ${exercise.id} missing location compatibility`);
+  if (exercise.locationCompatibility.home) {
+    const allowed = new Set(locations.home.equipment || []);
+    const unavailable = exercise.requiredEquipment.filter(item => !allowed.has(item));
+    if (unavailable.length) fail(`Home-compatible exercise ${exercise.id} still requires ${unavailable.join(', ')}`);
+  }
+}
+
+const pullupLike = trainingExercises.filter(x => /(pull[- ]?ups?|chin[- ]?ups?|hanging)/i.test([x.name, ...(x.instructions || [])].join(' ')));
+if (!pullupLike.length) fail('Expected pull-up/hanging exercises for equipment inference test');
+if (pullupLike.some(x => x.locationCompatibility.home && !x.requiredEquipment.includes('pullup_bar'))) fail('Pull-up/hanging exercise incorrectly considered apparatus-free at Home');
+
+if (trainingSummary.sourceExerciseCount !== exercises.length || trainingSummary.trainingExerciseCount !== trainingExercises.length) fail('Training summary count mismatch');
+if (!(trainingSummary.bodyweightRequiringImplicitApparatus > 0)) fail('Expected at least one bodyweight exercise with inferred apparatus');
+if (!(trainingSummary.homeCompatibleCount < trainingSummary.sourceBodyweightCount)) fail('Apparatus resolution should reduce the naive bodyweight Home set');
 
 const metCodes = new Set();
 for (const activity of activities) {
@@ -32,7 +56,7 @@ for (const activity of activities) {
   if (!activity.sourcePdf || activity.edition !== 2024) fail(`MET activity ${activity.code} lacks canonical PDF provenance`);
 }
 
-for (const required of ['02054', '02056', '02101', '02150', '17190', '17200']) {
+for (const required of ['02050', '02054', '02056', '02101', '02150', '17190', '17200']) {
   if (!metCodes.has(required)) fail(`Missing required Compendium code ${required}`);
 }
 
@@ -47,13 +71,12 @@ if (!Array.isArray(reconciliation.metMismatches)) fail('Reconciliation MET misma
 for (const requiredLocation of ['home', 'apartmentGym', 'fullGym']) {
   if (!locations[requiredLocation]) fail(`Missing location profile ${requiredLocation}`);
 }
-
 if (locations.apartmentGym.inventoryStatus !== 'pending_photos') fail('Apartment gym must remain pending until photo inventory is verified');
 if (!energy.formulas?.grossKcal || !energy.formulas?.activeKcal) fail('Energy model formulas missing');
 if (summary.counts.exercises !== exercises.length || summary.counts.metActivities !== activities.length) fail('Catalog summary counts do not match generated data');
 if (summary.reconciliation?.officialPdfParsedRows !== activities.length) fail('Catalog summary reconciliation count mismatch');
 
-console.log(`Validated ${exercises.length} exercises and ${activities.length} official-PDF MET activities.`);
-console.log(`Website reconciliation rows: ${reconciliation.currentWebsiteParsedRows}`);
-console.log(`PDF-only codes: ${reconciliation.pdfOnlyCodes.length}; website-only codes: ${reconciliation.websiteOnlyCodes.length}; MET mismatches: ${reconciliation.metMismatches.length}`);
-console.log(`Home-compatible exercises: ${summary.counts.homeCompatibleExercises}`);
+console.log(`Validated ${exercises.length} source exercises and ${trainingExercises.length} apparatus-aware training exercises.`);
+console.log(`Home-safe after apparatus resolution: ${trainingSummary.homeCompatibleCount} of ${trainingSummary.sourceBodyweightCount} source bodyweight exercises.`);
+console.log(`Validated ${activities.length} official-PDF MET activities; website reconciliation rows: ${reconciliation.currentWebsiteParsedRows}.`);
+console.log(`PDF-only codes: ${reconciliation.pdfOnlyCodes.length}; website-only codes: ${reconciliation.websiteOnlyCodes.length}; MET mismatches: ${reconciliation.metMismatches.length}.`);
