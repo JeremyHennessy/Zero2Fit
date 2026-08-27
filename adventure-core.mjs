@@ -325,6 +325,6 @@ export function processAutoAdventure({ appState = {}, adventure: rawAdventure = 
     if (simulated.result) runs.push(simulated.result);
     if (simulated.error) break;
   }
-  adventure.autoLastProcessedAt = new Date(now).toISOString();
+  if (count > 0) adventure.autoLastProcessedAt = new Date(previous + count * intervalMs).toISOString();
   return { adventure, runs };
 }
