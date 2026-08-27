@@ -1,10 +1,12 @@
 {
   "version": 1,
   "purpose": "Automatically rank exercise substitutes without requiring manual exercise or equipment entry.",
+  "plannerMinimumScore": 55,
   "hardFilters": [
     "exercise equipment must be available at the selected location",
     "exercise must not be excluded by a later user-specific restriction",
-    "exercise must have at least one primary muscle or movement-pattern match to the workout slot"
+    "automatic strength-workout selections must come from the strength category",
+    "automatic planner selections must score at least good_substitute; partial/fallback matches stay informational only"
   ],
   "scoreWeights": {
     "sameMovementPattern": 40,
@@ -29,10 +31,11 @@
     "preferSimilarDifficulty": true,
     "allowDifferentEquipmentAtSameLocation": true,
     "neverAssumeUnavailableEquipment": true,
-    "doNotClaimEquivalentWhenQualityIsFallbackOnly": true
+    "doNotClaimEquivalentWhenQualityIsPartialOrFallback": true,
+    "leaveSlotUnavailableRatherThanInventExercise": true
   },
   "homePullingLimitation": {
-    "appliesWhen": "selected location has only bodyweight and yoga_mat",
-    "message": "A true loaded lat/back pull may not be available with the confirmed home equipment. Zero2Fit may offer a lower-equivalence bodyweight movement for pattern practice, but it must label the limitation instead of pretending it is an equivalent lat-strength exercise."
+    "appliesWhen": "selected location has only bodyweight, yoga_mat and wall",
+    "message": "The researched catalog contains no good-or-better strength substitute for horizontal pulling or lat pulling with the confirmed Home equipment. Zero2Fit must show the pull slot as unavailable rather than substituting a stretch or unrelated exercise."
   }
 }
