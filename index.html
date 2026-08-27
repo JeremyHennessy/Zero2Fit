@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f4f0e8" />
+  <meta name="description" content="Zero2Fit personal fitness dashboard and progression tracker." />
+  <title>Zero2Fit</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand-block">
+        <div class="brand-mark">Z2F</div>
+        <div>
+          <div class="brand-name">Zero2Fit</div>
+          <div class="brand-subtitle">Personal progression system</div>
+        </div>
+      </div>
+
+      <nav class="nav-list" id="navList">
+        <button class="nav-item active" data-page="today"><span>◉</span> Today</button>
+        <button class="nav-item" data-page="character"><span>♜</span> Character</button>
+        <button class="nav-item" data-page="train"><span>▲</span> Train</button>
+        <button class="nav-item" data-page="nutrition"><span>◒</span> Nutrition</button>
+        <button class="nav-item" data-page="journey"><span>↗</span> Journey</button>
+        <button class="nav-item" data-page="data"><span>⌁</span> Data</button>
+      </nav>
+
+      <div class="sidebar-note">
+        <strong>Local-first build</strong>
+        <span>Your entries are stored in this browser until device sync is added.</span>
+      </div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow" id="todayDate"></div>
+          <h1 id="pageTitle">Today</h1>
+        </div>
+        <div class="topbar-actions">
+          <span class="sync-pill"><span class="sync-dot"></span> Local data</span>
+          <button class="icon-button" id="resetDemo" title="Reset local data" aria-label="Reset local data">↻</button>
+        </div>
+      </header>
+
+      <section class="page active" id="page-today">
+        <div class="hero-grid">
+          <article class="card character-summary">
+            <div class="character-visual" aria-hidden="true">
+              <div class="avatar-halo"></div>
+              <div class="avatar-head"></div>
+              <div class="avatar-body"></div>
+              <div class="avatar-emblem">I</div>
+            </div>
+            <div class="character-copy">
+              <div class="eyebrow">Current chapter</div>
+              <h2>Foundation</h2>
+              <p class="muted">Build the habit first. Intensity comes later.</p>
+              <div class="level-row">
+                <span class="level-badge">LV <strong id="heroLevel">1</strong></span>
+                <div class="xp-wrap">
+                  <div class="xp-meta"><span id="heroXpText">0 / 100 XP</span><span id="heroTitle">The Rebuilder</span></div>
+                  <div class="progress-track"><div class="progress-fill" id="heroXpBar"></div></div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card momentum-card">
+            <div class="card-heading">
+              <div>
+                <div class="eyebrow">Today</div>
+                <h2>Momentum</h2>
+              </div>
+              <div class="momentum-ring" id="momentumRing"><span id="momentumValue">0</span></div>
+            </div>
+            <p class="muted" id="momentumMessage">Complete one useful action to get moving.</p>
+            <div class="mini-stats">
+              <div><span>Quests</span><strong id="questCount">0 / 4</strong></div>
+              <div><span>XP today</span><strong id="xpToday">0</strong></div>
+              <div><span>Week</span><strong id="weekScore">0 / 7</strong></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="content-grid">
+          <article class="card quest-card">
+            <div class="card-heading">
+              <div>
+                <div class="eyebrow">Daily plan</div>
+                <h2>Quest board</h2>
+              </div>
+              <span class="small-tag">Recovery-safe</span>
+            </div>
+            <div id="questList" class="quest-list"></div>
+          </article>
+
+          <article class="card today-workout-card">
+            <div class="eyebrow">Recommended next</div>
+            <h2>Full Body A</h2>
+            <p class="muted">Simple foundation session. Pick the version that fits the day.</p>
+            <div class="mode-grid">
+              <button class="mode-button" data-workout-mode="quick"><strong>Quick</strong><span>12 min</span></button>
+              <button class="mode-button selected" data-workout-mode="standard"><strong>Standard</strong><span>30 min</span></button>
+              <button class="mode-button" data-workout-mode="full"><strong>Full</strong><span>45 min</span></button>
+            </div>
+            <button class="primary-button full-width" data-go-page="train">Start workout</button>
+          </article>
+
+          <article class="card metric-card">
+            <div class="card-heading">
+              <div>
+                <div class="eyebrow">Body</div>
+                <h2>Weight</h2>
+              </div>
+              <span class="source-label">Manual</span>
+            </div>
+            <div class="metric-value"><span id="latestWeight">—</span><small>lb</small></div>
+            <p class="trend-line" id="weightTrend">Add your first weigh-in.</p>
+            <form id="weightForm" class="inline-form">
+              <input id="weightInput" type="number" min="80" max="500" step="0.1" placeholder="Today's weight" aria-label="Today's weight in pounds" />
+              <button type="submit">Log</button>
+            </form>
+          </article>
+
+          <article class="card metric-card">
+            <div class="card-heading">
+              <div>
+                <div class="eyebrow">Activity</div>
+                <h2>Steps</h2>
+              </div>
+              <span class="source-label">Manual</span>
+            </div>
+            <div class="metric-value"><span id="stepValue">0</span><small>/ 7,000</small></div>
+            <div class="progress-track large"><div class="progress-fill" id="stepBar"></div></div>
+            <form id="stepsForm" class="inline-form">
+              <input id="stepsInput" type="number" min="0" max="100000" step="100" placeholder="Today's steps" aria-label="Today's steps" />
+              <button type="submit">Update</button>
+            </form>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="page-character">
+        <div class="character-page-grid">
+          <article class="card character-sheet">
+            <div class="character-stage">
+              <div class="character-visual large" aria-hidden="true">
+                <div class="avatar-halo"></div>
+                <div class="avatar-head"></div>
+                <div class="avatar-body"></div>
+                <div class="avatar-emblem">I</div>
+              </div>
+              <div class="title-ribbon" id="characterTitle">The Rebuilder</div>
+            </div>
+            <div class="character-main-stats">
+              <div><span>Level</span><strong id="characterLevel">1</strong></div>
+              <div><span>Total XP</span><strong id="totalXp">0</strong></div>
+              <div><span>Chapter</span><strong>Foundation</strong></div>
+            </div>
+            <div class="progress-track large"><div class="progress-fill" id="characterXpBar"></div></div>
+            <p class="muted compact" id="characterXpText">0 XP until Level 2</p>
+          </article>
+
+          <article class="card attribute-card">
+            <div class="eyebrow">Character attributes</div>
+            <h2>Stats earned by real actions</h2>
+            <div id="attributeList" class="attribute-list"></div>
+          </article>
+        </div>
+
+        <div class="content-grid two-col">
+          <article class="card boss-card">
+            <div class="eyebrow">Current boss objective</div>
+            <h2>Foundation Gate</h2>
+            <p>Complete 12 workouts to prove the routine is sustainable.</p>
+            <div class="boss-progress"><span id="bossProgressText">0 / 12 workouts</span><strong id="bossPct">0%</strong></div>
+            <div class="progress-track large"><div class="progress-fill" id="bossBar"></div></div>
+            <p class="muted compact">Boss goals are longer-term objectives. Missing a day never resets them.</p>
+          </article>
+
+          <article class="card">
+            <div class="eyebrow">Achievements</div>
+            <h2>Milestones</h2>
+            <div id="achievementGrid" class="achievement-grid"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="page-train">
+        <div class="train-header card">
+          <div>
+            <div class="eyebrow">Workout 1</div>
+            <h2>Full Body A</h2>
+            <p class="muted">Foundation strength · selected mode: <strong id="selectedModeLabel">Standard</strong></p>
+          </div>
+          <div class="workout-score"><span id="workoutCompletion">0%</span><small>complete</small></div>
+        </div>
+        <div class="exercise-list" id="exerciseList"></div>
+        <button class="primary-button finish-button" id="finishWorkout">Finish workout + earn XP</button>
+      </section>
+
+      <section class="page" id="page-nutrition">
+        <div class="nutrition-grid">
+          <article class="card nutrition-summary">
+            <div class="eyebrow">Today</div>
+            <h2>Nutrition</h2>
+            <div class="nutrition-numbers">
+              <div><span>Calories</span><strong><span id="calorieTotal">0</span> <small>/ 2300</small></strong></div>
+              <div><span>Protein</span><strong><span id="proteinTotal">0</span> <small>/ 160 g</small></strong></div>
+            </div>
+            <p class="muted">Targets are placeholders until you explicitly set them. This build does not infer a medical or weight-loss target.</p>
+          </article>
+          <article class="card">
+            <div class="eyebrow">Fast entry</div>
+            <h2>Add food</h2>
+            <form id="mealForm" class="meal-form">
+              <input id="mealName" type="text" placeholder="Meal or food" required />
+              <div class="split-inputs">
+                <input id="mealCalories" type="number" min="0" max="10000" placeholder="Calories" required />
+                <input id="mealProtein" type="number" min="0" max="500" placeholder="Protein g" required />
+              </div>
+              <button class="primary-button" type="submit">Add entry</button>
+            </form>
+          </article>
+        </div>
+        <article class="card">
+          <div class="card-heading"><div><div class="eyebrow">Log</div><h2>Today's food</h2></div><button class="text-button" id="clearMeals">Clear</button></div>
+          <div id="mealList" class="meal-list"></div>
+        </article>
+      </section>
+
+      <section class="page" id="page-journey">
+        <div class="journey-hero card">
+          <div>
+            <div class="eyebrow">Journey</div>
+            <h2>Evidence that you're moving forward</h2>
+            <p class="muted">Zero2Fit will compare you with your own baseline, not with other people.</p>
+          </div>
+          <div class="journey-total"><span>Lifetime XP</span><strong id="journeyXp">0</strong></div>
+        </div>
+        <div class="content-grid">
+          <article class="card">
+            <div class="eyebrow">Body trend</div>
+            <h2>Weight history</h2>
+            <div id="weightChart" class="weight-chart"></div>
+            <p class="muted compact" id="weightHistoryText">No weigh-ins yet.</p>
+          </article>
+          <article class="card">
+            <div class="eyebrow">Training</div>
+            <h2>Completed workouts</h2>
+            <div class="metric-value"><span id="completedWorkouts">0</span><small> lifetime</small></div>
+            <p class="muted compact">Each finished session advances Strength, Consistency and the Foundation Gate.</p>
+          </article>
+          <article class="card">
+            <div class="eyebrow">This week</div>
+            <h2>Consistency</h2>
+            <div class="week-dots" id="weekDots"></div>
+            <p class="muted compact">A low day does not erase previous work.</p>
+          </article>
+          <article class="card">
+            <div class="eyebrow">Recent XP</div>
+            <h2>Progress log</h2>
+            <div id="xpLog" class="xp-log"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="page-data">
+        <div class="data-intro card">
+          <div>
+            <div class="eyebrow">Data architecture</div>
+            <h2>One timeline, many sources</h2>
+            <p class="muted">The app will normalize device/app data but preserve its original source and timestamp. Build 001 uses manual/local entries only.</p>
+          </div>
+          <span class="small-tag">No cloud storage yet</span>
+        </div>
+        <div class="connection-grid">
+          <article class="connection-card connected"><div class="connection-icon">✎</div><div><strong>Manual / local</strong><span>Weight, steps, meals, workouts</span></div><span>Active</span></article>
+          <article class="connection-card"><div class="connection-icon">♥</div><div><strong>Apple Health</strong><span>Requires companion/sync integration</span></div><span>Planned</span></article>
+          <article class="connection-card"><div class="connection-icon">W</div><div><strong>Withings</strong><span>Scale and body composition</span></div><span>Planned</span></article>
+          <article class="connection-card"><div class="connection-icon">G</div><div><strong>Garmin / Fitbit</strong><span>Activity, HR, sleep, workouts</span></div><span>Planned</span></article>
+          <article class="connection-card"><div class="connection-icon">N</div><div><strong>Nutrition imports</strong><span>MyFitnessPal/Cronometer or Zero2Fit logger</span></div><span>Planned</span></article>
+        </div>
+        <article class="card data-table-card">
+          <div class="eyebrow">Normalized record examples</div>
+          <h2>Provenance stays visible</h2>
+          <div class="data-table">
+            <div class="data-row head"><span>Metric</span><span>Value</span><span>Source</span><span>Status</span></div>
+            <div class="data-row"><span>Weight</span><span id="dataWeight">—</span><span>Manual</span><span>Observed</span></div>
+            <div class="data-row"><span>Steps</span><span id="dataSteps">0</span><span>Manual</span><span>Observed</span></div>
+            <div class="data-row"><span>Momentum</span><span id="dataMomentum">0</span><span>Zero2Fit</span><span>Derived</span></div>
+            <div class="data-row"><span>Level</span><span id="dataLevel">1</span><span>Zero2Fit</span><span>Derived</span></div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js"></script>
+</body>
+</html>
