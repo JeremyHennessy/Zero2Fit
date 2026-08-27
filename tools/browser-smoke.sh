@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PORT="${PORT:-4173}"
+DOM_FILE="${RUNNER_TEMP:-/tmp}/zero2fit-dom.html"
+SERVER_LOG="${RUNNER_TEMP:-/tmp}/zero2fit-server.log"
+
+python3 -m http.server "$PORT" --bind 127.0.0.1 >"$SERVER_LOG" 2>&1 &
+SERVER_PID=$!
+trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+
+for _ in {1..20}; do
+  if curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null; then
+    break
+  fi
+  sleep 0.25
+done
+
+CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+if [[ -z "$CHROME" ]]; then
+  echo 'No Chrome/Chromium executable found on runner.' >&2
+  exit 1
+fi
+
+"$CHROME" \
+  --headless=new \
+  --no-sandbox \
+  --disable-gpu \
+  --disable-dev-shm-usage \
+  --virtual-time-budget=6000 \
+  --dump-dom "http://127.0.0.1:${PORT}/" >"$DOM_FILE"
+
+grep -q 'Use what is actually available' "$DOM_FILE"
+grep -q 'Bodyweight Squat' "$DOM_FILE"
+grep -q 'No true substitute here' "$DOM_FILE"
+grep -q '873 exercises' "$DOM_FILE"
+grep -q '1111 MET activities' "$DOM_FILE"
+grep -q 'Photo inventory pending' "$DOM_FILE"
+
+if grep -q 'Workout reference data could not load' "$DOM_FILE"; then
+  echo 'Workout catalog load failed in browser.' >&2
+  exit 1
+fi
+
+echo 'Browser smoke passed: researched catalog loaded, Home workout rendered, unavailable pull slot preserved, and location controls are present.'
