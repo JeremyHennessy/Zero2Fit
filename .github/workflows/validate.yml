@@ -38,6 +38,7 @@ jobs:
           test -s build002.css
           test -s build003.css
           test -s build004.css
+          test -s build006.css
           test -s app.js
           test -s training-core.mjs
           test -s storage.js
@@ -54,11 +55,14 @@ jobs:
           test -s data/substitution_rules.json
           test -s data/energy_model.json
           grep -q './styles.css' index.html
+          grep -q './build006.css' index.html
           grep -q './storage.js' index.html
           grep -q './ingestion.js' index.html
           grep -q './app.js' index.html
           grep -q './build003-integration.js' index.html
           grep -q './build004-integration.js' index.html
+          grep -q '#070b09' build006.css
+          grep -q '#b7f34a' build006.css
 
       - name: Reject embedded private credential patterns
         run: |
