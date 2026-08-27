@@ -9,7 +9,10 @@ on:
       - main
       - agent/build-002-location-exercise-substitutions
     paths:
+      - 'app.js'
+      - 'build002.css'
       - 'training-core.mjs'
+      - 'tools/browser-smoke.sh'
       - 'tools/sync-fitness-data.mjs'
       - 'tools/build-training-catalog.mjs'
       - 'tools/validate-fitness-data.mjs'
@@ -32,6 +35,11 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
+      - name: Check client JavaScript syntax
+        run: |
+          node --check app.js
+          node --check training-core.mjs
+
       - name: Install PDF text extraction dependency
         run: sudo apt-get update && sudo apt-get install -y poppler-utils
 
@@ -46,6 +54,9 @@ jobs:
 
       - name: Test automatic workout planner
         run: node tools/test-training-planner.mjs
+
+      - name: Browser smoke test
+        run: bash tools/browser-smoke.sh
 
       - name: Commit refreshed catalogs when changed
         shell: bash
