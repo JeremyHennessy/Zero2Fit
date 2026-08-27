@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "energyXpPerCharge": 25,
+  "autoIntervalMinutes": 120,
+  "maxOfflineRuns": 6,
+  "expeditionEncounters": 3,
+  "zones": [
+    {
+      "id": "foundation_trail",
+      "name": "Foundation Trail",
+      "tier": 1,
+      "minFitnessLevel": 1,
+      "description": "A low-risk proving ground where the Rebuilder learns to turn real-world momentum into field power.",
+      "enemyIds": ["moss_rat", "bramble_sprite", "stonebeak"],
+      "bossId": "gatewarden_boar",
+      "bossEveryVictories": 8,
+      "lootItemIds": ["ashwood_club", "trailguard_vest", "moss_charm"]
+    },
+    {
+      "id": "briar_hollow",
+      "name": "Briar Hollow",
+      "tier": 2,
+      "minFitnessLevel": 3,
+      "requires": {"zoneId": "foundation_trail", "victories": 5},
+      "description": "Twisted roots, denser enemies and better salvage. Unlocks once the real-world character has enough foundation and field wins.",
+      "enemyIds": ["thorn_hound", "hollow_wisp", "rootguard"],
+      "bossId": "briar_stag",
+      "bossEveryVictories": 8,
+      "lootItemIds": ["briar_blade", "rootmail", "ember_seed"]
+    },
+    {
+      "id": "ironwood_pass",
+      "name": "Ironwood Pass",
+      "tier": 3,
+      "minFitnessLevel": 5,
+      "requires": {"zoneId": "briar_hollow", "victories": 7},
+      "description": "Cold stone and armored creatures reward a balanced build instead of raw Strength alone.",
+      "enemyIds": ["ironback", "pass_raider", "frost_moth"],
+      "bossId": "ironwood_colossus",
+      "bossEveryVictories": 8,
+      "lootItemIds": ["ironwood_axe", "passwarden_plate", "frostglass_token"]
+    },
+    {
+      "id": "ember_ridge",
+      "name": "Ember Ridge",
+      "tier": 4,
+      "minFitnessLevel": 8,
+      "requires": {"zoneId": "ironwood_pass", "victories": 9},
+      "description": "The first high-tier frontier. Real-world consistency matters here because adventure gear alone cannot carry a weak base character.",
+      "enemyIds": ["cinder_fox", "ash_knight", "ridge_drake"],
+      "bossId": "ember_crowned_warden",
+      "bossEveryVictories": 8,
+      "lootItemIds": ["emberbrand", "ridgeguard_shell", "sunstone_sigil"]
+    }
+  ],
+  "enemies": [
+    {"id":"moss_rat","name":"Moss Rat","tier":1,"hp":44,"attack":8,"defense":2,"coinMin":3,"coinMax":7,"lootChance":0.38},
+    {"id":"bramble_sprite","name":"Bramble Sprite","tier":1,"hp":38,"attack":10,"defense":1,"coinMin":4,"coinMax":8,"lootChance":0.4},
+    {"id":"stonebeak","name":"Stonebeak","tier":1,"hp":52,"attack":7,"defense":4,"coinMin":4,"coinMax":9,"lootChance":0.42},
+    {"id":"gatewarden_boar","name":"Gatewarden Boar","tier":1,"boss":true,"hp":88,"attack":12,"defense":5,"coinMin":12,"coinMax":20,"lootChance":1},
+    {"id":"thorn_hound","name":"Thorn Hound","tier":2,"hp":72,"attack":14,"defense":5,"coinMin":7,"coinMax":13,"lootChance":0.48},
+    {"id":"hollow_wisp","name":"Hollow Wisp","tier":2,"hp":60,"attack":17,"defense":3,"coinMin":7,"coinMax":14,"lootChance":0.5},
+    {"id":"rootguard","name":"Rootguard","tier":2,"hp":86,"attack":12,"defense":8,"coinMin":8,"coinMax":15,"lootChance":0.5},
+    {"id":"briar_stag","name":"Briar Stag","tier":2,"boss":true,"hp":132,"attack":19,"defense":8,"coinMin":20,"coinMax":32,"lootChance":1},
+    {"id":"ironback","name":"Ironback","tier":3,"hp":104,"attack":20,"defense":11,"coinMin":12,"coinMax":20,"lootChance":0.56},
+    {"id":"pass_raider","name":"Pass Raider","tier":3,"hp":90,"attack":23,"defense":8,"coinMin":12,"coinMax":22,"lootChance":0.57},
+    {"id":"frost_moth","name":"Frost Moth","tier":3,"hp":82,"attack":25,"defense":6,"coinMin":13,"coinMax":23,"lootChance":0.58},
+    {"id":"ironwood_colossus","name":"Ironwood Colossus","tier":3,"boss":true,"hp":176,"attack":27,"defense":14,"coinMin":32,"coinMax":48,"lootChance":1},
+    {"id":"cinder_fox","name":"Cinder Fox","tier":4,"hp":122,"attack":28,"defense":10,"coinMin":18,"coinMax":29,"lootChance":0.62},
+    {"id":"ash_knight","name":"Ash Knight","tier":4,"hp":138,"attack":26,"defense":15,"coinMin":19,"coinMax":31,"lootChance":0.64},
+    {"id":"ridge_drake","name":"Ridge Drake","tier":4,"hp":128,"attack":31,"defense":11,"coinMin":20,"coinMax":34,"lootChance":0.66},
+    {"id":"ember_crowned_warden","name":"Ember-Crowned Warden","tier":4,"boss":true,"hp":224,"attack":34,"defense":17,"coinMin":48,"coinMax":70,"lootChance":1}
+  ],
+  "items": [
+    {"id":"ashwood_club","name":"Ashwood Club","slot":"weapon","basePower":3,"icon":"⚔","description":"Simple field weapon from the Foundation Trail."},
+    {"id":"trailguard_vest","name":"Trailguard Vest","slot":"armor","basePower":3,"icon":"⬟","description":"Light protection stitched for long expeditions."},
+    {"id":"moss_charm","name":"Moss Charm","slot":"charm","basePower":2,"icon":"◆","description":"A quiet charm that steadies the character under pressure."},
+    {"id":"briar_blade","name":"Briar Blade","slot":"weapon","basePower":6,"icon":"⚔","description":"A sharper reward from deeper trail clears."},
+    {"id":"rootmail","name":"Rootmail","slot":"armor","basePower":6,"icon":"⬟","description":"Layered bark-mail that absorbs heavy hits."},
+    {"id":"ember_seed","name":"Ember Seed","slot":"charm","basePower":5,"icon":"◆","description":"Warm to the touch; useful when the trail turns cold."},
+    {"id":"ironwood_axe","name":"Ironwood Axe","slot":"weapon","basePower":9,"icon":"⚔","description":"Dense, balanced and difficult to earn."},
+    {"id":"passwarden_plate","name":"Passwarden Plate","slot":"armor","basePower":9,"icon":"⬟","description":"Heavy protection from the upper pass."},
+    {"id":"frostglass_token","name":"Frostglass Token","slot":"charm","basePower":8,"icon":"◆","description":"A clear token carrying the calm of the pass."},
+    {"id":"emberbrand","name":"Emberbrand","slot":"weapon","basePower":13,"icon":"⚔","description":"High-tier weapon forged from Ridge salvage."},
+    {"id":"ridgeguard_shell","name":"Ridgeguard Shell","slot":"armor","basePower":13,"icon":"⬟","description":"Dense armor built for Ember Ridge pressure."},
+    {"id":"sunstone_sigil","name":"Sunstone Sigil","slot":"charm","basePower":12,"icon":"◆","description":"A bright endgame charm for the first frontier arc."}
+  ]
+}
