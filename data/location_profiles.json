@@ -1,0 +1,41 @@
+{
+  "home": {
+    "id": "home",
+    "label": "Home",
+    "inventoryStatus": "confirmed",
+    "equipment": ["bodyweight", "yoga_mat"],
+    "selectionRule": "Only recommend exercises that require bodyweight or a yoga mat.",
+    "notes": "Confirmed user context: bodyweight-focused home training with a yoga mat. No door anchors, furniture anchors, bands, dumbbells or other equipment are assumed."
+  },
+  "apartmentGym": {
+    "id": "apartmentGym",
+    "label": "Apartment Gym",
+    "inventoryStatus": "pending_photos",
+    "equipment": ["bodyweight", "yoga_mat"],
+    "inheritsSafeFallbackFrom": "home",
+    "selectionRule": "Until equipment photos are reviewed, only recommend confirmed home-safe exercises. Add equipment automatically after visual inventory review.",
+    "notes": "Do not guess machines or weights. Equipment will be populated from user-provided photos."
+  },
+  "fullGym": {
+    "id": "fullGym",
+    "label": "Full Gym",
+    "inventoryStatus": "generic_full_gym",
+    "equipment": [
+      "bodyweight",
+      "yoga_mat",
+      "resistance_band",
+      "dumbbell",
+      "barbell",
+      "cable_machine",
+      "machine",
+      "kettlebell",
+      "stability_ball",
+      "medicine_ball",
+      "foam_roller",
+      "ez_bar",
+      "other"
+    ],
+    "selectionRule": "All normalized exercise equipment categories are available unless an exercise is later marked unavailable at the specific gym.",
+    "notes": "Generic all-equipment gym profile. Can be refined later without changing workout history."
+  }
+}
