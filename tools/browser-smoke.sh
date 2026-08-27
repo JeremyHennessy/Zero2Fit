@@ -27,7 +27,7 @@ fi
   --no-sandbox \
   --disable-gpu \
   --disable-dev-shm-usage \
-  --virtual-time-budget=7000 \
+  --virtual-time-budget=12000 \
   --dump-dom "http://127.0.0.1:${PORT}/" >"$DOM_FILE"
 
 grep -q 'Use what is actually available' "$DOM_FILE"
@@ -44,6 +44,13 @@ grep -q 'RENPHO scale' "$DOM_FILE"
 grep -q 'IndexedDB' "$DOM_FILE"
 grep -q 'Export JSON backup' "$DOM_FILE"
 
+grep -q 'Train outside. Advance inside.' "$DOM_FILE"
+grep -q 'Campaign frontier' "$DOM_FILE"
+grep -q 'Latest body snapshot' "$DOM_FILE"
+grep -q 'Aligned visual timeline' "$DOM_FILE"
+grep -q 'Your devices, one private timeline' "$DOM_FILE"
+grep -q 'z4SensorStrip' "$DOM_FILE"
+
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then
   echo 'Workout catalog load failed in browser.' >&2
   exit 1
@@ -54,4 +61,9 @@ if grep -q 'Structured storage or ingestion module failed to load' "$DOM_FILE"; 
   exit 1
 fi
 
-echo 'Browser smoke passed: Build 002 workout intelligence and Build 003 storage/device UI both rendered.'
+if grep -q 'Zero2Fit Build 004 initialization failed' "$DOM_FILE"; then
+  echo 'Build 004 device/UI initialization failed in browser.' >&2
+  exit 1
+fi
+
+echo 'Browser smoke passed: Build 002 workout intelligence, Build 003 storage/device imports, and Build 004 device-driven UI rendered.'

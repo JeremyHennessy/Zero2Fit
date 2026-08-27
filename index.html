@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#f4f0e8" />
-  <meta name="description" content="Zero2Fit personal fitness dashboard and progression tracker." />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f5f7f4" />
+  <meta name="description" content="Zero2Fit — a personal fitness system where real-world actions power RPG progression." />
   <title>Zero2Fit</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
@@ -71,10 +71,7 @@
 
           <article class="card momentum-card">
             <div class="card-heading">
-              <div>
-                <div class="eyebrow">Today</div>
-                <h2>Momentum</h2>
-              </div>
+              <div><div class="eyebrow">Today</div><h2>Momentum</h2></div>
               <div class="momentum-ring" id="momentumRing"><span id="momentumValue">0</span></div>
             </div>
             <p class="muted" id="momentumMessage">Complete one useful action to get moving.</p>
@@ -89,10 +86,7 @@
         <div class="content-grid">
           <article class="card quest-card">
             <div class="card-heading">
-              <div>
-                <div class="eyebrow">Daily plan</div>
-                <h2>Quest board</h2>
-              </div>
+              <div><div class="eyebrow">Daily plan</div><h2>Quest board</h2></div>
               <span class="small-tag">Recovery-safe</span>
             </div>
             <div id="questList" class="quest-list"></div>
@@ -112,10 +106,7 @@
 
           <article class="card metric-card">
             <div class="card-heading">
-              <div>
-                <div class="eyebrow">Body</div>
-                <h2>Weight</h2>
-              </div>
+              <div><div class="eyebrow">Body</div><h2>Weight</h2></div>
               <span class="source-label">Manual</span>
             </div>
             <div class="metric-value"><span id="latestWeight">—</span><small>lb</small></div>
@@ -128,10 +119,7 @@
 
           <article class="card metric-card">
             <div class="card-heading">
-              <div>
-                <div class="eyebrow">Activity</div>
-                <h2>Steps</h2>
-              </div>
+              <div><div class="eyebrow">Activity</div><h2>Steps</h2></div>
               <span class="source-label">Manual</span>
             </div>
             <div class="metric-value"><span id="stepValue">0</span><small>/ 7,000</small></div>
@@ -274,9 +262,9 @@
           <div>
             <div class="eyebrow">Data architecture</div>
             <h2>One timeline, many sources</h2>
-            <p class="muted">The app will normalize device/app data but preserve its original source and timestamp. Build 001 uses manual/local entries only.</p>
+            <p class="muted">The app normalizes device/app data while preserving source and timestamp.</p>
           </div>
-          <span class="small-tag">No cloud storage yet</span>
+          <span class="small-tag">Private by design</span>
         </div>
         <div class="connection-grid">
           <article class="connection-card connected"><div class="connection-icon">✎</div><div><strong>Manual / local</strong><span>Weight, steps, meals, workouts</span></div><span>Active</span></article>
@@ -305,5 +293,6 @@
   <script src="./ingestion.js"></script>
   <script src="./app.js"></script>
   <script src="./build003-integration.js"></script>
+  <script src="./build004-integration.js"></script>
 </body>
 </html>
