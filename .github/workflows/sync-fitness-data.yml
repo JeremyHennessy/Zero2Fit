@@ -38,7 +38,7 @@ jobs:
       - name: Commit refreshed catalogs when changed
         shell: bash
         run: |
-          if git diff --quiet -- data/generated; then
+          if [ -z "$(git status --porcelain -- data/generated)" ]; then
             echo 'Generated catalogs are already current.'
             exit 0
           fi
