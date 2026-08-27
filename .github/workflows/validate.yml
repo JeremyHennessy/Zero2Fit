@@ -28,11 +28,16 @@ jobs:
           node --check photo-core.mjs
           node --check build007-adventure.js
           node --check build008-photos.js
+          node --check zero2fit-config.js
+          node --check remote-sync-core.mjs
+          node --check remote-sync.js
+          node --check build008-device-sync.js
           node --check tools/build-training-catalog.mjs
           node --check tools/validate-fitness-data.mjs
           node --check tools/test-training-planner.mjs
           node --check tools/test-device-ingestion.mjs
           node --check tools/test-device-driven-progress.mjs
+          node --check tools/test-remote-sync.mjs
           node --check tools/test-adventure-core.mjs
           node --check tools/test-photo-core.mjs
           node --check tools/check-index-contract.mjs
@@ -57,6 +62,14 @@ jobs:
           test -s photo-core.mjs
           test -s build007-adventure.js
           test -s build008-photos.js
+          test -s zero2fit-config.js
+          test -s remote-sync-core.mjs
+          test -s remote-sync.js
+          test -s build008-device-sync.js
+          test -s ios/Zero2FitHealthBridge/project.yml
+          test -s ios/Zero2FitHealthBridge/Zero2FitHealthBridge.entitlements
+          test -s ios/Zero2FitHealthBridge/Sources/HealthKitBridge.swift
+          test -s ios/Zero2FitHealthBridge/Sources/SupabaseBridgeClient.swift
           test -s data/adventure_catalog.json
           test -s supabase/schema.sql
           test -s data/generated/training_exercises.json
@@ -69,21 +82,27 @@ jobs:
           grep -q './styles.css' index.html
           grep -q './build006.css' index.html
           grep -q './build007.css' index.html
+          grep -q './zero2fit-config.js' index.html
           grep -q './storage.js' index.html
+          grep -q './remote-sync.js' index.html
           grep -q './ingestion.js' index.html
           grep -q './app.js' index.html
           grep -q './build003-integration.js' index.html
           grep -q './build004-integration.js' index.html
           grep -q './build007-adventure.js' index.html
           grep -q './build008-photos.js' index.html
+          grep -q './build008-device-sync.js' index.html
           grep -q '#070b09' build006.css
           grep -q '#b7f34a' build006.css
           grep -q 'progress_photos' storage.js
           grep -q 'raw_photos_included: false' storage.js
+          grep -q 'device_source_observations' supabase/schema.sql
+          grep -q 'device_source_verifications' supabase/schema.sql
+          grep -q 'source_verification_id' device-core.mjs
 
       - name: Reject embedded private credential patterns
         run: |
-          if grep -RniE --exclude='validate.yml' --exclude-dir='.git' '(sk-[A-Za-z0-9_-]{20,}|SUPABASE_SERVICE_ROLE_KEY[[:space:]]*[:=][[:space:]]*[A-Za-z0-9._-]{20,})' .; then
+          if grep -RniE --exclude='validate.yml' --exclude-dir='.git' '(sk-[A-Za-z0-9_-]{20,}|SUPABASE_SERVICE_ROLE_KEY[[:space:]]*[:=][[:space:]]*[A-Za-z0-9._-]{20,}|sb_secret_[A-Za-z0-9_-]{10,})' .; then
             echo 'Potential private credential value found.'
             exit 1
           fi
@@ -99,6 +118,9 @@ jobs:
 
       - name: Test device-driven progress
         run: node tools/test-device-driven-progress.mjs
+
+      - name: Test private sync contract
+        run: node tools/test-remote-sync.mjs
 
       - name: Test RPG adventure engine
         run: node tools/test-adventure-core.mjs
