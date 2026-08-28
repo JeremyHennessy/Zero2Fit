@@ -1,4 +1,4 @@
-const CACHE = 'zero2fit-shell-v12';
+const CACHE = 'zero2fit-shell-v12-clean';
 const SHELL = [
   './', './index.html', './styles.css', './build002.css', './build003.css', './build004.css', './build006.css', './build007.css', './build012.css',
   './zero2fit-config.js', './app.js', './storage.js', './remote-sync.js', './ingestion.js', './device-core.mjs', './training-core.mjs', './adaptive-core.mjs', './intelligence-core.mjs', './adventure-core.mjs', './photo-core.mjs',
