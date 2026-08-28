@@ -1,4 +1,6 @@
 /* Build 014 — guided workout execution. Preserves the approved Build 006 dark/lime baseline. */
+html[data-zero2fit-qa="1"] .page { animation:none !important; opacity:1 !important; transform:none !important; }
+
 body.build004 .z14-focus-card { margin:0 0 14px; padding:20px; border-color:#35452f; background:linear-gradient(145deg,#121a14,#0d140f 68%,#111019); }
 body.build004 .z14-focus-top { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
 body.build004 .z14-focus-copy { min-width:0; }
@@ -38,6 +40,8 @@ body.build004 .z14-status { margin:9px 1px 0; color:#718077; font-size:9px; line
 
 @media (max-width:820px) {
   body.build004 #page-train:not(.z14-list-expanded) #exerciseList { display:none; }
+  body.build004 #page-train .finish-button { display:none; }
+  body.build004 #page-train.z14-finish-ready .finish-button { display:block; }
   body.build004 .z14-focus-card { padding:16px; margin-bottom:11px; }
   body.build004 .z14-focus-copy h2 { font-size:25px; }
   body.build004 .z14-progress-chip { min-width:62px; min-height:62px; }
