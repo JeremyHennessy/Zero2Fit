@@ -1,5 +1,9 @@
 /* Build 012 — iPhone productization. Extends the approved Build 006 dark/lime baseline. */
 
+html.z12-qa-frontier #page-character > .character-page-grid,
+html.z12-qa-frontier #page-character > .content-grid.two-col { display:none !important; }
+html.z12-qa-frontier #z4FrontierCard { margin-top:0 !important; }
+
 body.build004 .z12-settings-button { display:grid; place-items:center; }
 body.build004 .z12-settings-backdrop {
   position:fixed; inset:0; z-index:80; background:rgba(0,0,0,.54); backdrop-filter:blur(5px);
