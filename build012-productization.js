@@ -6,6 +6,7 @@ const qaSettings = qaParams.get('qaSettings') === '1';
 let progressTab = sessionStorage.getItem('zero2fit-progress-tab') || 'overview';
 let adventurePanel = null;
 let resizeTimer = null;
+let adventureObserver = null;
 
 function mobile() { return window.matchMedia(MOBILE_QUERY).matches; }
 
@@ -188,37 +189,66 @@ function applyProgressTab() {
   }
 }
 
+function syncAdventurePrimary() {
+  const stage = document.getElementById('z11StageTitle')?.textContent?.trim() || 'Stage pending';
+  const stageProgress = document.getElementById('z11StageProgress')?.textContent?.trim() || '—';
+  const wall = document.getElementById('z11Wall');
+  const wallTitle = wall?.querySelector('strong')?.textContent?.trim() || 'Frontier advancing';
+  const wallDetail = wall?.querySelector('span')?.textContent?.trim() || 'Adventure will stop when the current real-world capability ceiling is reached.';
+  const stageNode = document.getElementById('z12AdventureStageText');
+  const progressNode = document.getElementById('z12AdventureStageProgress');
+  const wallTitleNode = document.getElementById('z12AdventureWallTitle');
+  const wallDetailNode = document.getElementById('z12AdventureWallDetail');
+  if (stageNode) stageNode.textContent = stage;
+  if (progressNode) progressNode.textContent = stageProgress;
+  if (wallTitleNode) wallTitleNode.textContent = wallTitle;
+  if (wallDetailNode) wallDetailNode.textContent = wallDetail;
+}
+
+function observeAdventureStatus() {
+  const status = document.getElementById('z11AdventureStatus');
+  if (!status || adventureObserver) return;
+  adventureObserver = new MutationObserver(syncAdventurePrimary);
+  adventureObserver.observe(status, { childList:true, subtree:true, characterData:true });
+}
+
 function ensureAdventureControls() {
   const frontier = document.getElementById('z4FrontierCard');
   const zones = frontier?.querySelector('.z7-zone-list');
-  if (!frontier || !zones || document.getElementById('z12AdventureControls')) return;
+  if (!frontier || !zones) return;
 
-  const controls = document.createElement('nav');
-  controls.id = 'z12AdventureControls';
-  controls.className = 'z12-adventure-controls';
-  controls.setAttribute('aria-label','Adventure details');
-  controls.innerHTML = `
-    <button type="button" data-z12-adventure="stats">Stats</button>
-    <button type="button" data-z12-adventure="auto">Auto/Gear</button>
-    <button type="button" data-z12-adventure="materials">Materials</button>
-    <button type="button" data-z12-adventure="log">Log/Loot</button>`;
-  zones.after(controls);
-
-  const wall = document.getElementById('z11Wall');
-  if (wall) {
-    const holder = document.createElement('div');
-    holder.id = 'z12AdventureWall';
-    holder.className = 'z12-adventure-wall';
-    controls.after(holder);
-    holder.appendChild(wall);
-    const materialSection = document.querySelector('#z11AdventureStatus > section:nth-child(2) .z7-section-title h3');
-    if (materialSection) materialSection.textContent = 'Materials';
+  let controls = document.getElementById('z12AdventureControls');
+  if (!controls) {
+    controls = document.createElement('nav');
+    controls.id = 'z12AdventureControls';
+    controls.className = 'z12-adventure-controls';
+    controls.setAttribute('aria-label','Adventure details');
+    controls.innerHTML = `
+      <button type="button" data-z12-adventure="stats">Stats</button>
+      <button type="button" data-z12-adventure="auto">Auto/Gear</button>
+      <button type="button" data-z12-adventure="materials">Materials</button>
+      <button type="button" data-z12-adventure="log">Log/Loot</button>`;
+    zones.after(controls);
+    controls.querySelectorAll('[data-z12-adventure]').forEach(button => button.addEventListener('click', () => {
+      adventurePanel = adventurePanel === button.dataset.z12Adventure ? null : button.dataset.z12Adventure;
+      applyAdventurePanel();
+    }));
   }
 
-  controls.querySelectorAll('[data-z12-adventure]').forEach(button => button.addEventListener('click', () => {
-    adventurePanel = adventurePanel === button.dataset.z12Adventure ? null : button.dataset.z12Adventure;
-    applyAdventurePanel();
-  }));
+  if (!document.getElementById('z12AdventurePrimary')) {
+    const primary = document.createElement('div');
+    primary.id = 'z12AdventurePrimary';
+    primary.className = 'z12-adventure-primary';
+    primary.innerHTML = `
+      <div class="z12-adventure-stage"><span id="z12AdventureStageText">Stage pending</span><strong id="z12AdventureStageProgress">—</strong></div>
+      <div class="z12-adventure-wall-summary"><strong id="z12AdventureWallTitle">Frontier advancing</strong><span id="z12AdventureWallDetail">Adventure will stop when the current real-world capability ceiling is reached.</span></div>`;
+    controls.after(primary);
+  }
+
+  const materialHeading = document.querySelector('#z11AdventureStatus > section:nth-child(2) .z7-section-title h3');
+  if (materialHeading) materialHeading.textContent = 'Materials';
+  observeAdventureStatus();
+  syncAdventurePrimary();
   applyAdventurePanel();
 }
 
@@ -240,6 +270,7 @@ function applyAdventurePanel() {
     if (!node) continue;
     node.classList.toggle('z12-mobile-open', !mobile() || key === adventurePanel);
   }
+  syncAdventurePrimary();
 }
 
 function applyQaFocus() {
@@ -296,6 +327,7 @@ function init() {
   window.addEventListener('offline', updateOfflineStatus);
   window.addEventListener('resize', refreshResponsiveViews);
   window.addEventListener('zero2fit:personal-intelligence', () => { markStrengthBlocks(); applyProgressTab(); });
+  window.addEventListener('zero2fit:remote-sync', () => { syncAdventurePrimary(); });
   setTimeout(() => { correctTrainingCopy(); ensureProgressTabs(); ensureAdventureControls(); applyProgressTab(); applyAdventurePanel(); }, 500);
 }
 
