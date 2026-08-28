@@ -34,7 +34,7 @@ export function chooseActiveSet(sets = [], { preferredKey = null, skippedKeys = 
     const preferred = incomplete.find(item => item.key === preferredKey && !skipped.has(item.key));
     if (preferred) return preferred;
   }
-  return incomplete.find(item => !skipped.has(item.key)) || incomplete[0];
+  return incomplete.find(item => !skipped.has(item.key)) || null;
 }
 
 export function nextIncompleteSet(sets = [], currentKey, { skippedKeys = [] } = {}) {
@@ -43,8 +43,7 @@ export function nextIncompleteSet(sets = [], currentKey, { skippedKeys = [] } = 
   const after = sets.slice(currentIndex + 1).find(item => item?.key && !item.done && !skipped.has(item.key));
   if (after) return after;
   const before = sets.slice(0, Math.max(0, currentIndex + 1)).find(item => item?.key && !item.done && !skipped.has(item.key));
-  if (before) return before;
-  return sets.find(item => item?.key && !item.done) || null;
+  return before || null;
 }
 
 export function restSecondsForIntent(intent, overrides = {}) {
