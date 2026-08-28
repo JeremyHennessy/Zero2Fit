@@ -1,0 +1,66 @@
+name: Wire Build 016
+
+on:
+  push:
+    branches: [agent/build-016-fuel-2]
+
+permissions:
+  contents: write
+
+jobs:
+  wire:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: agent/build-016-fuel-2
+          fetch-depth: 0
+      - name: Wire Build 016 additively
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if new in text:
+                  return
+              if old not in text:
+                  raise SystemExit(f'Build 016 wiring needle missing in {path}: {old!r}')
+              p.write_text(text.replace(old, new, 1))
+
+          # Runtime loader: append only to the small Build 015 loader.
+          p = Path('build015-loader.js')
+          text = p.read_text()
+          loader = "import('./build016-loader.js').catch(error => console.warn('Zero2Fit Build 016 loader failed', error));"
+          if loader not in text:
+              p.write_text(text.rstrip() + '\n\n' + loader + '\n')
+
+          # Offline shell.
+          replace_once('sw.js', "const CACHE = 'zero2fit-shell-v15';", "const CACHE = 'zero2fit-shell-v16';")
+          replace_once('sw.js', "'./build014.css', './build015.css',", "'./build014.css', './build015.css', './build016.css',")
+          replace_once('sw.js', "'./workout-execution-core.mjs', './adventure-visual-core.mjs',", "'./workout-execution-core.mjs', './adventure-visual-core.mjs', './fuel-core.mjs',")
+          replace_once('sw.js', "'./build015-loader.js', './build015-adventure-visual.js',", "'./build015-loader.js', './build015-adventure-visual.js', './build016-loader.js', './build016-fuel.js',")
+
+          # Main validation contract.
+          replace_once('.github/workflows/validate.yml', '          node --check adventure-visual-core.mjs\n', '          node --check adventure-visual-core.mjs\n          node --check fuel-core.mjs\n')
+          replace_once('.github/workflows/validate.yml', '          node --check build015-adventure-visual.js\n', '          node --check build015-adventure-visual.js\n          node --check build016-loader.js\n          node --check build016-fuel.js\n')
+          replace_once('.github/workflows/validate.yml', '          node --check tools/test-adventure-visual-core.mjs\n', '          node --check tools/test-adventure-visual-core.mjs\n          node --check tools/test-fuel-core.mjs\n')
+          replace_once('.github/workflows/validate.yml', '          test -s build015.css\n', '          test -s build015.css\n          test -s build016.css\n')
+          replace_once('.github/workflows/validate.yml', '          test -s adventure-visual-core.mjs\n', '          test -s adventure-visual-core.mjs\n          test -s fuel-core.mjs\n')
+          replace_once('.github/workflows/validate.yml', '          test -s build015-adventure-visual.js\n', '          test -s build015-adventure-visual.js\n          test -s build016-loader.js\n          test -s build016-fuel.js\n')
+          replace_once('.github/workflows/validate.yml', "          grep -q 'build015-adventure-visual.js' sw.js\n", "          grep -q 'build015-adventure-visual.js' sw.js\n          grep -q 'build016-fuel.js' sw.js\n          grep -q 'fuel-core.mjs' sw.js\n")
+          replace_once('.github/workflows/validate.yml', '      - name: Test personal intelligence\n', '      - name: Test Fuel helpers\n        run: node tools/test-fuel-core.mjs\n\n      - name: Test personal intelligence\n')
+
+          # Browser contract.
+          replace_once('tools/browser-smoke.sh', "assert_dom 'Last expedition'\n", "assert_dom 'Last expedition'\n\nassert_dom 'id=\"z16FuelAssist\"' 'Build 016 Fuel quick-log panel'\nassert_dom 'Repeat yesterday'\nassert_dom 'Your repeat meals'\nassert_dom 'Used lately'\nassert_dom '/ no target'\n")
+          replace_once('tools/browser-smoke.sh', "if grep -q 'Zero2Fit Build 015 Adventure visual layer failed' \"$DOM_FILE\"; then\n", "if grep -q 'Zero2Fit Build 016 loader failed' \"$DOM_FILE\"; then\n  echo 'Build 016 loader failed in browser.' >&2\n  exit 1\nfi\n\nif grep -q 'Zero2Fit Build 016 Fuel failed' \"$DOM_FILE\"; then\n  echo 'Build 016 Fuel layer failed in browser.' >&2\n  exit 1\nfi\n\nif grep -q 'Zero2Fit Build 015 Adventure visual layer failed' \"$DOM_FILE\"; then\n")
+          PY
+
+          git rm .github/workflows/build016-wire.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add build015-loader.js sw.js .github/workflows/validate.yml tools/browser-smoke.sh
+          git commit -m 'Build 016: wire Fuel 2.0'
+          git push origin HEAD:agent/build-016-fuel-2
