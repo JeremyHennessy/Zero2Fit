@@ -51,7 +51,9 @@ function ensureUi() {
     <div class="z14-instructions" id="z14InstructionText" hidden></div>
     <button class="z14-resume-skipped" type="button" id="z14ResumeSkipped" hidden>Resume skipped sets</button>
     <p class="z14-status" id="z14Status">Choose location and workout length above. Zero2Fit will guide the available sets in order.</p>`;
-  list.before(card);
+  const context = document.getElementById('trainingContextCard');
+  if (context) context.before(card);
+  else list.before(card);
   bindUi();
   applyListPreference();
 }
@@ -141,6 +143,7 @@ function renderFocus() {
   const sets = collectSets();
   const summary = executionCore.completionSummary(sets);
   setText('z14Completion', `${summary.percent}%`);
+  document.getElementById('page-train')?.classList.toggle('z14-finish-ready', summary.percent >= 60);
   const active = currentDescriptor(sets);
   const resume = document.getElementById('z14ResumeSkipped');
 
@@ -149,7 +152,7 @@ function renderFocus() {
     if (resume) resume.hidden = !incomplete.length || !skippedKeys.size;
     setText('z14ExercisePosition', summary.complete ? 'Workout sets complete' : 'Guided workout');
     setText('z14ExerciseName', summary.complete ? 'All available sets are complete' : (sets.length ? 'All remaining sets are skipped' : 'Preparing workout…'));
-    setText('z14ExerciseMeta', summary.complete ? 'Use Finish workout below to record the session and Fitness XP.' : 'Resume skipped sets or change the workout context above.');
+    setText('z14ExerciseMeta', summary.complete ? 'Use Finish workout below to record the session and Fitness XP.' : 'Resume skipped sets or change the workout context below.');
     setText('z14SetPosition', summary.complete ? `${summary.completed} of ${summary.total} sets` : 'No active set');
     setText('z14Target', summary.complete ? 'Session ready to finish' : '—');
     document.getElementById('z14LoadBlock').hidden = true;
