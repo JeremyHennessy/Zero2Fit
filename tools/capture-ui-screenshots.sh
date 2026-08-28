@@ -30,7 +30,7 @@ capture() {
     --disable-gpu \
     --disable-dev-shm-usage \
     --hide-scrollbars \
-    --virtual-time-budget=14000 \
+    --virtual-time-budget=6000 \
     --window-size="$width,$height" \
     --screenshot="$file" \
     "http://127.0.0.1:${PORT}/?${query}" >/dev/null 2>&1
