@@ -83,6 +83,12 @@ assert_dom 'z12AdventurePrimary'
 assert_dom 'build012.css'
 assert_dom 'Machines + cable + Smith + full dumbbell set'
 
+assert_dom 'id="z14FocusCard"' 'Build 014 guided workout card'
+assert_dom 'Complete set'
+assert_dom 'Skip for now'
+assert_dom 'Full workout'
+assert_dom 'Exercise 1 of'
+
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then
   echo 'Workout catalog load failed in browser.' >&2
   exit 1
@@ -113,4 +119,14 @@ if grep -q 'Zero2Fit Build 012 productization extension failed to load' "$DOM_FI
   exit 1
 fi
 
-echo 'Browser smoke passed: training, devices, approved iPhone UI, adaptive/personal intelligence, RPG adventure v2, PWA/productization, progress-photo modules, and private-sync shell rendered.'
+if grep -q 'Zero2Fit Build 014 guided workout execution failed to load' "$DOM_FILE"; then
+  echo 'Build 014 loader failed in browser.' >&2
+  exit 1
+fi
+
+if grep -q 'Zero2Fit Build 014 workout execution failed' "$DOM_FILE"; then
+  echo 'Build 014 execution module failed in browser.' >&2
+  exit 1
+fi
+
+echo 'Browser smoke passed: training, guided workout execution, devices, approved iPhone UI, adaptive/personal intelligence, RPG adventure v2, PWA/productization, progress-photo modules, and private-sync shell rendered.'

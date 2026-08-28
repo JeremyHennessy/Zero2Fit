@@ -1,8 +1,8 @@
-const CACHE = 'zero2fit-shell-v12';
+const CACHE = 'zero2fit-shell-v14';
 const SHELL = [
-  './', './index.html', './styles.css', './build002.css', './build003.css', './build004.css', './build006.css', './build007.css', './build012.css',
-  './zero2fit-config.js', './app.js', './storage.js', './remote-sync.js', './ingestion.js', './device-core.mjs', './training-core.mjs', './adaptive-core.mjs', './intelligence-core.mjs', './adventure-core.mjs', './photo-core.mjs',
-  './build003-integration.js', './build004-integration.js', './build007-adventure.js', './build008-photos.js', './build008-device-sync.js', './build009-adaptive.js', './build010-intelligence.js', './build011-adventure.js', './build012-productization.js',
+  './', './index.html', './styles.css', './build002.css', './build003.css', './build004.css', './build006.css', './build007.css', './build012.css', './build014.css',
+  './zero2fit-config.js', './app.js', './storage.js', './remote-sync.js', './ingestion.js', './device-core.mjs', './training-core.mjs', './adaptive-core.mjs', './intelligence-core.mjs', './adventure-core.mjs', './photo-core.mjs', './workout-execution-core.mjs',
+  './build003-integration.js', './build004-integration.js', './build007-adventure.js', './build008-photos.js', './build008-device-sync.js', './build009-adaptive.js', './build010-intelligence.js', './build011-adventure.js', './build012-productization.js', './build014-workout-execution.js',
   './data/generated/training_exercises.json', './data/generated/catalog_summary.json', './data/generated/training_catalog_summary.json',
   './data/programming_rules.json', './data/substitution_rules.json', './data/location_profiles.json', './data/energy_model.json', './data/adventure_catalog.json',
   './manifest.webmanifest', './assets/z2f-icon-180.png', './assets/z2f-icon-192.png', './assets/z2f-icon-512.png'

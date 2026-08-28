@@ -328,3 +328,5 @@ function init() {
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true });
 else init();
+
+import('./build014-workout-execution.js').catch(error => console.warn('Zero2Fit Build 014 guided workout execution failed to load', error));
