@@ -77,3 +77,5 @@ body.build004 #page-data .small-tag {
   border-color:#c8ebe5 !important;
 }
 body.build004 #page-data .connection-card > span:last-child { color:#087f75 !important; }
+body.build004 .z7-toggle input:checked + span { background:rgba(26,169,154,.22) !important; }
+body.build004 .z7-toggle input:checked + span::after { background:#1aa99a !important; }
