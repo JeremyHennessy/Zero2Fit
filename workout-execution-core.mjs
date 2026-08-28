@@ -90,3 +90,5 @@ export function exercisePosition(sets = [], key) {
     label:index >= 0 ? `Exercise ${index + 1} of ${ordered.length}` : `Exercise 0 of ${ordered.length}`
   };
 }
+
+// Build 014 checkpoint: skipped sets remain incomplete until explicitly resumed.
