@@ -42,7 +42,7 @@ export function nextIncompleteSet(sets = [], currentKey, { skippedKeys = [] } = 
   const currentIndex = Math.max(-1, sets.findIndex(item => item?.key === currentKey));
   const after = sets.slice(currentIndex + 1).find(item => item?.key && !item.done && !skipped.has(item.key));
   if (after) return after;
-  const before = sets.slice(0, Math.max(0, currentIndex + 1)).find(item => item?.key && !item.done && !skipped.has(item.key));
+  const before = sets.slice(0, Math.max(0, currentIndex)).find(item => item?.key && !item.done && !skipped.has(item.key));
   return before || null;
 }
 
