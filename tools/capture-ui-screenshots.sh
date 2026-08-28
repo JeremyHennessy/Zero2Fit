@@ -22,28 +22,35 @@ if [[ -z "$CHROME" ]]; then
 fi
 
 capture() {
-  local label="$1" width="$2" height="$3" page="$4"
-  local file="$OUT_DIR/${label}-${page}.png"
+  local label="$1" width="$2" height="$3" name="$4" query="$5"
+  local file="$OUT_DIR/${label}-${name}.png"
   "$CHROME" \
     --headless=new \
     --no-sandbox \
     --disable-gpu \
     --disable-dev-shm-usage \
     --hide-scrollbars \
-    --virtual-time-budget=12000 \
+    --virtual-time-budget=14000 \
     --window-size="$width,$height" \
     --screenshot="$file" \
-    "http://127.0.0.1:${PORT}/?qaPage=${page}" >/dev/null 2>&1
+    "http://127.0.0.1:${PORT}/?${query}" >/dev/null 2>&1
   test -s "$file"
   echo "Captured $file"
 }
 
-for page in today train character nutrition journey data; do
-  capture iphone 393 852 "$page"
-done
+capture iphone 393 852 today 'qaPage=today'
+capture iphone 393 852 train 'qaPage=train'
+capture iphone 393 852 adventure 'qaPage=character&qaFocus=frontier'
+capture iphone 393 852 fuel 'qaPage=nutrition'
+capture iphone 393 852 progress 'qaPage=journey'
+capture iphone 393 852 devices 'qaPage=data'
+capture iphone 393 852 settings 'qaPage=today&qaSettings=1'
 
-for page in today train character nutrition journey data; do
-  capture desktop 1440 1000 "$page"
-done
+capture desktop 1440 1000 today 'qaPage=today'
+capture desktop 1440 1000 train 'qaPage=train'
+capture desktop 1440 1000 adventure 'qaPage=character&qaFocus=frontier'
+capture desktop 1440 1000 fuel 'qaPage=nutrition'
+capture desktop 1440 1000 progress 'qaPage=journey'
+capture desktop 1440 1000 devices 'qaPage=data'
 
 echo "UI screenshot set complete: $(find "$OUT_DIR" -name '*.png' | wc -l) images."
