@@ -1,0 +1,84 @@
+/* Build 012 — iPhone productization. Extends the approved Build 006 dark/lime baseline. */
+
+body.build004 .z12-settings-button { display:grid; place-items:center; }
+body.build004 .z12-settings-backdrop {
+  position:fixed; inset:0; z-index:80; background:rgba(0,0,0,.54); backdrop-filter:blur(5px);
+}
+body.build004 .z12-settings-backdrop[hidden] { display:none; }
+body.build004 .z12-settings-sheet {
+  position:fixed; z-index:81; top:74px; right:18px; width:min(390px,calc(100vw - 28px)); max-height:calc(100vh - 94px);
+  overflow:auto; border:1px solid #30402f; border-radius:22px; padding:19px;
+  background:linear-gradient(180deg,#121914,#0d130f); box-shadow:0 30px 90px rgba(0,0,0,.48);
+}
+body.build004 .z12-settings-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px; }
+body.build004 .z12-settings-head h2 { margin:2px 0 0; font-size:24px; }
+body.build004 .z12-settings-list { display:grid; gap:8px; }
+body.build004 .z12-settings-action {
+  width:100%; min-height:50px; display:flex; align-items:center; justify-content:space-between; gap:14px;
+  text-align:left; border:1px solid #29362e; border-radius:14px; padding:11px 12px; background:#101712; color:#dce6df; cursor:pointer;
+}
+body.build004 .z12-settings-action span { display:grid; gap:2px; }
+body.build004 .z12-settings-action small { color:#748279; line-height:1.35; }
+body.build004 .z12-settings-action b { color:#c8ff5a; font-size:16px; }
+body.build004 .z12-settings-meta { margin:12px 0 0; color:#718077; font-size:10px; line-height:1.5; }
+body.build004 #resetDemo.z12-reset-action {
+  width:100%; height:auto; min-height:48px; margin-top:4px; padding:10px 12px; border-radius:14px;
+  color:#e69aa2; background:#171113; border:1px solid #4b2930; font-weight:750;
+}
+
+body.build004 .z12-progress-tabs { display:none; }
+body.build004 .z12-adventure-controls { display:none; }
+body.build004 .z12-adventure-wall { margin:10px 0 0; }
+
+@media (max-width:820px) {
+  /* Daily iPhone information architecture: Today · Train · Fuel · Adventure · Progress. */
+  body.build004 .nav-list { grid-template-columns:repeat(5,1fr); }
+  body.build004 .nav-item[data-page="nutrition"] { display:grid !important; }
+  body.build004 .nav-item[data-page="data"] { display:none !important; }
+
+  body.build004 .z12-settings-sheet {
+    top:auto; left:0; right:0; bottom:0; width:100%; max-height:min(78vh,720px); border-radius:24px 24px 0 0;
+    padding:18px 16px calc(18px + env(safe-area-inset-bottom)); border-left:0; border-right:0; border-bottom:0;
+  }
+
+  body.build004 .z12-progress-tabs {
+    display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin:12px 0 14px; padding:4px;
+    border:1px solid #26332a; border-radius:15px; background:#0d140f;
+  }
+  body.build004 .z12-progress-tabs button {
+    min-width:0; min-height:38px; border:0; border-radius:11px; padding:6px 3px; background:transparent; color:#7f8e85;
+    font-size:9px; font-weight:800; cursor:pointer;
+  }
+  body.build004 .z12-progress-tabs button.active { color:#c8ff5a; background:rgba(183,243,74,.10); }
+  body.build004 #z10Intelligence.z12-strength-view > * { display:none !important; }
+  body.build004 #z10Intelligence.z12-strength-view > .z12-strength-block { display:block !important; }
+  body.build004 #z10Intelligence.z12-strength-view { min-height:160px; }
+
+  /* Adventure: primary fight/wall stays visible; secondary data is on demand. */
+  body.build004 .z12-adventure-controls {
+    display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin:10px 0; padding:4px;
+    border:1px solid #26332a; border-radius:15px; background:#0b110d;
+  }
+  body.build004 .z12-adventure-controls button {
+    min-height:38px; border:0; border-radius:11px; background:transparent; color:#7c8b82; font-size:9px; font-weight:800; cursor:pointer;
+  }
+  body.build004 .z12-adventure-controls button.active { color:#c8ff5a; background:rgba(183,243,74,.10); }
+  body.build004 #page-character .z7-auto-panel,
+  body.build004 #z11AdventureStatus > section,
+  body.build004 #page-character .z7-lower-grid:not(#z11AdventureStatus) { display:none; }
+  body.build004 #page-character .z7-auto-panel.z12-mobile-open,
+  body.build004 #z11AdventureStatus > section.z12-mobile-open,
+  body.build004 #page-character .z7-lower-grid.z12-mobile-open { display:grid; }
+  body.build004 #z11AdventureStatus { display:block; margin-top:0; }
+  body.build004 #z11AdventureStatus:empty { display:none; }
+  body.build004 .z12-adventure-wall .z7-rule-box { margin:0; }
+
+  body.build004 .data-table-card { -webkit-overflow-scrolling:touch; }
+  body.build004 .data-row { min-width:500px; }
+}
+
+@media (max-width:420px) {
+  body.build004 .z12-progress-tabs button,
+  body.build004 .z12-adventure-controls button { font-size:8.5px; }
+  body.build004 .z12-settings-sheet { max-height:82vh; }
+}
