@@ -242,3 +242,5 @@ async function init() {
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true });
 else init();
+
+import('./build012-productization.js').catch(error => console.warn('Zero2Fit Build 012 productization extension failed to load', error));
