@@ -1,0 +1,68 @@
+name: Build 015 Merge Gate
+
+on:
+  push:
+    branches: [agent/build-015-adventure-visual]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  gate-and-merge:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: agent/build-015-adventure-visual
+          fetch-depth: 0
+      - name: Reject Adventure engine or fitness-system drift
+        run: |
+          git fetch origin main
+          changed="$(git diff --name-only origin/main...HEAD)"
+          echo "$changed"
+          for forbidden in adventure-core.mjs data/adventure_catalog.json training-core.mjs adaptive-core.mjs device-core.mjs intelligence-core.mjs workout-execution-core.mjs storage.js ingestion.js supabase/schema.sql; do
+            if printf '%s\n' "$changed" | grep -Fxq "$forbidden"; then
+              echo "Build 015 must remain presentation-only; unexpected change: $forbidden" >&2
+              exit 1
+            fi
+          done
+          if test -e qa/build015; then
+            echo 'Review-only screenshots must be cleaned before merge.' >&2
+            exit 1
+          fi
+      - name: Full regression gate
+        run: |
+          node --check build015-loader.js
+          node --check build015-adventure-visual.js
+          node --check adventure-visual-core.mjs
+          node tools/validate-fitness-data.mjs
+          node tools/test-training-planner.mjs
+          node tools/test-adaptive-core.mjs
+          node tools/test-workout-execution-core.mjs
+          node tools/test-intelligence-core.mjs
+          node tools/test-device-ingestion.mjs
+          node tools/test-device-driven-progress.mjs
+          node tools/test-remote-sync.mjs
+          node tools/test-adventure-core.mjs
+          node tools/test-adventure-visual-core.mjs
+          node tools/test-photo-core.mjs
+          node tools/check-index-contract.mjs
+          bash tools/browser-smoke.sh
+      - name: Visual render gate
+        run: |
+          bash tools/capture-ui-screenshots.sh /tmp/build015-ui
+          test -s /tmp/build015-ui/iphone-adventure.png
+          test -s /tmp/build015-ui/desktop-adventure.png
+      - name: Self-remove and merge exact tested head
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/build015-merge-gate.yml
+          git commit -m 'Build 015: remove merge gate'
+          git push origin HEAD:agent/build-015-adventure-visual
+          tested_sha="$(git rev-parse HEAD)"
+          gh pr merge 21 --repo JeremyHennessy/Zero2Fit --squash --match-head-commit "$tested_sha" --subject 'Build 015: Adventure visual pass' --body 'Add a presentation-only battlefield, CSS character/enemy visuals, stage path, gear ceiling presentation, progression levers and reward reveal over the existing verified Adventure engine. Preserve all fitness/device/workout/Adventure calculations.'
