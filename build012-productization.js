@@ -244,7 +244,13 @@ function applyAdventurePanel() {
 
 function applyQaFocus() {
   if (qaFocus === 'frontier') {
-    document.getElementById('z4FrontierCard')?.scrollIntoView({ block:'start', behavior:'auto' });
+    const page = document.getElementById('page-character');
+    const frontier = document.getElementById('z4FrontierCard');
+    if (page && frontier) {
+      page.prepend(frontier);
+      frontier.style.marginTop = '0';
+      window.scrollTo({ top:0, behavior:'auto' });
+    }
   }
   if (qaSettings) openSettings();
 }
