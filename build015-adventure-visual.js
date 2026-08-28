@@ -137,7 +137,7 @@ function z15RenderEncounter(status, adventure) {
   z15SetText('z15SceneMeta', `Stage ${status.stage?.stage || 1}/${status.stage?.stageCount || 4} · ${status.stage?.victories || 0}/${status.stage?.clearVictories || 0} wins`);
   z15SetText('z15Level', `LV ${level}`);
   z15SetText('z15CharacterTitle', z15TitleForLevel(level));
-  z15SetText('z15FieldRating', `Field rating ${Math.round(Number(caps.rating || 0))}`);
+  z15SetText('z15FieldRating', `Field rating ${Math.round(Number(caps.attack || 0) + Number(caps.defense || 0) + Number(caps.maxHp || 0) / 10)}`);
   z15SetText('z15Outcome', encounter?.outcome || 'Threat ahead');
   if (!encounter) return;
   z15SetText('z15EnemyName', encounter.name);
