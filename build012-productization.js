@@ -27,7 +27,7 @@ function ensureMeta() {
   }
   const metas = [
     ['apple-mobile-web-app-capable','yes'],
-    ['apple-mobile-web-app-status-bar-style','black-translucent'],
+    ['apple-mobile-web-app-status-bar-style','default'],
     ['apple-mobile-web-app-title','Zero2Fit'],
     ['mobile-web-app-capable','yes']
   ];
