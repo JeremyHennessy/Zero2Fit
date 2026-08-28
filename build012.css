@@ -45,6 +45,15 @@ body.build004 .z12-adventure-wall { margin:10px 0 0; }
     padding:18px 16px calc(18px + env(safe-area-inset-bottom)); border-left:0; border-right:0; border-bottom:0;
   }
 
+  body.build004 #page-journey .journey-hero {
+    display:grid; grid-template-columns:1fr; align-items:start; gap:12px; padding:19px;
+  }
+  body.build004 #page-journey .journey-total {
+    min-width:0; width:100%; display:flex; align-items:baseline; justify-content:space-between; gap:12px; text-align:left;
+    padding-top:11px; border-top:1px solid #28342c;
+  }
+  body.build004 #page-journey .journey-total strong { font-size:26px; }
+
   body.build004 .z12-progress-tabs {
     display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin:12px 0 14px; padding:4px;
     border:1px solid #26332a; border-radius:15px; background:#0d140f;
