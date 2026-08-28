@@ -1,5 +1,8 @@
 const MOBILE_QUERY = '(max-width: 820px)';
-const qaPage = new URLSearchParams(location.search).get('qaPage');
+const qaParams = new URLSearchParams(location.search);
+const qaPage = qaParams.get('qaPage');
+const qaFocus = qaParams.get('qaFocus');
+const qaSettings = qaParams.get('qaSettings') === '1';
 let progressTab = sessionStorage.getItem('zero2fit-progress-tab') || 'overview';
 let adventurePanel = null;
 let resizeTimer = null;
@@ -239,19 +242,29 @@ function applyAdventurePanel() {
   }
 }
 
+function applyQaFocus() {
+  if (qaFocus === 'frontier') {
+    document.getElementById('z4FrontierCard')?.scrollIntoView({ block:'start', behavior:'auto' });
+  }
+  if (qaSettings) openSettings();
+}
+
 function prepareQaPage() {
-  if (!qaPage) return;
+  if (!qaPage && !qaSettings) return;
   document.documentElement.dataset.zero2fitQa = '1';
   const page = ['today','train','character','nutrition','journey','data'].includes(qaPage) ? qaPage : 'today';
   setTimeout(() => {
     document.querySelector(`.nav-item[data-page="${page}"]`)?.click();
     window.scrollTo({ top:0, behavior:'auto' });
-    document.documentElement.dataset.zero2fitQaReady = page;
+    setTimeout(() => {
+      applyQaFocus();
+      document.documentElement.dataset.zero2fitQaReady = qaFocus || (qaSettings ? 'settings' : page);
+    }, 350);
   }, 650);
 }
 
 async function registerServiceWorker() {
-  if (qaPage || !('serviceWorker' in navigator) || location.protocol !== 'https:') return;
+  if (qaPage || qaSettings || !('serviceWorker' in navigator) || location.protocol !== 'https:') return;
   try { await navigator.serviceWorker.register('./sw.js', { scope:'./' }); }
   catch (error) { console.warn('Zero2Fit offline shell registration failed', error); }
 }
