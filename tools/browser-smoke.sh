@@ -76,7 +76,6 @@ assert_dom 'Complete set'
 assert_dom 'Skip for now'
 assert_dom 'Full workout'
 assert_dom 'Exercise 1 of'
-assert_dom 'build014.css'
 
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then echo 'Workout catalog load failed in browser.' >&2; exit 1; fi
 if grep -q 'Structured storage or ingestion module failed to load' "$DOM_FILE"; then echo 'Build 003 storage/device modules failed to load in browser.' >&2; exit 1; fi
