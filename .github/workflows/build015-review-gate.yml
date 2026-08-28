@@ -1,0 +1,52 @@
+name: Build 015 Review Gate
+
+on:
+  push:
+    branches: [agent/build-015-adventure-visual]
+
+permissions:
+  contents: write
+
+jobs:
+  gate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: agent/build-015-adventure-visual
+          fetch-depth: 0
+      - name: Full regression gate
+        run: |
+          node --check build015-loader.js
+          node --check build015-adventure-visual.js
+          node --check adventure-visual-core.mjs
+          node tools/validate-fitness-data.mjs
+          node tools/test-training-planner.mjs
+          node tools/test-adaptive-core.mjs
+          node tools/test-workout-execution-core.mjs
+          node tools/test-intelligence-core.mjs
+          node tools/test-device-ingestion.mjs
+          node tools/test-device-driven-progress.mjs
+          node tools/test-remote-sync.mjs
+          node tools/test-adventure-core.mjs
+          node tools/test-adventure-visual-core.mjs
+          node tools/test-photo-core.mjs
+          node tools/check-index-contract.mjs
+          bash tools/browser-smoke.sh
+      - name: Capture review images
+        run: |
+          bash tools/capture-ui-screenshots.sh /tmp/build015-ui
+          test -s /tmp/build015-ui/iphone-adventure.png
+          test -s /tmp/build015-ui/desktop-adventure.png
+          mkdir -p qa/build015
+          cp /tmp/build015-ui/iphone-adventure.png qa/build015/iphone-adventure.png
+          cp /tmp/build015-ui/desktop-adventure.png qa/build015/desktop-adventure.png
+      - name: Publish review-only screenshots and self-remove gate
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add qa/build015/iphone-adventure.png qa/build015/desktop-adventure.png
+          git rm .github/workflows/build015-review-gate.yml
+          git commit -m 'Build 015: publish visual review checkpoint'
+          git push origin HEAD:agent/build-015-adventure-visual
