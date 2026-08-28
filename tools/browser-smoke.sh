@@ -79,6 +79,7 @@ assert_dom 'z12SettingsButton'
 assert_dom 'Devices &amp; private sync'
 assert_dom 'z12ProgressTabs'
 assert_dom 'z12AdventureControls'
+assert_dom 'z12AdventurePrimary'
 assert_dom 'build012.css'
 assert_dom 'Machines + cable + Smith + full dumbbell set'
 
