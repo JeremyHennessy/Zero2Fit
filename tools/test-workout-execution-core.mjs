@@ -21,8 +21,10 @@ assert.deepEqual(completionSummary(sets), { total:4, completed:1, remaining:3, p
 assert.equal(chooseActiveSet(sets).key, sets[1].key);
 assert.equal(chooseActiveSet(sets, { preferredKey:sets[2].key }).key, sets[2].key);
 assert.equal(chooseActiveSet(sets, { skippedKeys:[sets[1].key] }).key, sets[2].key);
+assert.equal(chooseActiveSet(sets, { skippedKeys:sets.filter(item => !item.done).map(item => item.key) }), null);
 assert.equal(nextIncompleteSet(sets, sets[1].key).key, sets[2].key);
 assert.equal(nextIncompleteSet(sets, sets[2].key, { skippedKeys:[sets[3].key] }).key, sets[1].key);
+assert.equal(nextIncompleteSet(sets, sets[2].key, { skippedKeys:[sets[1].key,sets[3].key] }), null);
 assert.equal(chooseActiveSet(sets.map(item => ({...item, done:true}))), null);
 
 assert.equal(restSecondsForIntent('horizontal_pull'), 90);
