@@ -275,13 +275,8 @@ function applyAdventurePanel() {
 
 function applyQaFocus() {
   if (qaFocus === 'frontier') {
-    const page = document.getElementById('page-character');
-    const frontier = document.getElementById('z4FrontierCard');
-    if (page && frontier) {
-      page.prepend(frontier);
-      frontier.style.marginTop = '0';
-      window.scrollTo({ top:0, behavior:'auto' });
-    }
+    document.documentElement.classList.add('z12-qa-frontier');
+    window.scrollTo({ top:0, behavior:'auto' });
   }
   if (qaSettings) openSettings();
 }
@@ -302,8 +297,8 @@ function prepareQaPage() {
 
 async function registerServiceWorker() {
   if (qaPage || qaSettings || !('serviceWorker' in navigator) || location.protocol !== 'https:') return;
-  try { await navigator.serviceWorker.register('./sw.js', { scope:'./' }); }
-  catch (error) { console.warn('Zero2Fit offline shell registration failed', error); }
+  try { await navigator.serviceWorker.register('./sw.js', { scope:'./' });
+  } catch (error) { console.warn('Zero2Fit offline shell registration failed', error); }
 }
 
 function refreshResponsiveViews() {
