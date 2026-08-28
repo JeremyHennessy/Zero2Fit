@@ -36,6 +36,14 @@ function ensureMeta() {
   }
 }
 
+function correctTrainingCopy() {
+  const button = document.querySelector('[data-workout-location="apartmentGym"]');
+  const detail = button?.querySelector('span');
+  if (detail && /photo inventory pending/i.test(detail.textContent || '')) {
+    detail.textContent = 'Machines + cable + Smith + full dumbbell set';
+  }
+}
+
 function closeSettings() {
   const backdrop = document.getElementById('z12SettingsBackdrop');
   if (backdrop) backdrop.hidden = true;
@@ -259,6 +267,7 @@ function refreshResponsiveViews() {
 function init() {
   ensureStylesheet();
   ensureMeta();
+  correctTrainingCopy();
   ensureSettings();
   ensureProgressTabs();
   ensureAdventureControls();
@@ -268,7 +277,7 @@ function init() {
   window.addEventListener('offline', updateOfflineStatus);
   window.addEventListener('resize', refreshResponsiveViews);
   window.addEventListener('zero2fit:personal-intelligence', () => { markStrengthBlocks(); applyProgressTab(); });
-  setTimeout(() => { ensureProgressTabs(); ensureAdventureControls(); applyProgressTab(); applyAdventurePanel(); }, 500);
+  setTimeout(() => { correctTrainingCopy(); ensureProgressTabs(); ensureAdventureControls(); applyProgressTab(); applyAdventurePanel(); }, 500);
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true });
