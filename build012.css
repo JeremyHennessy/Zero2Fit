@@ -54,7 +54,7 @@ body.build004 .z12-adventure-wall { margin:10px 0 0; }
   body.build004 #z10Intelligence.z12-strength-view > .z12-strength-block { display:block !important; }
   body.build004 #z10Intelligence.z12-strength-view { min-height:160px; }
 
-  /* Adventure: primary fight/wall stays visible; secondary data is on demand. */
+  /* Adventure: fight, stage and wall stay visible; secondary data is on demand. */
   body.build004 .z12-adventure-controls {
     display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin:10px 0; padding:4px;
     border:1px solid #26332a; border-radius:15px; background:#0b110d;
@@ -64,13 +64,18 @@ body.build004 .z12-adventure-wall { margin:10px 0 0; }
   }
   body.build004 .z12-adventure-controls button.active { color:#c8ff5a; background:rgba(183,243,74,.10); }
   body.build004 #page-character .z7-auto-panel,
-  body.build004 #z11AdventureStatus > section,
+  body.build004 #z11AdventureStatus > section:nth-child(2),
   body.build004 #page-character .z7-lower-grid:not(#z11AdventureStatus) { display:none; }
   body.build004 #page-character .z7-auto-panel.z12-mobile-open,
-  body.build004 #z11AdventureStatus > section.z12-mobile-open,
+  body.build004 #z11AdventureStatus > section:nth-child(2).z12-mobile-open,
   body.build004 #page-character .z7-lower-grid.z12-mobile-open { display:grid; }
   body.build004 #z11AdventureStatus { display:block; margin-top:0; }
   body.build004 #z11AdventureStatus:empty { display:none; }
+  body.build004 #z11AdventureStatus > section:first-child { display:block; padding:13px 14px; }
+  body.build004 #z11AdventureStatus > section:first-child > #z11Capabilities,
+  body.build004 #z11AdventureStatus > section:first-child > #z11GearCeiling { display:none; }
+  body.build004 #z11AdventureStatus > section:first-child.z12-mobile-open > #z11Capabilities { display:grid; }
+  body.build004 #z11AdventureStatus > section:first-child.z12-mobile-open > #z11GearCeiling { display:block; }
   body.build004 .z12-adventure-wall .z7-rule-box { margin:0; }
 
   body.build004 .data-table-card { -webkit-overflow-scrolling:touch; }
