@@ -10,17 +10,29 @@ SERVER_PID=$!
 trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
 
 for _ in {1..20}; do
-  if curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null; then break; fi
+  if curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null; then
+    break
+  fi
   sleep 0.25
 done
 
 CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
-if [[ -z "$CHROME" ]]; then echo 'No Chrome/Chromium executable found on runner.' >&2; exit 1; fi
+if [[ -z "$CHROME" ]]; then
+  echo 'No Chrome/Chromium executable found on runner.' >&2
+  exit 1
+fi
 
-"$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=15000 --dump-dom "http://127.0.0.1:${PORT}/" >"$DOM_FILE"
+"$CHROME" \
+  --headless=new \
+  --no-sandbox \
+  --disable-gpu \
+  --disable-dev-shm-usage \
+  --virtual-time-budget=15000 \
+  --dump-dom "http://127.0.0.1:${PORT}/" >"$DOM_FILE"
 
 assert_dom() {
-  local needle="$1" label="${2:-$1}"
+  local needle="$1"
+  local label="${2:-$1}"
   if ! grep -Fq "$needle" "$DOM_FILE"; then
     echo "Browser smoke missing expected DOM marker: $label" >&2
     echo "Expected literal: $needle" >&2
@@ -77,13 +89,44 @@ assert_dom 'Skip for now'
 assert_dom 'Full workout'
 assert_dom 'Exercise 1 of'
 
-if grep -q 'Workout reference data could not load' "$DOM_FILE"; then echo 'Workout catalog load failed in browser.' >&2; exit 1; fi
-if grep -q 'Structured storage or ingestion module failed to load' "$DOM_FILE"; then echo 'Build 003 storage/device modules failed to load in browser.' >&2; exit 1; fi
-if grep -q 'Zero2Fit Build 004 initialization failed' "$DOM_FILE"; then echo 'Build 004 device/UI initialization failed in browser.' >&2; exit 1; fi
-if grep -q 'Zero2Fit Build 007 adventure failed' "$DOM_FILE"; then echo 'Build 007 adventure initialization failed in browser.' >&2; exit 1; fi
-if grep -q 'Zero2Fit Build 008 photos failed' "$DOM_FILE"; then echo 'Build 008 photo initialization failed in browser.' >&2; exit 1; fi
-if grep -q 'Zero2Fit Build 012 productization extension failed to load' "$DOM_FILE"; then echo 'Build 012 productization module failed in browser.' >&2; exit 1; fi
-if grep -q 'Zero2Fit Build 014 guided workout execution failed to load' "$DOM_FILE"; then echo 'Build 014 loader failed in browser.' >&2; exit 1; fi
-if grep -q 'Zero2Fit Build 014 workout execution failed' "$DOM_FILE"; then echo 'Build 014 execution module failed in browser.' >&2; exit 1; fi
+if grep -q 'Workout reference data could not load' "$DOM_FILE"; then
+  echo 'Workout catalog load failed in browser.' >&2
+  exit 1
+fi
+
+if grep -q 'Structured storage or ingestion module failed to load' "$DOM_FILE"; then
+  echo 'Build 003 storage/device modules failed to load in browser.' >&2
+  exit 1
+fi
+
+if grep -q 'Zero2Fit Build 004 initialization failed' "$DOM_FILE"; then
+  echo 'Build 004 device/UI initialization failed in browser.' >&2
+  exit 1
+fi
+
+if grep -q 'Zero2Fit Build 007 adventure failed' "$DOM_FILE"; then
+  echo 'Build 007 adventure initialization failed in browser.' >&2
+  exit 1
+fi
+
+if grep -q 'Zero2Fit Build 008 photos failed' "$DOM_FILE"; then
+  echo 'Build 008 photo initialization failed in browser.' >&2
+  exit 1
+fi
+
+if grep -q 'Zero2Fit Build 012 productization extension failed to load' "$DOM_FILE"; then
+  echo 'Build 012 productization module failed in browser.' >&2
+  exit 1
+fi
+
+if grep -q 'Zero2Fit Build 014 guided workout execution failed to load' "$DOM_FILE"; then
+  echo 'Build 014 loader failed in browser.' >&2
+  exit 1
+fi
+
+if grep -q 'Zero2Fit Build 014 workout execution failed' "$DOM_FILE"; then
+  echo 'Build 014 execution module failed in browser.' >&2
+  exit 1
+fi
 
 echo 'Browser smoke passed: training, guided workout execution, devices, approved iPhone UI, adaptive/personal intelligence, RPG adventure v2, PWA/productization, progress-photo modules, and private-sync shell rendered.'
