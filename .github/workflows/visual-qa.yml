@@ -1,0 +1,27 @@
+name: Visual QA Screenshots
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Capture deterministic iPhone and desktop screens
+        run: bash tools/capture-ui-screenshots.sh ui-screenshots
+
+      - name: Upload screenshot set
+        uses: actions/upload-artifact@v4
+        with:
+          name: zero2fit-ui-${{ github.sha }}
+          path: ui-screenshots/*.png
+          if-no-files-found: error
+          retention-days: 14
