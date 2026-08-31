@@ -4,6 +4,7 @@ set -euo pipefail
 PORT="${PORT:-4173}"
 DOM_FILE="${RUNNER_TEMP:-/tmp}/zero2fit-dom.html"
 SERVER_LOG="${RUNNER_TEMP:-/tmp}/zero2fit-server.log"
+# Count expectations deliberately follow the currently generated reference catalogs.
 EXPECTED_EXERCISES="$(node -e "const x=require('./data/generated/catalog_summary.json'); process.stdout.write(String(x.counts.exercises))")"
 EXPECTED_MET_ACTIVITIES="$(node -e "const x=require('./data/generated/catalog_summary.json'); process.stdout.write(String(x.counts.metActivities))")"
 
