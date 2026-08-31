@@ -124,7 +124,7 @@ function ensureDataCopy() {
     }
   }
 
-  const storageNote = document.querySelector('#z8StorageStats .storage-source-note');
+  const storageNote = document.querySelector('#deviceToolsGrid .storage-source-note');
   if (storageNote) {
     storageNote.textContent = 'Browser storage remains the local cache. Authenticated Supabase sync is configured with per-user RLS; sign in under Private sync to reconcile supported data across browsers.';
   }
