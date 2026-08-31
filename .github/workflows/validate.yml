@@ -28,6 +28,7 @@ jobs:
           node --check device-core.mjs
           node --check build004-integration.js
           node --check adventure-core.mjs
+          node --check adventure-visual-core.mjs
           node --check photo-core.mjs
           node --check build007-adventure.js
           node --check build008-photos.js
@@ -40,6 +41,7 @@ jobs:
           node --check build011-adventure.js
           node --check build012-productization.js
           node --check build014-workout-execution.js
+          node --check build016-adventure-visual.js
           node --check sw.js
           node --check tools/build-training-catalog.mjs
           node --check tools/validate-fitness-data.mjs
@@ -51,6 +53,7 @@ jobs:
           node --check tools/test-device-driven-progress.mjs
           node --check tools/test-remote-sync.mjs
           node --check tools/test-adventure-core.mjs
+          node --check tools/test-adventure-visual-core.mjs
           node --check tools/test-photo-core.mjs
           node --check tools/check-index-contract.mjs
           bash -n tools/capture-ui-screenshots.sh
@@ -66,6 +69,7 @@ jobs:
           test -s build007.css
           test -s build012.css
           test -s build014.css
+          test -s build016.css
           test -s app.js
           test -s training-core.mjs
           test -s adaptive-core.mjs
@@ -77,6 +81,7 @@ jobs:
           test -s device-core.mjs
           test -s build004-integration.js
           test -s adventure-core.mjs
+          test -s adventure-visual-core.mjs
           test -s photo-core.mjs
           test -s build007-adventure.js
           test -s build008-photos.js
@@ -89,6 +94,8 @@ jobs:
           test -s build011-adventure.js
           test -s build012-productization.js
           test -s build014-workout-execution.js
+          test -s build016-adventure-visual.js
+          test -s tools/test-adventure-visual-core.mjs
           test -s manifest.webmanifest
           test -s sw.js
           test -s assets/z2f-icon-180.png
@@ -130,14 +137,16 @@ jobs:
           grep -q 'build011-adventure.js' build010-intelligence.js
           grep -q 'build012-productization.js' build011-adventure.js
           grep -q 'build014-workout-execution.js' build012-productization.js
+          grep -q 'build016-adventure-visual.js' build012-productization.js
           grep -q 'workout-execution-core.mjs' build014-workout-execution.js
-          grep -q 'zero2fit-shell-v15-clean' sw.js
-          grep -q 'build014-workout-execution.js' sw.js
-          grep -q 'workout-execution-core.mjs' sw.js
+          grep -q 'zero2fit-shell-v16-adventure' sw.js
+          grep -q 'build016-adventure-visual.js' sw.js
+          grep -q 'adventure-visual-core.mjs' sw.js
           grep -Fq 'nav-item[data-page="nutrition"]' build012.css
           grep -q 'serviceWorker.register' build012-productization.js
           grep -q -- '--z15-blue:#3f7df4' build012.css
           grep -q -- '--z15-bg:#f5f7fb' build012.css
+          if grep -q '#b7f34a' build016.css; then echo 'Build 016 must not reintroduce the fluorescent lime theme.'; exit 1; fi
           grep -q '#070b09' build006.css
           grep -q '#b7f34a' build006.css
           grep -q 'progress_photos' storage.js
@@ -182,6 +191,9 @@ jobs:
 
       - name: Test full RPG adventure engine
         run: node tools/test-adventure-core.mjs
+
+      - name: Test Adventure visual model
+        run: node tools/test-adventure-visual-core.mjs
 
       - name: Test progress-photo helpers
         run: node tools/test-photo-core.mjs
