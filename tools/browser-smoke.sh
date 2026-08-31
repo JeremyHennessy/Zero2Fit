@@ -89,6 +89,13 @@ assert_dom 'Skip for now'
 assert_dom 'Full workout'
 assert_dom 'Exercise 1 of'
 
+assert_dom 'id="z16Battlefield"' 'Build 016 Adventure battlefield'
+assert_dom 'Current expedition'
+assert_dom 'What improves your odds'
+assert_dom 'Last expedition'
+assert_dom 'Run expedition'
+assert_dom 'Auto-equip best'
+
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then
   echo 'Workout catalog load failed in browser.' >&2
   exit 1
@@ -129,4 +136,14 @@ if grep -q 'Zero2Fit Build 014 workout execution failed' "$DOM_FILE"; then
   exit 1
 fi
 
-echo 'Browser smoke passed: training, guided workout execution, devices, approved iPhone UI, adaptive/personal intelligence, RPG adventure v2, PWA/productization, progress-photo modules, and private-sync shell rendered.'
+if grep -q 'Zero2Fit Build 016 Adventure visual extension failed to load' "$DOM_FILE"; then
+  echo 'Build 016 Adventure visual loader failed in browser.' >&2
+  exit 1
+fi
+
+if grep -q 'Zero2Fit Build 016 Adventure visual layer failed' "$DOM_FILE"; then
+  echo 'Build 016 Adventure visual module failed in browser.' >&2
+  exit 1
+fi
+
+echo 'Browser smoke passed: training, guided workout execution, devices, clean iPhone UI, adaptive/personal intelligence, RPG adventure v2 + visual battlefield, PWA/productization, progress-photo modules, and private-sync shell rendered.'
