@@ -125,7 +125,14 @@ assert_dom 'id="z19FuelSync"' 'Build 019 Fuel private-sync strip'
 assert_dom 'Fuel private sync'
 assert_dom 'Fuel history is local + backup.'
 assert_dom 'Fuel history, saved meals and explicit nutrition targets'
+assert_dom 'Browser storage remains the local cache.'
+assert_dom 'full Fuel store'
 assert_dom './build019.css'
+
+if grep -Fq 'Supabase remains disabled until authenticated RLS is configured and tested.' "$DOM_FILE"; then
+  echo 'Stale pre-private-sync Supabase copy is still rendered.' >&2
+  exit 1
+fi
 
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then
   echo 'Workout catalog load failed in browser.' >&2
