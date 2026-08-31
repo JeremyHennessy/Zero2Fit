@@ -131,11 +131,13 @@ jobs:
           grep -q 'build012-productization.js' build011-adventure.js
           grep -q 'build014-workout-execution.js' build012-productization.js
           grep -q 'workout-execution-core.mjs' build014-workout-execution.js
-          grep -q 'zero2fit-shell-v14' sw.js
+          grep -q 'zero2fit-shell-v15-clean' sw.js
           grep -q 'build014-workout-execution.js' sw.js
           grep -q 'workout-execution-core.mjs' sw.js
           grep -Fq 'nav-item[data-page="nutrition"]' build012.css
           grep -q 'serviceWorker.register' build012-productization.js
+          grep -q -- '--z15-blue:#3f7df4' build012.css
+          grep -q -- '--z15-bg:#f5f7fb' build012.css
           grep -q '#070b09' build006.css
           grep -q '#b7f34a' build006.css
           grep -q 'progress_photos' storage.js

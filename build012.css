@@ -1,6 +1,6 @@
 @import url('./build014.css');
 
-/* Build 012 — iPhone productization. Extends the approved Build 006 dark/lime baseline. */
+/* Build 012 — iPhone productization. */
 
 html.z12-qa-frontier #page-character > .character-page-grid,
 html.z12-qa-frontier #page-character > .content-grid.two-col { display:none !important; }
@@ -37,7 +37,6 @@ body.build004 .z12-adventure-controls { display:none; }
 body.build004 .z12-adventure-primary { display:none; }
 
 @media (max-width:820px) {
-  /* Daily iPhone information architecture: Today · Train · Fuel · Adventure · Progress. */
   body.build004 .nav-list { grid-template-columns:repeat(5,1fr); }
   body.build004 .nav-item[data-page="today"] { order:1; }
   body.build004 .nav-item[data-page="train"] { order:2; }
@@ -73,7 +72,6 @@ body.build004 .z12-adventure-primary { display:none; }
   body.build004 #z10Intelligence.z12-strength-view > .z12-strength-block { display:block !important; }
   body.build004 #z10Intelligence.z12-strength-view { min-height:160px; }
 
-  /* Adventure: fight, stage and wall stay visible; secondary data is on demand. */
   body.build004 .z12-adventure-controls {
     display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin:10px 0 0; padding:4px;
     border:1px solid #26332a; border-radius:15px; background:#0b110d;
@@ -115,4 +113,300 @@ body.build004 .z12-adventure-primary { display:none; }
   body.build004 .z12-progress-tabs button,
   body.build004 .z12-adventure-controls button { font-size:8.5px; }
   body.build004 .z12-settings-sheet { max-height:82vh; }
+}
+
+/* Build 015 — clean bright theme. Overrides the legacy dark/lime palette
+   without changing any productization or guided-workout behavior. */
+body.build004 {
+  --z15-bg:#f5f7fb;
+  --z15-surface:#ffffff;
+  --z15-surface-2:#f8fafc;
+  --z15-ink:#142238;
+  --z15-muted:#66758a;
+  --z15-muted-2:#8491a3;
+  --z15-line:#dce5ef;
+  --z15-blue:#3f7df4;
+  --z15-blue-dark:#285fcf;
+  --z15-blue-soft:#eaf1ff;
+  --z15-teal:#1aa99a;
+  --z15-teal-soft:#e8f8f5;
+  --z15-violet:#7b68ee;
+  --z15-violet-soft:#f0edff;
+  --z15-amber:#d99a32;
+  --z15-amber-soft:#fff5df;
+  --z15-rose:#d86777;
+  --z15-rose-soft:#fff0f2;
+  --z15-shadow:0 14px 42px rgba(38,68,104,.09);
+  color:var(--z15-ink);
+  background:
+    radial-gradient(circle at 92% -8%,rgba(63,125,244,.11),transparent 30rem),
+    radial-gradient(circle at 12% 108%,rgba(26,169,154,.08),transparent 32rem),
+    var(--z15-bg);
+}
+html { background:#f5f7fb; }
+
+body.build004 .sidebar {
+  background:rgba(251,253,255,.95);
+  border-right-color:var(--z15-line);
+  box-shadow:10px 0 36px rgba(48,72,105,.055);
+}
+body.build004 .brand-mark {
+  color:#fff;
+  background:linear-gradient(145deg,#5b8ff7,#316de1);
+  box-shadow:0 10px 28px rgba(63,125,244,.22);
+}
+body.build004 .brand-name,
+body.build004 .topbar h1,
+body.build004 .card h2,
+body.build004 .metric-value span { color:var(--z15-ink); }
+body.build004 .brand-subtitle,
+body.build004 .sidebar-note span,
+body.build004 .z4-page-subtitle,
+body.build004 .muted,
+body.build004 .exercise-meta,
+body.build004 .z4-device-line { color:var(--z15-muted); }
+body.build004 .sidebar-note { color:var(--z15-ink); border-color:var(--z15-line); background:#f7f9fc; }
+body.build004 .nav-item { color:#6d7b8f; }
+body.build004 .nav-item:hover { background:#f0f4fa; color:#32445d; }
+body.build004 .nav-item.active { color:var(--z15-blue-dark); background:var(--z15-blue-soft); }
+body.build004 .z4-nav-icon { background:#f7f9fd; border-color:#e2e9f2; color:#7b889a; }
+body.build004 .nav-item.active .z4-nav-icon { color:var(--z15-blue-dark); background:#fff; box-shadow:0 4px 14px rgba(63,125,244,.13); }
+body.build004 .topbar .eyebrow,
+body.build004 .eyebrow { color:var(--z15-blue); }
+body.build004 .sync-pill,
+body.build004 .small-tag,
+body.build004 .source-label,
+body.build004 .icon-button {
+  color:var(--z15-muted); background:#fff; border-color:var(--z15-line); box-shadow:none;
+}
+body.build004 .sync-dot { background:var(--z15-teal); box-shadow:0 0 0 4px rgba(26,169,154,.11); }
+body.build004 .icon-button:hover { color:var(--z15-blue); border-color:#bfd0e7; }
+
+body.build004 .card,
+body.build004 .z4-sensor,
+body.build004 .z4-body-metric,
+body.build004 .connection-card,
+body.build004 .exercise-card,
+body.build004 .training-context-card {
+  color:var(--z15-ink);
+  background:rgba(255,255,255,.97);
+  border-color:var(--z15-line);
+  box-shadow:var(--z15-shadow);
+}
+body.build004 .progress-track { background:#e7edf5; }
+body.build004 .progress-fill { background:linear-gradient(90deg,var(--z15-blue),#65a0ff); box-shadow:none; }
+body.build004 .primary-button {
+  color:#fff;
+  background:linear-gradient(135deg,#4d88f6,#2f6ddb);
+  border:1px solid rgba(34,89,190,.18);
+  box-shadow:0 10px 24px rgba(63,125,244,.20);
+}
+body.build004 .z4-secondary,
+body.build004 .secondary-button,
+body.build004 .text-button {
+  color:#34465e; background:#f7f9fc; border-color:var(--z15-line);
+}
+body.build004 input,
+body.build004 select {
+  color:var(--z15-ink) !important;
+  background:#fff !important;
+  border-color:var(--z15-line) !important;
+}
+body.build004 input::placeholder { color:#9aa6b6; }
+
+body.build004 .character-summary {
+  background:
+    radial-gradient(circle at 7% 14%,rgba(26,169,154,.11),transparent 22rem),
+    radial-gradient(circle at 96% 8%,rgba(123,104,238,.11),transparent 22rem),
+    linear-gradient(140deg,#ffffff,#f5f9ff 68%,#f7f4ff);
+  border-color:#d8e4f1;
+}
+body.build004 .character-summary::after { background:radial-gradient(circle,rgba(63,125,244,.08),transparent 68%); }
+body.build004 .avatar-halo { background:linear-gradient(145deg,#e9f5ff,#eeeaff); border:1px solid #dbe7f4; }
+body.build004 .avatar-body { background:linear-gradient(150deg,#5e7fae,#344f78); box-shadow:0 16px 38px rgba(47,75,112,.16); }
+body.build004 .avatar-head { border-color:#6e7f94; background:#f8fbff; }
+body.build004 .avatar-emblem { color:var(--z15-blue-dark); border-color:#9db7dc; background:#eef5ff; }
+body.build004 .level-badge { color:#fff; background:var(--z15-blue); }
+body.build004 .momentum-card,
+body.build004 .z4-manual-card { background:linear-gradient(180deg,#fff,#f9fbfd); }
+body.build004 .momentum-ring { background:conic-gradient(var(--z15-teal) calc(var(--p)*1%),#e4ebf3 0); }
+body.build004 .momentum-ring::after { background:#fff; }
+body.build004 .mini-stats div { background:#f7f9fc; border-color:#e9eef5; }
+body.build004 .z4-sensor-icon { color:var(--z15-blue-dark); background:var(--z15-blue-soft); border:1px solid #dce8ff; }
+body.build004 .z4-sensor:nth-child(3) .z4-sensor-icon,
+body.build004 .z4-sensor:nth-child(4) .z4-sensor-icon,
+body.build004 .z4-sensor:nth-child(5) .z4-sensor-icon { color:#087f75; background:var(--z15-teal-soft); border-color:#d3f0ea; }
+body.build004 .z4-sensor span { color:#7c899b; }
+body.build004 .z4-sensor small { color:#929eae; }
+body.build004 .z4-feature-card::before { background:linear-gradient(var(--z15-blue),#79a9ff); }
+body.build004 .mode-button { color:#56677d; background:#fff; border-color:var(--z15-line); }
+body.build004 .mode-button.selected { color:var(--z15-blue-dark); background:var(--z15-blue-soft); border-color:#bfd2f3; }
+body.build004 .quest-item { color:#314258; background:#fff; border-color:var(--z15-line); }
+body.build004 .quest-item.done { background:#eef9f6; border-color:#cdebe5; }
+body.build004 .quest-item.done .quest-check { color:#fff; background:var(--z15-teal); border-color:var(--z15-teal); }
+body.build004 .quest-xp { color:var(--z15-amber); }
+
+body.build004 .character-stage {
+  background:
+    radial-gradient(circle at 50% 10%,rgba(255,255,255,.95),transparent 30%),
+    radial-gradient(circle at 80% 70%,rgba(123,104,238,.09),transparent 38%),
+    linear-gradient(160deg,#edf6ff,#f2efff 64%,#fff9ee);
+  border-color:#dce5ef;
+}
+body.build004 .title-ribbon { color:#fff; background:#34445d; border:1px solid #50627c; }
+body.build004 .attribute-card { background:linear-gradient(180deg,#fff,#fafbfe); }
+body.build004 .z4-frontier-card,
+body.build004 .z7-adventure-card {
+  color:var(--z15-ink);
+  background:
+    radial-gradient(circle at 92% 8%,rgba(123,104,238,.12),transparent 25rem),
+    radial-gradient(circle at 3% 100%,rgba(63,125,244,.10),transparent 24rem),
+    linear-gradient(145deg,#ffffff,#f6f8ff);
+  border:1px solid #d9e3ef;
+  box-shadow:0 22px 58px rgba(46,68,105,.10);
+}
+body.build004 .z4-frontier-card .eyebrow,
+body.build004 .z7-adventure-card .eyebrow { color:var(--z15-violet); }
+body.build004 .z4-frontier-card h2,
+body.build004 .z7-adventure-card h2 { color:var(--z15-ink); }
+body.build004 .z4-frontier-card p,
+body.build004 .z7-adventure-header p { color:var(--z15-muted); }
+body.build004 .z7-adventure-kpis div,
+body.build004 .z7-expedition-panel,
+body.build004 .z7-auto-panel,
+body.build004 .z7-lower-grid > section { background:#fff; border-color:var(--z15-line); }
+body.build004 .z7-adventure-kpis strong { color:var(--z15-violet); }
+body.build004 .z7-zone { color:#53647a; background:#f8f9fd; border-color:#dfe6f0; }
+body.build004 .z7-zone span,
+body.build004 .z7-zone small { color:#8793a4; }
+body.build004 .z7-zone.selected { border-color:#c5bcf4; background:var(--z15-violet-soft); box-shadow:none; }
+body.build004 .z7-zone.selected strong { color:#6654d7; }
+body.build004 .z7-panel-heading > span { color:#6654d7; border-color:#d4cff7; background:#f5f2ff; }
+body.build004 .z7-subtle { color:var(--z15-muted); }
+body.build004 .z7-encounter { background:linear-gradient(135deg,#f8fbff,#faf8ff); border-color:#dfe7f1; }
+body.build004 .z7-encounter-title span,
+body.build004 .z7-health-row { color:#7d899b; }
+body.build004 .z7-encounter-title strong,
+body.build004 .z7-health-row b { color:var(--z15-ink); }
+body.build004 .z7-health-row > div { background:#e4ebf3; }
+body.build004 .z7-health-row i { background:linear-gradient(90deg,#19a99a,#54c9b8); }
+body.build004 .z7-health-row.enemy i { background:linear-gradient(90deg,#c9586b,#ed8291); }
+body.build004 .z7-result-rewards span { background:#f7f9fc; border-color:#e0e7f0; color:#6e7d91; }
+body.build004 .z7-auto-status small,
+body.build004 .z7-rule-box span,
+body.build004 .z7-gear-summary span,
+body.build004 .z7-battle-row span,
+body.build004 .z7-battle-row small { color:#8794a6; }
+body.build004 .z7-orb { background:radial-gradient(circle at 35% 30%,#dff8f4,#63d5c3 38%,#1aa99a 75%); box-shadow:0 0 22px rgba(26,169,154,.14); }
+body.build004 .z7-rule-box,
+body.build004 .z7-battle-row,
+body.build004 .z7-loot { background:#f8fafc; border-color:#dfe6ef; }
+body.build004 .z7-rule-box strong,
+body.build004 .z7-gear-summary strong,
+body.build004 .z7-battle-row strong,
+body.build004 .z7-loot-copy strong { color:#34455d; }
+body.build004 .z7-gear-summary small,
+body.build004 .z7-combat-rating strong,
+body.build004 .z7-battle-row b,
+body.build004 .z7-loot-copy small,
+body.build004 .z7-equip:disabled { color:#6654d7; }
+body.build004 .z7-loot-icon { background:var(--z15-amber-soft); color:#b77814; }
+body.build004 .z7-equip { border-color:#d9e2ed; background:#fff; color:#53657c; }
+body.build004 .z7-empty,
+body.build004 .z8-empty { color:#8794a6; border-color:#ccd7e5; background:#fafbfd; }
+body.build004 .boss-card { border-top-color:var(--z15-violet); }
+body.build004 .achievement-icon { color:#b77814; background:var(--z15-amber-soft); }
+
+body.build004 .train-header { background:linear-gradient(135deg,#fff,#f2f7ff); }
+body.build004 .workout-score { color:var(--z15-blue-dark); background:var(--z15-blue-soft); }
+body.build004 .location-button { color:#58697e !important; background:#fff !important; border-color:var(--z15-line) !important; }
+body.build004 .location-button.selected { color:var(--z15-blue-dark) !important; background:var(--z15-blue-soft) !important; border-color:#bfd2f3 !important; }
+body.build004 .nutrition-summary { background:linear-gradient(140deg,#fff9ed,#fff); border-color:#efe3cf; }
+body.build004 .nutrition-numbers > div { border-color:#eee5d8; }
+body.build004 .z4-progress-hero { background:linear-gradient(135deg,#eef8f6,#fff 54%,#f2efff); }
+body.build004 .z4-body-metric > span { color:#7e8b9d; }
+body.build004 .z4-body-metric > small,
+body.build004 .z4-body-metric strong small { color:#8e9aab; }
+body.build004 .z4-photo-frames { background:linear-gradient(135deg,#f3f7fb,#f5f2ff); }
+body.build004 .z4-photo-frames span { color:#718197; background:#fff; border-color:#dae3ee; }
+body.build004 .z4-status-chip { color:#6654d7; background:var(--z15-violet-soft); border:1px solid #d7d0fa; }
+body.build004 .weight-bar { background:linear-gradient(180deg,#7ec0ff,#3f7df4); }
+body.build004 .week-dot { color:#79879a; background:#eef2f7; }
+body.build004 .week-dot.active { color:#fff; background:var(--z15-teal); }
+body.build004 .xp-log-row span { color:var(--z15-amber); }
+
+body.build004 .z8-photo-module,
+body.build004 .z8-controls,
+body.build004 .data-table-card { color:var(--z15-ink); }
+body.build004 .z8-photo-header p { color:var(--z15-muted); }
+body.build004 .z8-private-badge { color:#087f75; background:var(--z15-teal-soft); border-color:#c8ebe5; }
+body.build004 .z8-view-tabs button { background:#f8fafc; color:#718096; border-color:#dde5ef; }
+body.build004 .z8-view-tabs button.active { color:var(--z15-blue-dark); border-color:#bfd2f3; background:var(--z15-blue-soft); }
+body.build004 .z8-stage { border-color:#d7e1ec; background:linear-gradient(160deg,#eaf2fb,#eef0fa); }
+body.build004 .z8-guide line,
+body.build004 .z8-guide circle,
+body.build004 .z8-guide path { stroke:rgba(63,125,244,.55); }
+body.build004 .z8-stage-label { background:rgba(20,34,56,.76); }
+body.build004 .z8-stage-label span { color:#dbe8ff; }
+body.build004 .z8-controls output { color:var(--z15-blue-dark); }
+body.build004 .z8-controls label input { accent-color:var(--z15-blue); }
+body.build004 .z4-devices-hero { background:linear-gradient(135deg,#eff8f6,#f5f8ff); }
+body.build004 .connected .connection-icon,
+body.build004 .build003-connected .connection-icon { color:#087f75; background:var(--z15-teal-soft); }
+body.build004 .data-row { border-color:#e0e7f0; }
+body.build004 .data-row.head { color:#7d8a9c; background:#f3f6fa; }
+body.build004 .toast { color:#fff; background:#233650; border:1px solid #354d6d; box-shadow:0 16px 42px rgba(27,47,74,.22); }
+
+/* Productization UI recolor */
+body.build004 .z12-settings-backdrop { background:rgba(28,43,63,.28); backdrop-filter:blur(7px); }
+body.build004 .z12-settings-sheet { border-color:var(--z15-line); background:#fff; box-shadow:0 30px 90px rgba(38,58,87,.20); }
+body.build004 .z12-settings-action { border-color:var(--z15-line); background:#f8fafc; color:#35475f; }
+body.build004 .z12-settings-action small,
+body.build004 .z12-settings-meta { color:#8491a3; }
+body.build004 .z12-settings-action b { color:var(--z15-blue); }
+body.build004 #resetDemo.z12-reset-action { color:#bd5362; background:var(--z15-rose-soft); border-color:#f0cbd1; }
+
+/* Guided workout execution recolor — behavior remains Build 014. */
+body.build004 .z14-focus-card { border-color:#d8e4f1; background:linear-gradient(145deg,#ffffff,#f4f8ff 68%,#f8f5ff); }
+body.build004 .z14-meta { color:#76869a; }
+body.build004 .z14-progress-chip { background:var(--z15-blue-soft); border-color:#bfd2f3; }
+body.build004 .z14-progress-chip strong { color:var(--z15-blue-dark); }
+body.build004 .z14-progress-chip small { color:#7d8b9e; }
+body.build004 .z14-set-progress { border-color:#dfe7f0; background:#f8fafc; }
+body.build004 .z14-set-progress span { color:#748499; }
+body.build004 .z14-set-progress strong { color:var(--z15-blue-dark); }
+body.build004 .z14-stepper { border-color:#dfe7f0; background:#fff; }
+body.build004 .z14-stepper > span { color:#7a899c; }
+body.build004 .z14-stepper button { border-color:#d5e0ec; background:#f3f7fc; color:var(--z15-blue-dark); }
+body.build004 .z14-stepper input { color:var(--z15-ink) !important; background:#fff !important; border-color:#dce5ef !important; }
+body.build004 .z14-stepper > small { color:#8c98a8; }
+body.build004 .z14-rest { border-color:#c9ebe5; background:var(--z15-teal-soft); }
+body.build004 .z14-rest span { color:#6f817f; }
+body.build004 .z14-rest strong { color:#087f75; }
+body.build004 .z14-rest small { color:#78918d; }
+body.build004 .z14-rest-actions button,
+body.build004 .z14-quick-actions button,
+body.build004 .z14-resume-skipped { border-color:#dce5ef; background:#f8fafc; color:#53667e; }
+body.build004 .z14-rest-actions button:last-child,
+body.build004 .z14-resume-skipped { color:var(--z15-blue-dark); border-color:#bfd2f3; }
+body.build004 .z14-instructions { border-color:#dfe7f0; background:#f8fafc; color:#66778c; }
+body.build004 .z14-status { color:#8491a3; }
+
+@media (max-width:820px) {
+  body.build004 { background:var(--z15-bg); }
+  body.build004 .sidebar { background:rgba(255,255,255,.96); border-top-color:var(--z15-line); box-shadow:0 -10px 34px rgba(39,61,90,.09); }
+  body.build004 .nav-item.active .z4-nav-icon { color:var(--z15-blue-dark); background:var(--z15-blue-soft); }
+  body.build004 #page-journey .journey-total { border-top-color:var(--z15-line); }
+  body.build004 .z12-progress-tabs { border-color:var(--z15-line); background:#eef2f7; }
+  body.build004 .z12-progress-tabs button { color:#718096; }
+  body.build004 .z12-progress-tabs button.active { color:var(--z15-blue-dark); background:#fff; box-shadow:0 2px 8px rgba(47,73,107,.08); }
+  body.build004 .z12-adventure-controls { border-color:#dcdff1; background:#f1f0fa; }
+  body.build004 .z12-adventure-controls button { color:#777f95; }
+  body.build004 .z12-adventure-controls button.active { color:#6654d7; background:#fff; box-shadow:0 2px 8px rgba(75,65,145,.08); }
+  body.build004 .z12-adventure-stage,
+  body.build004 .z12-adventure-wall-summary { border-color:#dfe5ef; background:#f8fafc; }
+  body.build004 .z12-adventure-stage span { color:#69798e; }
+  body.build004 .z12-adventure-stage strong { color:#6654d7; }
+  body.build004 .z12-adventure-wall-summary strong { color:var(--z15-ink); }
+  body.build004 .z12-adventure-wall-summary span { color:#7d899b; }
 }

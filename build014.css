@@ -65,3 +65,17 @@ body.build004 .z14-status { margin:9px 1px 0; color:#718077; font-size:9px; line
   body.build004 .z14-input-grid { grid-template-columns:1fr; }
   body.build004 .z14-stepper > div { grid-template-columns:52px minmax(0,1fr) 52px; }
 }
+
+/* Build 015 compatibility fixes. These are intentionally high-specificity so
+   the later clean theme can coexist with the existing Build 012/014 cascade. */
+body.build004 .app-shell,
+body.build004 .main-panel { background:#f5f7fb !important; }
+body.build004 .z12-settings-head h2 { color:#142238 !important; }
+body.build004 #page-data .small-tag {
+  color:#087f75 !important;
+  background:#e8f8f5 !important;
+  border-color:#c8ebe5 !important;
+}
+body.build004 #page-data .connection-card > span:last-child { color:#087f75 !important; }
+body.build004 .z7-toggle input:checked + span { background:rgba(26,169,154,.22) !important; }
+body.build004 .z7-toggle input:checked + span::after { background:#1aa99a !important; }
