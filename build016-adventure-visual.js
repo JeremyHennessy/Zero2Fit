@@ -233,3 +233,5 @@ async function z16Init() {
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', z16Init, { once:true });
 else z16Init();
+
+import('./build017-fuel.js').catch(error => console.warn('Zero2Fit Build 017 Fuel extension failed to load', error));
