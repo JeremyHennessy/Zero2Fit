@@ -71,6 +71,15 @@
     };
   }
 
+  function localJson(key) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
   async function saveSnapshot(state) {
     if (!hasIndexedDb()) return { persisted: false, reason: 'indexeddb-unavailable' };
     const db = await openDb();
@@ -197,9 +206,10 @@
 
   async function exportBackup(localState) {
     return {
-      format: 'zero2fit-backup-v4',
+      format: 'zero2fit-backup-v5',
       exported_at: new Date().toISOString(),
       state: localState || null,
+      fuel_state: localJson('zero2fit-fuel-v2'),
       normalized_events: await getRecentEvents(Number.MAX_SAFE_INTEGER),
       imports: await getAllImports(),
       photo_metadata: await getAllPhotoMetadata(),
