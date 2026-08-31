@@ -1,0 +1,51 @@
+/* Build 018 — explicit food search + barcode lookup. */
+body.build004.build018-food-lookup .z18-lookup { background:linear-gradient(145deg,#f8fbff,#fff 58%,#f5fbfa); border-color:#dce8f2; }
+body.build004.build018-food-lookup .z18-head { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+body.build004.build018-food-lookup .z18-head h2 { margin:3px 0 5px; font-size:23px; letter-spacing:-.025em; }
+body.build004.build018-food-lookup .z18-head p { margin:0; }
+body.build004.build018-food-lookup #z18MealType { min-width:125px; min-height:42px; border-radius:12px; }
+body.build004.build018-food-lookup .z18-forms { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr); gap:10px; margin-top:13px; }
+body.build004.build018-food-lookup .z18-form { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:end; gap:8px; padding:10px; border:1px solid #e0e8f1; border-radius:15px; background:rgba(255,255,255,.82); }
+body.build004.build018-food-lookup .z18-form label { display:grid; gap:5px; min-width:0; }
+body.build004.build018-food-lookup .z18-form label span { color:#66778d; font-size:10px; font-weight:800; }
+body.build004.build018-food-lookup .z18-form input { width:100%; min-width:0; min-height:44px; border-radius:12px !important; }
+body.build004.build018-food-lookup .z18-form button { min-height:44px; white-space:nowrap; }
+body.build004.build018-food-lookup .z18-barcode-form { grid-template-columns:minmax(0,1fr) auto; }
+body.build004.build018-food-lookup .z18-barcode-form #z18Scan { grid-column:1/-1; justify-self:start; min-height:30px; padding:3px 0; }
+body.build004.build018-food-lookup .z18-barcode-form #z18Scan:disabled { opacity:.55; cursor:not-allowed; }
+body.build004.build018-food-lookup .z18-status { margin:10px 1px 0; min-height:18px; color:#758397; font-size:10px; line-height:1.45; }
+body.build004.build018-food-lookup .z18-status[data-state="loading"] { color:var(--z15-blue-dark); }
+body.build004.build018-food-lookup .z18-status[data-state="success"] { color:#167f73; }
+body.build004.build018-food-lookup .z18-status[data-state="error"] { color:#a04f4f; }
+body.build004.build018-food-lookup .z18-results { display:grid; gap:7px; margin-top:9px; }
+body.build004.build018-food-lookup .z18-result { display:grid; grid-template-columns:minmax(0,1fr) auto auto; align-items:center; gap:11px; padding:10px 11px; border:1px solid #e0e8f0; border-radius:14px; background:#fff; }
+body.build004.build018-food-lookup .z18-result-copy { display:grid; gap:2px; min-width:0; }
+body.build004.build018-food-lookup .z18-result-copy strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#263c56; font-size:12px; }
+body.build004.build018-food-lookup .z18-result-copy small { color:#8592a2; font-size:9px; }
+body.build004.build018-food-lookup .z18-basis { width:max-content; padding:2px 6px; border-radius:999px; background:#edf5ff; color:#4772aa; font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
+body.build004.build018-food-lookup .z18-macros { display:grid; gap:2px; text-align:right; }
+body.build004.build018-food-lookup .z18-macros strong { color:#314d6a; font-size:11px; }
+body.build004.build018-food-lookup .z18-macros small { color:#8492a3; font-size:9px; }
+body.build004.build018-food-lookup .z18-result > button { min-height:36px; padding:7px 11px; font-size:10px; }
+body.build004.build018-food-lookup .z18-source { margin-top:10px; padding-top:9px; border-top:1px solid #e8edf3; color:#8a96a5; font-size:9px; line-height:1.5; }
+body.build004.build018-food-lookup .z18-source a { color:#4178b9; font-weight:800; text-decoration:none; }
+
+@media (max-width:820px) {
+  body.build004.build018-food-lookup .z18-lookup { padding:15px; border-radius:18px; }
+  body.build004.build018-food-lookup .z18-head { display:grid; grid-template-columns:1fr auto; gap:9px; }
+  body.build004.build018-food-lookup .z18-head h2 { font-size:21px; line-height:1.1; }
+  body.build004.build018-food-lookup #z18MealType { min-width:105px; min-height:38px; font-size:10px; }
+  body.build004.build018-food-lookup .z18-forms { grid-template-columns:1fr; gap:7px; margin-top:10px; }
+  body.build004.build018-food-lookup .z18-form { padding:8px; border-radius:13px; }
+  body.build004.build018-food-lookup .z18-result { grid-template-columns:minmax(0,1fr) auto; gap:7px; }
+  body.build004.build018-food-lookup .z18-result > button { grid-column:1/-1; justify-self:stretch; width:100%; }
+}
+
+@media (max-width:420px) {
+  body.build004.build018-food-lookup .z18-head { grid-template-columns:1fr; }
+  body.build004.build018-food-lookup #z18MealType { width:100%; }
+  body.build004.build018-food-lookup .z18-form { grid-template-columns:1fr auto; }
+  body.build004.build018-food-lookup .z18-macros { text-align:left; }
+  body.build004.build018-food-lookup .z18-result { grid-template-columns:1fr; }
+  body.build004.build018-food-lookup .z18-result > button { grid-column:1; }
+}
