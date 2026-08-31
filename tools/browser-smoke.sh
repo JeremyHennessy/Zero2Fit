@@ -111,6 +111,16 @@ assert_dom 'id="mealForm"' 'legacy nutrition form retained for XP bridge'
 assert_dom 'id="z17NutritionIntel"' 'Build 017 personal-intelligence Fuel context'
 assert_dom './build017.css'
 
+assert_dom 'id="z18FoodLookup"' 'Build 018 food lookup shell'
+assert_dom 'Find food without typing the macros.'
+assert_dom 'Search Open Food Facts'
+assert_dom 'Barcode'
+assert_dom 'Look up'
+assert_dom 'Camera scan unavailable'
+assert_dom 'Open Food Facts'
+assert_dom 'ODbL'
+assert_dom './build018.css'
+
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then
   echo 'Workout catalog load failed in browser.' >&2
   exit 1
@@ -166,4 +176,9 @@ if grep -q 'Zero2Fit Build 017 Fuel extension failed to load' "$DOM_FILE"; then
   exit 1
 fi
 
-echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution, devices, clean iPhone UI, Fuel 2.0, adaptive/personal intelligence, RPG adventure v2 + visual battlefield, PWA/productization, progress-photo modules, and private-sync shell rendered."
+if grep -q 'Food lookup is not configured' "$DOM_FILE"; then
+  echo 'Build 018 food lookup configuration failed.' >&2
+  exit 1
+fi
+
+echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution, devices, clean iPhone UI, Fuel 2.0 + food lookup, adaptive/personal intelligence, RPG adventure v2 + visual battlefield, PWA/productization, progress-photo modules, and private-sync shell rendered."
