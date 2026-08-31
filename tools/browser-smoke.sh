@@ -93,7 +93,7 @@ assert_dom 'id="z16Battlefield"' 'Build 016 Adventure battlefield'
 assert_dom 'Current expedition'
 assert_dom 'What improves your odds'
 assert_dom 'Last expedition'
-assert_dom 'Run expedition'
+assert_dom 'id="z16Run"' 'Build 016 delegated expedition control'
 assert_dom 'Auto-equip best'
 
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then
