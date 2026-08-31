@@ -1,0 +1,48 @@
+name: Verify food provider
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'supabase/functions/food-lookup/**'
+      - '.github/workflows/verify-food-provider.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  live-provider:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Resolve public function configuration
+        run: |
+          URL="$(sed -n "s/.*supabaseUrl: '\([^']*\)'.*/\1/p" zero2fit-config.js)"
+          KEY="$(sed -n "s/.*supabasePublishableKey: '\([^']*\)'.*/\1/p" zero2fit-config.js)"
+          test -n "$URL"
+          test -n "$KEY"
+          echo "SUPABASE_URL=$URL" >> "$GITHUB_ENV"
+          echo "SUPABASE_KEY=$KEY" >> "$GITHUB_ENV"
+
+      - name: Verify barcode lookup through deployed Edge Function
+        run: |
+          timeout 25s curl -fsS --retry 1 \
+            -X POST "$SUPABASE_URL/functions/v1/food-lookup" \
+            -H "apikey: $SUPABASE_KEY" \
+            -H 'Content-Type: application/json' \
+            --data '{"mode":"barcode","barcode":"3017624010701"}' > /tmp/barcode.json
+          jq -e '.provider == "open_food_facts" and .mode == "barcode" and .found == true and (.product | type == "object")' /tmp/barcode.json >/dev/null
+          echo 'Live barcode provider path passed.'
+
+      - name: Verify deliberate full-text search through deployed Edge Function
+        run: |
+          timeout 25s curl -fsS --retry 1 \
+            -X POST "$SUPABASE_URL/functions/v1/food-lookup" \
+            -H "apikey: $SUPABASE_KEY" \
+            -H 'Content-Type: application/json' \
+            --data '{"mode":"search","query":"nutella"}' > /tmp/search.json
+          jq -e '.provider == "open_food_facts" and .mode == "search" and (.products | type == "array") and (.products | length > 0)' /tmp/search.json >/dev/null
+          echo 'Live explicit search provider path passed.'

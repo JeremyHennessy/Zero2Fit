@@ -23,6 +23,7 @@ jobs:
           node --check intelligence-core.mjs
           node --check workout-execution-core.mjs
           node --check nutrition-core.mjs
+          node --check food-lookup-core.mjs
           node --check storage.js
           node --check ingestion.js
           node --check build003-integration.js
@@ -44,6 +45,7 @@ jobs:
           node --check build014-workout-execution.js
           node --check build016-adventure-visual.js
           node --check build017-fuel.js
+          node --check build018-food-lookup.js
           node --check sw.js
           node --check tools/build-training-catalog.mjs
           node --check tools/validate-fitness-data.mjs
@@ -52,6 +54,7 @@ jobs:
           node --check tools/test-intelligence-core.mjs
           node --check tools/test-workout-execution-core.mjs
           node --check tools/test-nutrition-core.mjs
+          node --check tools/test-food-lookup-core.mjs
           node --check tools/test-device-ingestion.mjs
           node --check tools/test-device-driven-progress.mjs
           node --check tools/test-remote-sync.mjs
@@ -74,12 +77,14 @@ jobs:
           test -s build014.css
           test -s build016.css
           test -s build017.css
+          test -s build018.css
           test -s app.js
           test -s training-core.mjs
           test -s adaptive-core.mjs
           test -s intelligence-core.mjs
           test -s workout-execution-core.mjs
           test -s nutrition-core.mjs
+          test -s food-lookup-core.mjs
           test -s storage.js
           test -s ingestion.js
           test -s build003-integration.js
@@ -101,8 +106,10 @@ jobs:
           test -s build014-workout-execution.js
           test -s build016-adventure-visual.js
           test -s build017-fuel.js
+          test -s build018-food-lookup.js
           test -s tools/test-adventure-visual-core.mjs
           test -s tools/test-nutrition-core.mjs
+          test -s tools/test-food-lookup-core.mjs
           test -s manifest.webmanifest
           test -s sw.js
           test -s assets/z2f-icon-180.png
@@ -115,6 +122,7 @@ jobs:
           test -s ios/Zero2FitHealthBridge/Sources/SupabaseBridgeClient.swift
           test -s data/adventure_catalog.json
           test -s supabase/schema.sql
+          test -s supabase/functions/food-lookup/index.ts
           test -s data/generated/training_exercises.json
           test -s data/generated/met_activities.json
           test -s data/generated/met_reconciliation.json
@@ -139,6 +147,7 @@ jobs:
           grep -q './build007-adventure.js' index.html
           grep -q './build008-photos.js' index.html
           grep -q './build008-device-sync.js' index.html
+          grep -q './build018-food-lookup.js' index.html
           grep -q 'build009-adaptive.js' build008-device-sync.js
           grep -q 'build010-intelligence.js' build009-adaptive.js
           grep -q 'build011-adventure.js' build010-intelligence.js
@@ -147,21 +156,33 @@ jobs:
           grep -q 'build016-adventure-visual.js' build012-productization.js
           grep -q 'build017-fuel.js' build016-adventure-visual.js
           grep -q 'workout-execution-core.mjs' build014-workout-execution.js
-          grep -q 'zero2fit-shell-v17-fuel' sw.js
+          grep -q 'zero2fit-shell-v18-food-lookup' sw.js
           grep -q 'build016-adventure-visual.js' sw.js
           grep -q 'adventure-visual-core.mjs' sw.js
           grep -q 'build017-fuel.js' sw.js
           grep -q 'nutrition-core.mjs' sw.js
           grep -q 'build017.css' sw.js
+          grep -q 'build018-food-lookup.js' sw.js
+          grep -q 'food-lookup-core.mjs' sw.js
+          grep -q 'build018.css' sw.js
           grep -Fq 'nav-item[data-page="nutrition"]' build012.css
           grep -q 'serviceWorker.register' build012-productization.js
           grep -q -- '--z15-blue:#3f7df4' build012.css
           grep -q -- '--z15-bg:#f5f7fb' build012.css
           if grep -q '#b7f34a' build016.css; then echo 'Build 016 must not reintroduce the fluorescent lime theme.'; exit 1; fi
           if grep -q '#b7f34a\|#070b09' build017.css; then echo 'Build 017 Fuel must stay on the clean theme.'; exit 1; fi
+          if grep -q '#b7f34a\|#070b09' build018.css; then echo 'Build 018 lookup must stay on the clean theme.'; exit 1; fi
           grep -q 'zero2fit-fuel-v2' build017-fuel.js
           grep -q 'nutrition_entry' build017-fuel.js
           grep -q 'No target set' build017-fuel.js
+          grep -q 'functions/v1/food-lookup' build018-food-lookup.js
+          grep -q 'Open Food Facts' build018-food-lookup.js
+          grep -q 'BarcodeDetector' build018-food-lookup.js
+          grep -q 'search_terms' supabase/functions/food-lookup/index.ts
+          grep -q '/api/v3/product/' supabase/functions/food-lookup/index.ts
+          grep -q 'Zero2Fit/0.18' supabase/functions/food-lookup/index.ts
+          grep -q 'SUPABASE_PUBLISHABLE_KEYS' supabase/functions/food-lookup/index.ts
+          if grep -q 'SUPABASE_SERVICE_ROLE_KEY\|SUPABASE_SECRET_KEYS' supabase/functions/food-lookup/index.ts; then echo 'Food lookup proxy must not require a secret/service-role key.'; exit 1; fi
           grep -q 'progress_photos' storage.js
           grep -q 'raw_photos_included: false' storage.js
           grep -q 'device_source_observations' supabase/schema.sql
@@ -192,6 +213,9 @@ jobs:
 
       - name: Test Fuel nutrition core
         run: node tools/test-nutrition-core.mjs
+
+      - name: Test food lookup normalization
+        run: node tools/test-food-lookup-core.mjs
 
       - name: Test personal intelligence
         run: node tools/test-intelligence-core.mjs
