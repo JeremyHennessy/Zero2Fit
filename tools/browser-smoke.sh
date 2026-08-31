@@ -99,6 +99,18 @@ assert_dom 'Last expedition'
 assert_dom 'id="z16Run"' 'Build 016 delegated expedition control'
 assert_dom 'Auto-equip best'
 
+assert_dom 'id="z17Fuel"' 'Build 017 Fuel shell'
+assert_dom 'Log once. Reuse what you actually eat.'
+assert_dom 'Search saved + recent'
+assert_dom 'Repeat last'
+assert_dom 'Paste a nutrition line'
+assert_dom 'Saved meals'
+assert_dom '7-day logging'
+assert_dom 'id="z17LegacyNutrition"' 'Build 017 legacy nutrition compatibility bridge'
+assert_dom 'id="mealForm"' 'legacy nutrition form retained for XP bridge'
+assert_dom 'id="z17NutritionIntel"' 'Build 017 personal-intelligence Fuel context'
+assert_dom './build017.css'
+
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then
   echo 'Workout catalog load failed in browser.' >&2
   exit 1
@@ -149,4 +161,9 @@ if grep -q 'Zero2Fit Build 016 Adventure visual layer failed' "$DOM_FILE"; then
   exit 1
 fi
 
-echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution, devices, clean iPhone UI, adaptive/personal intelligence, RPG adventure v2 + visual battlefield, PWA/productization, progress-photo modules, and private-sync shell rendered."
+if grep -q 'Zero2Fit Build 017 Fuel extension failed to load' "$DOM_FILE"; then
+  echo 'Build 017 Fuel module failed in browser.' >&2
+  exit 1
+fi
+
+echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution, devices, clean iPhone UI, Fuel 2.0, adaptive/personal intelligence, RPG adventure v2 + visual battlefield, PWA/productization, progress-photo modules, and private-sync shell rendered."

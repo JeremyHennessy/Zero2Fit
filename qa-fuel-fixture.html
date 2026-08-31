@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Zero2Fit Fuel QA fixture</title></head>
+<body>
+<script>
+(() => {
+  const params = new URLSearchParams(location.search);
+  const page = ['nutrition','journey'].includes(params.get('page')) ? params.get('page') : 'nutrition';
+  const now = new Date();
+  const key = offset => {
+    const date = new Date(now);
+    date.setDate(date.getDate() + offset);
+    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+  };
+  const loggedAt = (day, hour) => `${day}T${String(hour).padStart(2,'0')}:00:00`;
+  const meal = (id, day, name, calories, protein, carbs, fat, mealType, serving, hour) => ({
+    id, day, name, calories, protein, carbs, fat, mealType, serving, source:'manual', sourceItemId:'', barcode:'', loggedAt:loggedAt(day,hour)
+  });
+  const today = key(0);
+  const oats = meal('qa-oats',today,'Breakfast oats',410,28,52,10,'breakfast','oats · yogurt · berries',8);
+  const bowl = meal('qa-bowl',today,'Chicken rice bowl',620,48,64,18,'lunch','regular bowl',13);
+  const coffee = meal('qa-coffee',today,'Iced latte',140,9,17,5,'snack','medium',15);
+  const historical = {
+    [key(-1)]:[meal('qa-y1',key(-1),'Greek yogurt + granola',340,25,42,8,'breakfast','1 bowl',8),meal('qa-y2',key(-1),'Steak dinner',760,58,46,34,'dinner','plate',19)],
+    [key(-2)]:[meal('qa-2',key(-2),'Turkey wrap',540,42,48,17,'lunch','1 wrap',12)],
+    [key(-4)]:[meal('qa-4',key(-4),'Chicken rice bowl',620,48,64,18,'lunch','regular bowl',13)],
+    [key(-5)]:[meal('qa-5',key(-5),'Egg breakfast',480,31,35,24,'breakfast','3 eggs + toast',9)]
+  };
+  const state = {
+    version:1,
+    meals:{...historical,[today]:[oats,bowl,coffee]},
+    savedMeals:[
+      {...oats,id:'qa-saved-oats',source:'saved',savedAt:loggedAt(key(-8),9)},
+      {...bowl,id:'qa-saved-bowl',source:'saved',savedAt:loggedAt(key(-7),13)},
+      {id:'qa-saved-wrap',name:'Turkey wrap',calories:540,protein:42,carbs:48,fat:17,serving:'1 wrap',mealType:'lunch',source:'saved',sourceItemId:'',barcode:'',savedAt:loggedAt(key(-6),12)}
+    ],
+    nutritionTargets:{calories:2300,protein:160,carbs:250,fat:70},
+    migratedFromLegacyAt:new Date().toISOString(),
+    updatedAt:new Date().toISOString()
+  };
+  localStorage.setItem('zero2fit-fuel-v2', JSON.stringify(state));
+  location.replace(`./?qaPage=${encodeURIComponent(page)}`);
+})();
+</script>
+</body>
+</html>

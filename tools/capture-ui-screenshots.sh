@@ -34,6 +34,10 @@ capture() {
   local label="$1" width="$2" height="$3" name="$4" query="$5"
   local file="$OUT_DIR/${label}-${name}.png"
   local profile="${RUNNER_TEMP:-/tmp}/z2f-chrome-${label}-${name}-$$"
+  local target="http://127.0.0.1:${PORT}/?${query}"
+  if [[ "$query" == path:* ]]; then
+    target="http://127.0.0.1:${PORT}/${query#path:}"
+  fi
   rm -rf "$profile"
 
   set +e
@@ -51,7 +55,7 @@ capture() {
     --virtual-time-budget=6000 \
     --window-size="$width,$height" \
     --screenshot="$file" \
-    "http://127.0.0.1:${PORT}/?${query}" >/dev/null 2>&1
+    "$target" >/dev/null 2>&1
   local chrome_status=$?
   set -e
 
@@ -70,16 +74,16 @@ capture() {
 capture iphone 393 852 today 'qaPage=today'
 capture iphone 393 852 train 'qaPage=train'
 capture iphone 393 852 adventure 'qaPage=character&qaFocus=frontier'
-capture iphone 393 852 fuel 'qaPage=nutrition'
-capture iphone 393 852 progress 'qaPage=journey'
+capture iphone 393 852 fuel 'path:qa-fuel-fixture.html?page=nutrition'
+capture iphone 393 852 progress 'path:qa-fuel-fixture.html?page=journey'
 capture iphone 393 852 devices 'qaPage=data'
 capture iphone 393 852 settings 'qaPage=today&qaSettings=1'
 
 capture desktop 1440 1000 today 'qaPage=today'
 capture desktop 1440 1000 train 'qaPage=train'
 capture desktop 1440 1000 adventure 'qaPage=character&qaFocus=frontier'
-capture desktop 1440 1000 fuel 'qaPage=nutrition'
-capture desktop 1440 1000 progress 'qaPage=journey'
+capture desktop 1440 1000 fuel 'path:qa-fuel-fixture.html?page=nutrition'
+capture desktop 1440 1000 progress 'path:qa-fuel-fixture.html?page=journey'
 capture desktop 1440 1000 devices 'qaPage=data'
 
 count="$(find "$OUT_DIR" -name '*.png' | wc -l)"
