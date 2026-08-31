@@ -210,8 +210,8 @@ function recordEvent(entry) {
       metricType:'nutrition_entry', value:Number(entry.calories || 0), unit:'kcal',
       observedAt:entry.day === today() ? entry.loggedAt : `${entry.day}T12:00:00`,
       sourceProvider:'open_food_facts', sourceDevice:'web_app', sourceRecordId:`nutrition:${entry.id}`,
-      provenanceStatus:'user-selected-provider', confidence:'provider_reported',
-      metadata:{ date:entry.day, name:entry.name, protein_g:entry.protein, carbs_g:entry.carbs, fat_g:entry.fat, meal_type:entry.mealType, serving:entry.serving, barcode:entry.barcode, source_item_id:entry.sourceItemId, backfilled:entry.day !== today() }
+      provenanceStatus:'user-entered', confidence:'provider_reported',
+      metadata:{ date:entry.day, name:entry.name, protein_g:entry.protein, carbs_g:entry.carbs, fat_g:entry.fat, meal_type:entry.mealType, serving:entry.serving, barcode:entry.barcode, source_item_id:entry.sourceItemId, selection_provenance:'user-selected-provider', backfilled:entry.day !== today() }
     });
     storage.upsertEvents([event]).catch(() => {});
   } catch {}
@@ -317,3 +317,5 @@ function init() {
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',init,{once:true});
 else init();
+
+import('./build019-fuel-sync.js').catch(error => console.warn('Zero2Fit Build 019 Fuel sync extension failed to load', error));

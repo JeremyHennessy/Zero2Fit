@@ -2,6 +2,7 @@
   'use strict';
 
   const SESSION_KEY = 'zero2fit-supabase-session-v1';
+  const FUEL_KEY = 'zero2fit-fuel-v2';
   const config = window.ZERO2FIT_CONFIG || {};
   const storage = window.Zero2FitStorage;
   let corePromise = null;
@@ -26,6 +27,22 @@
     if (!session) localStorage.removeItem(SESSION_KEY);
     else localStorage.setItem(SESSION_KEY, JSON.stringify(session));
     window.dispatchEvent(new CustomEvent('zero2fit:remote-session', { detail: { signedIn: Boolean(session?.access_token) } }));
+  }
+
+  function readFuelState() {
+    try {
+      const raw = localStorage.getItem(FUEL_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function writeFuelState(state) {
+    if (!state) return;
+    localStorage.setItem(FUEL_KEY, JSON.stringify(state));
+    try { window.Zero2FitFuel?.render?.(state); } catch {}
+    window.dispatchEvent(new CustomEvent('zero2fit:fuel-updated', { detail:{ source:'private-sync' } }));
   }
 
   function sessionExpired(session) {
@@ -180,20 +197,102 @@
     return contract.applySourceVerifications(rows.map(contract.remoteRowToEvent), verifications);
   }
 
+  async function mirrorFuelEntriesToEvents() {
+    if (!storage) return { entries:0, events:0 };
+    const fuel = readFuelState();
+    const ingestion = window.Zero2FitIngestion;
+    if (!fuel?.meals || !ingestion?.makeEvent) return { entries:0, events:0 };
+    const contract = await core();
+    const events = [];
+    let entries = 0;
+    for (const [day, rows] of Object.entries(fuel.meals || {})) {
+      if (!Array.isArray(rows)) continue;
+      for (const entry of rows) {
+        entries += 1;
+        events.push(ingestion.makeEvent(contract.fuelEntryEventInput(entry, day)));
+      }
+    }
+    if (events.length) await storage.upsertEvents(events);
+    return { entries, events:events.length };
+  }
+
+  async function pullUserPreferencesRow() {
+    const rows = await rest('user_preferences?select=preferred_units,workout_location,settings,updated_at&limit=1') || [];
+    return rows[0] || null;
+  }
+
+  async function syncFuelPreferences(user) {
+    const local = readFuelState();
+    if (!local) return { enabled:false, saved_meals:0, targets_set:0 };
+    const contract = await core();
+    const remoteRow = await pullUserPreferencesRow();
+    const remoteFuel = remoteRow?.settings?.fuel_v1 || {};
+    const merged = contract.mergeFuelPreferences(local, remoteFuel);
+    const localMerged = {
+      ...local,
+      nutritionTargets:merged.nutritionTargets,
+      savedMeals:merged.savedMeals,
+      syncMeta:{ ...(local.syncMeta || {}), ...merged.syncMeta },
+      updatedAt:new Date().toISOString()
+    };
+    writeFuelState(localMerged);
+
+    const settings = {
+      ...(remoteRow?.settings || {}),
+      fuel_v1:{ ...merged.remotePayload, synced_at:new Date().toISOString() }
+    };
+    await rest('user_preferences?on_conflict=user_id', {
+      method:'POST',
+      body:[{
+        user_id:user.id,
+        preferred_units:remoteRow?.preferred_units || {},
+        workout_location:remoteRow?.workout_location || 'home',
+        settings,
+        updated_at:new Date().toISOString()
+      }],
+      headers:{ Prefer:'resolution=merge-duplicates,return=minimal' }
+    });
+    return {
+      enabled:true,
+      saved_meals:merged.savedMeals.length,
+      targets_set:Object.values(merged.nutritionTargets || {}).filter(value => value !== null).length
+    };
+  }
+
+  async function hydrateFuelHistory(events = []) {
+    const local = readFuelState();
+    if (!local) return { enabled:false, entries:0, deleted:0 };
+    const contract = await core();
+    const meals = contract.mergeFuelHistory(local.meals || {}, events);
+    const entries = Object.values(meals).reduce((sum, rows) => sum + (Array.isArray(rows) ? rows.length : 0), 0);
+    const deleted = contract.deletedFuelEntryIds(events).size;
+    writeFuelState({ ...local, meals, updatedAt:new Date().toISOString() });
+    return { enabled:true, entries, deleted };
+  }
+
   async function syncNow() {
     if (!storage) throw new Error('Local structured storage is unavailable.');
     const user = await getUser();
     if (!user?.id) throw new Error('Sign in to private sync first.');
+
+    const fuelMirror = await mirrorFuelEntriesToEvents();
+    const fuelPreferences = await syncFuelPreferences(user);
     const localEvents = await storage.getRecentEvents(50000);
     const pushed = await pushEvents(localEvents);
     const remoteEvents = await pullEvents(50000);
     await storage.upsertEvents(remoteEvents);
+    const fuelHistory = await hydrateFuelHistory(remoteEvents);
     const stats = await storage.getStats();
     const result = {
       user_id:user.id,
       pushed:pushed.written,
       pulled:remoteEvents.length,
       local_events:stats.events,
+      fuel_mirrored:fuelMirror.events,
+      fuel_history_entries:fuelHistory.entries,
+      fuel_deleted_entries:fuelHistory.deleted,
+      fuel_saved_meals:fuelPreferences.saved_meals,
+      fuel_targets_set:fuelPreferences.targets_set,
       synced_at:new Date().toISOString()
     };
     localStorage.setItem('zero2fit-last-private-sync', JSON.stringify(result));
@@ -216,6 +315,7 @@
 
   window.Zero2FitRemoteSync = {
     configured, status, readSession, signUp, signIn, signOut, getUser, syncNow,
-    pushEvents, pullEvents, pullVerifications, pullSourceObservations, verifySource
+    pushEvents, pullEvents, pullVerifications, pullSourceObservations, verifySource,
+    pullUserPreferencesRow, mirrorFuelEntriesToEvents, hydrateFuelHistory
   };
 })();

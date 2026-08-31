@@ -30,7 +30,7 @@ fi
   --no-sandbox \
   --disable-gpu \
   --disable-dev-shm-usage \
-  --virtual-time-budget=15000 \
+  --virtual-time-budget=18000 \
   --dump-dom "http://127.0.0.1:${PORT}/" >"$DOM_FILE"
 
 assert_dom() {
@@ -121,6 +121,19 @@ assert_dom 'Open Food Facts'
 assert_dom 'ODbL'
 assert_dom './build018.css'
 
+assert_dom 'id="z19FuelSync"' 'Build 019 Fuel private-sync strip'
+assert_dom 'Fuel private sync'
+assert_dom 'Fuel history is local + backup.'
+assert_dom 'Fuel history, saved meals and explicit nutrition targets'
+assert_dom 'Browser storage remains the local cache.'
+assert_dom 'full Fuel store'
+assert_dom './build019.css'
+
+if grep -Fq 'Supabase remains disabled until authenticated RLS is configured and tested.' "$DOM_FILE"; then
+  echo 'Stale pre-private-sync Supabase copy is still rendered.' >&2
+  exit 1
+fi
+
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then
   echo 'Workout catalog load failed in browser.' >&2
   exit 1
@@ -181,4 +194,9 @@ if grep -q 'Food lookup is not configured' "$DOM_FILE"; then
   exit 1
 fi
 
-echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution, devices, clean iPhone UI, Fuel 2.0 + food lookup, adaptive/personal intelligence, RPG adventure v2 + visual battlefield, PWA/productization, progress-photo modules, and private-sync shell rendered."
+if grep -q 'Zero2Fit Build 019 Fuel sync extension failed to load' "$DOM_FILE"; then
+  echo 'Build 019 Fuel private-sync module failed in browser.' >&2
+  exit 1
+fi
+
+echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution, devices, clean iPhone UI, Fuel 2.0 + food lookup + private-sync shell, adaptive/personal intelligence, RPG adventure v2 + visual battlefield, PWA/productization, progress-photo modules, and private-sync shell rendered."

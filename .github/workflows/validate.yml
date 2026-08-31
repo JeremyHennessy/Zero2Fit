@@ -46,6 +46,7 @@ jobs:
           node --check build016-adventure-visual.js
           node --check build017-fuel.js
           node --check build018-food-lookup.js
+          node --check build019-fuel-sync.js
           node --check sw.js
           node --check tools/build-training-catalog.mjs
           node --check tools/validate-fitness-data.mjs
@@ -78,6 +79,7 @@ jobs:
           test -s build016.css
           test -s build017.css
           test -s build018.css
+          test -s build019.css
           test -s app.js
           test -s training-core.mjs
           test -s adaptive-core.mjs
@@ -107,6 +109,7 @@ jobs:
           test -s build016-adventure-visual.js
           test -s build017-fuel.js
           test -s build018-food-lookup.js
+          test -s build019-fuel-sync.js
           test -s tools/test-adventure-visual-core.mjs
           test -s tools/test-nutrition-core.mjs
           test -s tools/test-food-lookup-core.mjs
@@ -155,8 +158,9 @@ jobs:
           grep -q 'build014-workout-execution.js' build012-productization.js
           grep -q 'build016-adventure-visual.js' build012-productization.js
           grep -q 'build017-fuel.js' build016-adventure-visual.js
+          grep -q 'build019-fuel-sync.js' build018-food-lookup.js
           grep -q 'workout-execution-core.mjs' build014-workout-execution.js
-          grep -q 'zero2fit-shell-v18-food-lookup' sw.js
+          grep -q 'zero2fit-shell-v19-fuel-sync' sw.js
           grep -q 'build016-adventure-visual.js' sw.js
           grep -q 'adventure-visual-core.mjs' sw.js
           grep -q 'build017-fuel.js' sw.js
@@ -165,6 +169,8 @@ jobs:
           grep -q 'build018-food-lookup.js' sw.js
           grep -q 'food-lookup-core.mjs' sw.js
           grep -q 'build018.css' sw.js
+          grep -q 'build019-fuel-sync.js' sw.js
+          grep -q 'build019.css' sw.js
           grep -Fq 'nav-item[data-page="nutrition"]' build012.css
           grep -q 'serviceWorker.register' build012-productization.js
           grep -q -- '--z15-blue:#3f7df4' build012.css
@@ -172,12 +178,22 @@ jobs:
           if grep -q '#b7f34a' build016.css; then echo 'Build 016 must not reintroduce the fluorescent lime theme.'; exit 1; fi
           if grep -q '#b7f34a\|#070b09' build017.css; then echo 'Build 017 Fuel must stay on the clean theme.'; exit 1; fi
           if grep -q '#b7f34a\|#070b09' build018.css; then echo 'Build 018 lookup must stay on the clean theme.'; exit 1; fi
+          if grep -q '#b7f34a\|#070b09' build019.css; then echo 'Build 019 Fuel sync must stay on the clean theme.'; exit 1; fi
           grep -q 'zero2fit-fuel-v2' build017-fuel.js
           grep -q 'nutrition_entry' build017-fuel.js
           grep -q 'No target set' build017-fuel.js
           grep -q 'functions/v1/food-lookup' build018-food-lookup.js
           grep -q 'Open Food Facts' build018-food-lookup.js
           grep -q 'BarcodeDetector' build018-food-lookup.js
+          grep -q "provenanceStatus:'user-entered'" build018-food-lookup.js
+          grep -q "selection_provenance:'user-selected-provider'" build018-food-lookup.js
+          grep -q 'fuel_v1' remote-sync.js
+          grep -q 'nutrition_entry_deleted' remote-sync-core.mjs
+          grep -q 'user_preferences' remote-sync.js
+          grep -q 'mirrorFuelEntriesToEvents' remote-sync.js
+          grep -q 'hydrateFuelHistory' remote-sync.js
+          grep -q 'z19FuelSync' build019-fuel-sync.js
+          grep -q 'Food history is local + backup\|Fuel history is local + backup' build019-fuel-sync.js
           grep -q 'search_terms' supabase/functions/food-lookup/index.ts
           grep -q '/api/v3/product/' supabase/functions/food-lookup/index.ts
           grep -q 'Zero2Fit/0.18' supabase/functions/food-lookup/index.ts
