@@ -116,11 +116,24 @@ function ensureFuelStatus() {
 
 function ensureDataCopy() {
   const panel = document.getElementById('z8PrivateSync');
-  if (!panel) return;
-  const description = panel.querySelector(':scope > p.muted');
-  if (description && !description.dataset.z19FuelCopy) {
-    description.dataset.z19FuelCopy = '1';
-    description.textContent = 'Events are private per authenticated user. Sync now reconciles device events plus Fuel history, saved meals and explicit nutrition targets. HealthKit source names remain evidence only until you explicitly verify the exact source bundle; unverified device data never awards permanent Fitness XP.';
+  if (panel) {
+    const description = panel.querySelector(':scope > p.muted');
+    if (description && !description.dataset.z19FuelCopy) {
+      description.dataset.z19FuelCopy = '1';
+      description.textContent = 'Events are private per authenticated user. Sync now reconciles device events plus Fuel history, saved meals and explicit nutrition targets. HealthKit source names remain evidence only until you explicitly verify the exact source bundle; unverified device data never awards permanent Fitness XP.';
+    }
+  }
+
+  const storageNote = document.querySelector('#z8StorageStats .storage-source-note');
+  if (storageNote) {
+    storageNote.textContent = 'Browser storage remains the local cache. Authenticated Supabase sync is configured with per-user RLS; sign in under Private sync to reconcile supported data across browsers.';
+  }
+
+  const backupCard = [...document.querySelectorAll('#deviceToolsGrid .card')]
+    .find(card => card.querySelector('h2')?.textContent?.trim() === 'Backup local data');
+  const backupDescription = backupCard?.querySelector(':scope > p.muted');
+  if (backupDescription) {
+    backupDescription.textContent = 'Export a portable JSON snapshot of local state, normalized events, imports, photo metadata and the full Fuel store. Raw progress-photo image blobs remain local and are excluded from this backup.';
   }
 }
 
