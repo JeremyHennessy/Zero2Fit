@@ -4,6 +4,9 @@ set -euo pipefail
 PORT="${PORT:-4173}"
 DOM_FILE="${RUNNER_TEMP:-/tmp}/zero2fit-dom.html"
 SERVER_LOG="${RUNNER_TEMP:-/tmp}/zero2fit-server.log"
+# Count expectations deliberately follow the currently generated reference catalogs.
+EXPECTED_EXERCISES="$(node -e "const x=require('./data/generated/catalog_summary.json'); process.stdout.write(String(x.counts.exercises))")"
+EXPECTED_MET_ACTIVITIES="$(node -e "const x=require('./data/generated/catalog_summary.json'); process.stdout.write(String(x.counts.metActivities))")"
 
 python3 -m http.server "$PORT" --bind 127.0.0.1 >"$SERVER_LOG" 2>&1 &
 SERVER_PID=$!
@@ -43,8 +46,8 @@ assert_dom() {
 assert_dom 'Use what is actually available'
 assert_dom 'Bodyweight Squat'
 assert_dom 'No true substitute here'
-assert_dom '873 exercises'
-assert_dom '1111 MET activities'
+assert_dom "${EXPECTED_EXERCISES} exercises" 'generated exercise count'
+assert_dom "${EXPECTED_MET_ACTIVITIES} MET activities" 'generated MET activity count'
 
 assert_dom 'Data architecture · Build 003'
 assert_dom 'Import measurements'
@@ -146,4 +149,4 @@ if grep -q 'Zero2Fit Build 016 Adventure visual layer failed' "$DOM_FILE"; then
   exit 1
 fi
 
-echo 'Browser smoke passed: training, guided workout execution, devices, clean iPhone UI, adaptive/personal intelligence, RPG adventure v2 + visual battlefield, PWA/productization, progress-photo modules, and private-sync shell rendered.'
+echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution, devices, clean iPhone UI, adaptive/personal intelligence, RPG adventure v2 + visual battlefield, PWA/productization, progress-photo modules, and private-sync shell rendered."
