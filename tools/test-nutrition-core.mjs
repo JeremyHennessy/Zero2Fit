@@ -15,7 +15,7 @@ import {
 const legacy = {
   meals:{
     '2026-08-29':[
-      {name:'Chicken bowl',calories:620,protein:48},
+      {name:'Chicken bowl',calories:620,protein:48,carbs:64,fat:18},
       {name:'Greek yogurt',calories:170,protein:17}
     ],
     '2026-08-30':[
@@ -28,7 +28,7 @@ const migrated = migrateNutritionState(legacy);
 assert.equal(migrated.state.nutritionSchemaVersion, 1);
 assert.equal(migrated.state.meals['2026-08-29'].length, 2);
 assert(migrated.state.meals['2026-08-29'][0].id.startsWith('meal_'));
-assert.equal(migrated.state.meals['2026-08-29'][0].carbs, 0);
+assert.equal(migrated.state.meals['2026-08-29'][1].carbs, 0, 'legacy entries without carbs should migrate safely to zero');
 assert.deepEqual(migrated.state.nutritionTargets, {calories:null,protein:null,carbs:null,fat:null});
 
 const day = summarizeDay([
@@ -42,7 +42,7 @@ assert.equal(day.totals.fat, 25);
 assert(Math.round(day.progress.protein) === 38);
 
 const recent = recentMealCandidates(migrated.state.meals, {limit:10});
-assert.equal(recent.length, 2, 'duplicate chicken bowl should collapse to one recent candidate');
+assert.equal(recent.length, 2, 'identical chicken bowl entries should collapse to one recent candidate');
 assert.equal(recent[0].name, 'Chicken bowl');
 
 const saved = createSavedMeal({name:'Breakfast oats',calories:410,protein:28,carbs:52,fat:10,mealType:'breakfast'}, {now:new Date('2026-08-30T12:00:00Z').getTime()});
@@ -77,5 +77,6 @@ assert(consistency.averageCalories > 0);
 assert.equal(consistency.entries, 4);
 
 assert.deepEqual(normalizeTargets({calories:2300,protein:160,carbs:0,fat:''}), {calories:2300,protein:160,carbs:null,fat:null});
+assert.deepEqual(summarizeDay(null).totals, {calories:0,protein:0,carbs:0,fat:0});
 
 console.log('Build 017 nutrition-core tests passed.');
