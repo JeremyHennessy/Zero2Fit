@@ -1,43 +1,84 @@
 import * as core from './nutrition-core.mjs';
 
-const STORAGE_KEY = 'zero2fit-v1';
-const app = () => window.Zero2FitApp || null;
+const APP_STORAGE_KEY = 'zero2fit-v1';
+const FUEL_STORAGE_KEY = 'zero2fit-fuel-v2';
 const today = () => core.dayKey(new Date());
 let activeDay = sessionStorage.getItem('zero2fit-fuel-day') || today();
-let lastState = null;
 let searchText = '';
 let initialized = false;
+let resetBeforeRaw = null;
 
-function readState() {
-  const live = app()?.getState?.();
-  if (live) return live;
+function readAppState() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(APP_STORAGE_KEY);
     return raw ? JSON.parse(raw) : {};
   } catch {
     return {};
   }
 }
 
-function fallbackWrite(state) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  window.Zero2FitStorage?.saveSnapshot?.(state).catch(() => {});
-  window.dispatchEvent(new CustomEvent('zero2fit:statechange'));
+function baseFuelState() {
+  const migrated = core.migrateNutritionState(readAppState());
+  return {
+    version:1,
+    meals:migrated.state.meals || {},
+    savedMeals:[],
+    nutritionTargets:core.normalizeTargets({}),
+    migratedFromLegacyAt:new Date().toISOString()
+  };
 }
 
-function mutate(mutator, { render = true } = {}) {
-  const api = app();
-  if (api?.mutateState) return api.mutateState(mutator, { render });
-  const state = readState();
-  mutator(state);
-  fallbackWrite(state);
-  if (render) renderFromState(state);
+function normalizeFuelState(input = {}) {
+  const migrated = core.migrateNutritionState({
+    meals:input.meals || {},
+    savedMeals:input.savedMeals || [],
+    nutritionTargets:input.nutritionTargets || {}
+  });
+  return {
+    ...input,
+    version:1,
+    meals:migrated.state.meals,
+    savedMeals:migrated.state.savedMeals,
+    nutritionTargets:migrated.state.nutritionTargets
+  };
+}
+
+function readFuelState() {
+  try {
+    const raw = localStorage.getItem(FUEL_STORAGE_KEY);
+    if (raw) return normalizeFuelState(JSON.parse(raw));
+  } catch {}
+  const state = baseFuelState();
+  localStorage.setItem(FUEL_STORAGE_KEY, JSON.stringify(state));
   return state;
 }
 
+function saveFuelState(state) {
+  const normalized = normalizeFuelState(state);
+  normalized.updatedAt = new Date().toISOString();
+  localStorage.setItem(FUEL_STORAGE_KEY, JSON.stringify(normalized));
+  window.dispatchEvent(new CustomEvent('zero2fit:fuel-updated', { detail:{ day:activeDay } }));
+  return normalized;
+}
+
+function mutateFuel(mutator, { render = true } = {}) {
+  const state = readFuelState();
+  mutator(state);
+  const saved = saveFuelState(state);
+  if (render) render(saved);
+  return saved;
+}
+
 function toast(message) {
-  if (app()?.showToast) app().showToast(message);
-  else console.info(message);
+  const node = document.getElementById('toast');
+  if (node) {
+    node.textContent = message;
+    node.classList.add('show');
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => node.classList.remove('show'), 2300);
+  } else {
+    console.info(message);
+  }
 }
 
 function esc(value) {
@@ -79,17 +120,27 @@ function ensureStylesheet() {
   document.head.appendChild(link);
 }
 
+function preserveLegacyNutrition(page) {
+  if (document.getElementById('z17LegacyNutrition')) return;
+  const legacy = document.createElement('div');
+  legacy.id = 'z17LegacyNutrition';
+  legacy.hidden = true;
+  while (page.firstChild) legacy.appendChild(page.firstChild);
+  page.appendChild(legacy);
+}
+
 function ensureUi() {
   const page = document.getElementById('page-nutrition');
   if (!page || document.getElementById('z17Fuel')) return;
-  page.innerHTML = `
+  preserveLegacyNutrition(page);
+  page.insertAdjacentHTML('afterbegin', `
     <div id="z17Fuel" class="z17-fuel-shell">
       <article class="card z17-fuel-hero">
         <div class="z17-fuel-head">
           <div>
             <div class="eyebrow">Fuel · Build 017</div>
             <h2>Log once. Reuse what you actually eat.</h2>
-            <p class="muted">Recent and saved foods stay one tap away. Targets are optional and never inferred from your weight or health data.</p>
+            <p class="muted">Recent and saved foods stay one tap away. Targets are optional and never inferred from weight, device, or health data.</p>
           </div>
           <div class="z17-day-nav" aria-label="Nutrition day">
             <button type="button" data-z17-day="prev" aria-label="Previous day">‹</button>
@@ -117,7 +168,7 @@ function ensureUi() {
           <div class="card-heading"><div><div class="eyebrow">One-tap logging</div><h2>Your foods</h2></div><button class="secondary-button" type="button" id="z17RepeatLast">Repeat last</button></div>
           <label class="z17-search"><span>Search saved + recent</span><input id="z17FoodSearch" type="search" autocomplete="off" placeholder="Chicken bowl, yogurt, coffee…"></label>
           <div class="z17-candidate-list" id="z17Candidates"></div>
-          <p class="muted compact">Food candidates retain provider, source-item and barcode fields so a future database/scanner can plug into this same model without rewriting your log.</p>
+          <p class="muted compact">Provider, source-item and barcode fields are already part of the record model, so food-database or scanner input can plug into this same log later.</p>
         </article>
 
         <article class="card z17-quick-line-card">
@@ -155,8 +206,70 @@ function ensureUi() {
         <div class="card-heading"><div><div class="eyebrow">Daily log</div><h2 id="z17LogTitle">Today's food</h2></div><button class="text-button" id="z17ClearDay" type="button">Clear day</button></div>
         <div id="z17MealLog" class="z17-meal-log"></div>
       </article>
-    </div>`;
+    </div>`);
   bindUi(page);
+}
+
+function submitLegacyToday(entry) {
+  if (activeDay !== today()) return false;
+  const form = document.getElementById('mealForm');
+  const name = document.getElementById('mealName');
+  const calories = document.getElementById('mealCalories');
+  const protein = document.getElementById('mealProtein');
+  if (!form || !name || !calories || !protein) return false;
+  name.value = entry.name;
+  calories.value = String(entry.calories || 0);
+  protein.value = String(entry.protein || 0);
+  form.dispatchEvent(new Event('submit', { bubbles:true, cancelable:true }));
+  return true;
+}
+
+function removeLegacyToday(index) {
+  if (activeDay !== today()) return;
+  document.querySelector(`#mealList [data-remove-meal="${index}"]`)?.click();
+}
+
+function clearLegacyToday() {
+  if (activeDay !== today()) return;
+  document.getElementById('clearMeals')?.click();
+}
+
+function eventObservedAt(entry) {
+  if (entry.day === today()) return entry.loggedAt || new Date().toISOString();
+  return `${entry.day}T12:00:00`;
+}
+
+function recordNutritionEvent(entry) {
+  const ingestion = window.Zero2FitIngestion;
+  const storage = window.Zero2FitStorage;
+  if (!ingestion?.makeEvent || !storage?.upsertEvents) return;
+  try {
+    const event = ingestion.makeEvent({
+      metricType:'nutrition_entry',
+      value:Number(entry.calories || 0),
+      unit:'kcal',
+      observedAt:eventObservedAt(entry),
+      sourceProvider:'zero2fit',
+      sourceDevice:'web_app',
+      sourceRecordId:`nutrition:${entry.id}`,
+      provenanceStatus:'user-entered',
+      confidence:'user_tracked',
+      metadata:{
+        date:entry.day,
+        name:entry.name,
+        protein_g:Number(entry.protein || 0),
+        carbs_g:Number(entry.carbs || 0),
+        fat_g:Number(entry.fat || 0),
+        meal_type:entry.mealType,
+        serving:entry.serving || null,
+        logging_method:entry.source || 'manual',
+        source_item_id:entry.sourceItemId || null,
+        barcode:entry.barcode || null,
+        backfilled:entry.day !== today()
+      }
+    });
+    storage.upsertEvents([event]).catch(() => {});
+  } catch {}
 }
 
 function saveTargets(event) {
@@ -167,7 +280,7 @@ function saveTargets(event) {
     carbs:document.getElementById('z17TargetCarbs')?.value,
     fat:document.getElementById('z17TargetFat')?.value
   });
-  mutate(state => { state.nutritionTargets = targets; state.nutritionSchemaVersion = 1; });
+  mutateFuel(state => { state.nutritionTargets = targets; });
   document.getElementById('z17TargetForm').hidden = true;
   toast('Fuel targets saved.');
 }
@@ -175,31 +288,32 @@ function saveTargets(event) {
 function logCandidate(candidate, source = null) {
   if (!candidate) return;
   const entry = core.createMealEntry(candidate, { day:activeDay, source:source || candidate.kind || candidate.source });
-  mutate(state => {
+  submitLegacyToday(entry);
+  mutateFuel(state => {
     state.meals ||= {};
     state.meals[activeDay] ||= [];
     state.meals[activeDay].push(entry);
   });
-  app()?.completeQuest?.('nutrition');
-  window.dispatchEvent(new CustomEvent('zero2fit:fuel-updated', { detail:{ day:activeDay, entryId:entry.id } }));
+  recordNutritionEvent(entry);
   toast(`${entry.name} logged.`);
 }
 
 function removeEntry(entryId) {
-  mutate(state => {
-    const entries = state.meals?.[activeDay] || [];
-    state.meals[activeDay] = entries.filter(entry => entry.id !== entryId);
-  });
-  window.dispatchEvent(new CustomEvent('zero2fit:fuel-updated', { detail:{ day:activeDay } }));
+  const state = readFuelState();
+  const entries = state.meals?.[activeDay] || [];
+  const index = entries.findIndex(entry => entry.id === entryId);
+  if (index < 0) return;
+  removeLegacyToday(index);
+  mutateFuel(next => { next.meals[activeDay] = (next.meals[activeDay] || []).filter(entry => entry.id !== entryId); });
   toast('Food entry removed.');
 }
 
 function saveEntry(entryId) {
-  const state = readState();
+  const state = readFuelState();
   const entry = (state.meals?.[activeDay] || []).find(item => item.id === entryId);
   if (!entry) return;
   const saved = core.createSavedMeal(entry);
-  mutate(next => {
+  mutateFuel(next => {
     next.savedMeals ||= [];
     const fingerprint = core.mealFingerprint(saved);
     if (!next.savedMeals.some(item => core.mealFingerprint(item) === fingerprint)) next.savedMeals.unshift(saved);
@@ -208,7 +322,7 @@ function saveEntry(entryId) {
 }
 
 function deleteSaved(savedId) {
-  mutate(state => { state.savedMeals = (state.savedMeals || []).filter(item => item.id !== savedId); });
+  mutateFuel(state => { state.savedMeals = (state.savedMeals || []).filter(item => item.id !== savedId); });
   toast('Saved meal removed.');
 }
 
@@ -219,7 +333,7 @@ function bindUi(page) {
     if (action === 'today') activeDay = today();
     if (action === 'next' && activeDay < today()) activeDay = shiftDay(activeDay, 1);
     sessionStorage.setItem('zero2fit-fuel-day', activeDay);
-    renderFromState(readState());
+    render(readFuelState());
   }));
 
   document.getElementById('z17TargetToggle')?.addEventListener('click', () => {
@@ -228,19 +342,19 @@ function bindUi(page) {
   });
   document.getElementById('z17TargetForm')?.addEventListener('submit', saveTargets);
   document.getElementById('z17ClearTargets')?.addEventListener('click', () => {
-    mutate(state => { state.nutritionTargets = core.normalizeTargets({}); });
+    mutateFuel(state => { state.nutritionTargets = core.normalizeTargets({}); });
     toast('Fuel targets cleared.');
   });
 
   document.getElementById('z17FoodSearch')?.addEventListener('input', event => {
     searchText = event.target.value || '';
-    renderCandidates(readState());
+    renderCandidates(readFuelState());
   });
 
   document.getElementById('z17Candidates')?.addEventListener('click', event => {
     const button = event.target.closest('[data-z17-candidate]');
     if (!button) return;
-    const state = readState();
+    const state = readFuelState();
     const candidates = core.searchMealCandidates(searchText, { savedMeals:state.savedMeals || [], meals:state.meals || {}, limit:8 });
     logCandidate(candidates[Number(button.dataset.z17Candidate)]);
   });
@@ -248,7 +362,7 @@ function bindUi(page) {
   document.getElementById('z17SavedList')?.addEventListener('click', event => {
     const add = event.target.closest('[data-z17-saved-add]');
     const remove = event.target.closest('[data-z17-saved-remove]');
-    const state = readState();
+    const state = readFuelState();
     if (add) {
       const candidate = core.savedMealCandidates(state.savedMeals || []).find(item => item.sourceId === add.dataset.z17SavedAdd);
       logCandidate(candidate, 'saved');
@@ -257,7 +371,7 @@ function bindUi(page) {
   });
 
   document.getElementById('z17RepeatLast')?.addEventListener('click', () => {
-    const candidate = core.recentMealCandidates(readState().meals || {}, { limit:1 })[0];
+    const candidate = core.recentMealCandidates(readFuelState().meals || {}, { limit:1 })[0];
     if (!candidate) return toast('Log one food first; then Repeat last becomes one tap.');
     logCandidate(candidate, 'repeat');
   });
@@ -290,8 +404,9 @@ function bindUi(page) {
       source:'manual'
     };
     const entry = core.createMealEntry(candidate, { day:activeDay, source:'manual' });
+    submitLegacyToday(entry);
     const save = !!document.getElementById('z17CustomSave')?.checked;
-    mutate(state => {
+    mutateFuel(state => {
       state.meals ||= {};
       state.meals[activeDay] ||= [];
       state.meals[activeDay].push(entry);
@@ -302,10 +417,9 @@ function bindUi(page) {
         if (!state.savedMeals.some(item => core.mealFingerprint(item) === fingerprint)) state.savedMeals.unshift(saved);
       }
     });
-    app()?.completeQuest?.('nutrition');
+    recordNutritionEvent(entry);
     event.target.reset();
     event.target.hidden = true;
-    window.dispatchEvent(new CustomEvent('zero2fit:fuel-updated', { detail:{ day:activeDay, entryId:entry.id } }));
     toast(`${entry.name} logged${save ? ' and saved' : ''}.`);
   });
 
@@ -317,11 +431,11 @@ function bindUi(page) {
   });
 
   document.getElementById('z17ClearDay')?.addEventListener('click', () => {
-    const entries = readState().meals?.[activeDay] || [];
+    const entries = readFuelState().meals?.[activeDay] || [];
     if (!entries.length) return;
     if (!window.confirm(`Clear ${entries.length} food entr${entries.length === 1 ? 'y' : 'ies'} from ${displayDay(activeDay)}?`)) return;
-    mutate(state => { state.meals[activeDay] = []; });
-    window.dispatchEvent(new CustomEvent('zero2fit:fuel-updated', { detail:{ day:activeDay } }));
+    clearLegacyToday();
+    mutateFuel(state => { state.meals[activeDay] = []; });
     toast('Food log cleared for this day.');
   });
 }
@@ -360,7 +474,8 @@ function renderSummary(state) {
     const input = document.getElementById(`z17Target${suffix}`);
     if (input && document.activeElement !== input) input.value = summary.targets[key] ?? '';
   }
-  document.getElementById('z17ClearDay')?.toggleAttribute('disabled', !entries.length);
+  const clear = document.getElementById('z17ClearDay');
+  if (clear) clear.disabled = !entries.length;
 }
 
 function renderCandidates(state) {
@@ -412,26 +527,63 @@ function renderLog(state) {
   }).join('');
 }
 
-export function renderFromState(state = readState()) {
+function ensureNutritionIntelligence() {
+  const intel = document.getElementById('z10Intelligence');
+  const stats = intel?.querySelector('.mini-stats');
+  if (!intel || !stats || document.getElementById('z17NutritionIntel')) return;
+  const block = document.createElement('div');
+  block.id = 'z17NutritionIntel';
+  block.className = 'z17-nutrition-intel';
+  stats.after(block);
+}
+
+function renderNutritionIntelligence(state) {
+  ensureNutritionIntelligence();
+  const target = document.getElementById('z17NutritionIntel');
+  if (!target) return;
+  const summary = core.nutritionConsistency(state.meals || {}, { now:new Date(`${today()}T12:00:00`).getTime(), days:7 });
+  const coverage = `${summary.daysLogged} / 7 days logged`;
+  const protein = Number.isFinite(summary.averageProtein) ? `${formatNumber(summary.averageProtein,1)} g protein / logged day` : 'Protein baseline not established';
+  const action = summary.daysLogged >= 4
+    ? 'Coverage is usable for personal week-to-week context; keep logging representative days.'
+    : 'Use Repeat last or Saved meals to reduce friction and build enough coverage for stronger personal context.';
+  target.innerHTML = `
+    <div class="eyebrow">Fuel context</div>
+    <div class="xp-row"><span><strong>${esc(coverage)}</strong><small>${esc(protein)} · observed intake only; no calorie or weight-loss target inferred.</small></span><strong>${Math.round(summary.coverage*100)}%</strong></div>
+    <p>${esc(action)}</p>`;
+}
+
+function render(state = readFuelState()) {
   if (!document.getElementById('z17Fuel')) return;
-  lastState = state;
   renderSummary(state);
   renderCandidates(state);
   renderSaved(state);
   renderLog(state);
+  renderNutritionIntelligence(state);
 }
 
-function migrate() {
-  const current = readState();
-  const result = core.migrateNutritionState(current);
-  if (!result.changed) return result.state;
-  mutate(state => {
-    state.meals = result.state.meals;
-    state.savedMeals = result.state.savedMeals;
-    state.nutritionTargets = result.state.nutritionTargets;
-    state.nutritionSchemaVersion = 1;
-  }, { render:false });
-  return result.state;
+function resetFuelIfAppReset() {
+  const afterRaw = localStorage.getItem(APP_STORAGE_KEY);
+  if (!resetBeforeRaw || afterRaw === resetBeforeRaw) return;
+  try {
+    const after = afterRaw ? JSON.parse(afterRaw) : {};
+    const looksReset = Number(after.totalXp || 0) === 0 && !(after.weights || []).length && !Object.values(after.meals || {}).some(entries => entries?.length);
+    if (!looksReset) return;
+    localStorage.removeItem(FUEL_STORAGE_KEY);
+    activeDay = today();
+    sessionStorage.setItem('zero2fit-fuel-day', activeDay);
+    render(readFuelState());
+  } catch {}
+}
+
+function bindResetBridge() {
+  document.addEventListener('click', event => {
+    if (event.target.closest('#resetDemo')) resetBeforeRaw = localStorage.getItem(APP_STORAGE_KEY);
+  }, true);
+  document.addEventListener('click', event => {
+    if (!event.target.closest('#resetDemo')) return;
+    setTimeout(resetFuelIfAppReset, 0);
+  });
 }
 
 function init() {
@@ -440,11 +592,12 @@ function init() {
   ensureStylesheet();
   document.body.classList.add('build017-fuel');
   ensureUi();
-  window.Zero2FitFuel = { renderFromState, coreVersion:1 };
-  const state = migrate();
-  renderFromState(state);
-  window.addEventListener('zero2fit:statechange', () => renderFromState(readState()));
-  window.addEventListener('focus', () => renderFromState(readState()));
+  bindResetBridge();
+  window.Zero2FitFuel = { readState:readFuelState, render, coreVersion:1 };
+  render(readFuelState());
+  window.addEventListener('zero2fit:personal-intelligence', () => renderNutritionIntelligence(readFuelState()));
+  window.addEventListener('focus', () => render(readFuelState()));
+  setTimeout(() => render(readFuelState()), 600);
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true });
