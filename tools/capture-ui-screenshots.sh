@@ -10,10 +10,19 @@ python3 -m http.server "$PORT" --bind 127.0.0.1 >"$SERVER_LOG" 2>&1 &
 SERVER_PID=$!
 trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
 
+server_ready=0
 for _ in {1..30}; do
-  if curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null; then break; fi
+  if curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null; then
+    server_ready=1
+    break
+  fi
   sleep 0.25
 done
+if [[ "$server_ready" != 1 ]]; then
+  echo 'Visual QA server did not become ready.' >&2
+  cat "$SERVER_LOG" >&2 || true
+  exit 1
+fi
 
 CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
 if [[ -z "$CHROME" ]]; then
@@ -24,18 +33,38 @@ fi
 capture() {
   local label="$1" width="$2" height="$3" name="$4" query="$5"
   local file="$OUT_DIR/${label}-${name}.png"
-  "$CHROME" \
+  local profile="${RUNNER_TEMP:-/tmp}/z2f-chrome-${label}-${name}-$$"
+  rm -rf "$profile"
+
+  set +e
+  timeout --signal=TERM --kill-after=5s 35s "$CHROME" \
     --headless=new \
     --no-sandbox \
     --disable-gpu \
     --disable-dev-shm-usage \
+    --disable-background-networking \
+    --disable-component-update \
+    --no-first-run \
+    --no-default-browser-check \
     --hide-scrollbars \
+    --user-data-dir="$profile" \
     --virtual-time-budget=6000 \
     --window-size="$width,$height" \
     --screenshot="$file" \
     "http://127.0.0.1:${PORT}/?${query}" >/dev/null 2>&1
-  test -s "$file"
-  echo "Captured $file"
+  local chrome_status=$?
+  set -e
+
+  rm -rf "$profile"
+  if [[ ! -s "$file" ]]; then
+    echo "Screenshot failed for ${label}-${name}; Chrome exit ${chrome_status}." >&2
+    return "${chrome_status:-1}"
+  fi
+  if [[ "$chrome_status" -ne 0 ]]; then
+    echo "Chrome exit ${chrome_status} after producing ${file}; accepting verified non-empty screenshot."
+  else
+    echo "Captured $file"
+  fi
 }
 
 capture iphone 393 852 today 'qaPage=today'
@@ -53,4 +82,10 @@ capture desktop 1440 1000 fuel 'qaPage=nutrition'
 capture desktop 1440 1000 progress 'qaPage=journey'
 capture desktop 1440 1000 devices 'qaPage=data'
 
-echo "UI screenshot set complete: $(find "$OUT_DIR" -name '*.png' | wc -l) images."
+count="$(find "$OUT_DIR" -name '*.png' | wc -l)"
+if [[ "$count" -ne 13 ]]; then
+  echo "Expected 13 screenshots, found ${count}." >&2
+  exit 1
+fi
+
+echo "UI screenshot set complete: ${count} images."
