@@ -1,8 +1,8 @@
-const CACHE = 'zero2fit-shell-v17-fuel';
+const CACHE = 'zero2fit-shell-v18-food-lookup';
 const SHELL = [
-  './', './index.html', './styles.css', './build002.css', './build003.css', './build004.css', './build006.css', './build007.css', './build012.css', './build014.css', './build016.css', './build017.css',
-  './zero2fit-config.js', './app.js', './storage.js', './remote-sync.js', './ingestion.js', './device-core.mjs', './training-core.mjs', './adaptive-core.mjs', './intelligence-core.mjs', './adventure-core.mjs', './adventure-visual-core.mjs', './photo-core.mjs', './workout-execution-core.mjs', './nutrition-core.mjs',
-  './build003-integration.js', './build004-integration.js', './build007-adventure.js', './build008-photos.js', './build008-device-sync.js', './build009-adaptive.js', './build010-intelligence.js', './build011-adventure.js', './build012-productization.js', './build014-workout-execution.js', './build016-adventure-visual.js', './build017-fuel.js',
+  './', './index.html', './styles.css', './build002.css', './build003.css', './build004.css', './build006.css', './build007.css', './build012.css', './build014.css', './build016.css', './build017.css', './build018.css',
+  './zero2fit-config.js', './app.js', './storage.js', './remote-sync.js', './ingestion.js', './device-core.mjs', './training-core.mjs', './adaptive-core.mjs', './intelligence-core.mjs', './adventure-core.mjs', './adventure-visual-core.mjs', './photo-core.mjs', './workout-execution-core.mjs', './nutrition-core.mjs', './food-lookup-core.mjs',
+  './build003-integration.js', './build004-integration.js', './build007-adventure.js', './build008-photos.js', './build008-device-sync.js', './build009-adaptive.js', './build010-intelligence.js', './build011-adventure.js', './build012-productization.js', './build014-workout-execution.js', './build016-adventure-visual.js', './build017-fuel.js', './build018-food-lookup.js',
   './data/generated/training_exercises.json', './data/generated/catalog_summary.json', './data/generated/training_catalog_summary.json',
   './data/programming_rules.json', './data/substitution_rules.json', './data/location_profiles.json', './data/energy_model.json', './data/adventure_catalog.json',
   './manifest.webmanifest', './assets/z2f-icon-180.png', './assets/z2f-icon-192.png', './assets/z2f-icon-512.png'
