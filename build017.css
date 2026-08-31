@@ -129,10 +129,13 @@ body.build004.build017-fuel .z17-meal-actions button:disabled { opacity:.35; cur
 body.build004.build017-fuel .empty-state.compact { min-height:auto; padding:14px; }
 body.build004.build017-fuel .z17-nutrition-intel { display:grid; gap:7px; margin:12px 0 4px; }
 body.build004.build017-fuel .z17-nutrition-intel .xp-row {
+  display:grid !important; grid-template-columns:minmax(0,1fr) auto !important; align-items:start !important; gap:9px !important;
   border:1px solid #d9ebe7; border-radius:13px; padding:10px 11px; background:linear-gradient(135deg,#f0faf8,#fbfefd);
 }
-body.build004.build017-fuel .z17-nutrition-intel .xp-row small { color:#68807e; }
-body.build004.build017-fuel .z17-nutrition-intel .xp-row > strong { color:var(--z15-teal); }
+body.build004.build017-fuel .z17-nutrition-intel .xp-row > span { display:grid !important; gap:3px; min-width:0; }
+body.build004.build017-fuel .z17-nutrition-intel .xp-row > span strong { display:block; color:#233a51; font-size:12px; line-height:1.25; }
+body.build004.build017-fuel .z17-nutrition-intel .xp-row > span small { display:block; color:#68807e; font-size:9.5px; line-height:1.45; white-space:normal; }
+body.build004.build017-fuel .z17-nutrition-intel .xp-row > strong { color:var(--z15-teal); font-size:14px; justify-self:end; }
 body.build004.build017-fuel .z17-nutrition-intel p { margin:0; color:#718096; font-size:10px; line-height:1.5; }
 
 @media (max-width:820px) {
@@ -169,6 +172,8 @@ body.build004.build017-fuel .z17-nutrition-intel p { margin:0; color:#718096; fo
   body.build004.build017-fuel .z17-meal-row { grid-template-columns:minmax(0,1fr) auto; gap:8px; }
   body.build004.build017-fuel .z17-meal-actions { grid-column:1/-1; justify-content:flex-end; margin-top:-2px; }
   body.build004.build017-fuel .z17-meal-actions button { width:32px; height:30px; }
+  body.build004.build017-fuel .z17-nutrition-intel .xp-row { grid-template-columns:1fr !important; gap:5px !important; }
+  body.build004.build017-fuel .z17-nutrition-intel .xp-row > strong { justify-self:start; padding:3px 7px; border-radius:999px; background:#e6f6f3; }
 }
 
 @media (max-width:420px) {
