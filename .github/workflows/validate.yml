@@ -22,6 +22,7 @@ jobs:
           node --check adaptive-core.mjs
           node --check intelligence-core.mjs
           node --check workout-execution-core.mjs
+          node --check nutrition-core.mjs
           node --check storage.js
           node --check ingestion.js
           node --check build003-integration.js
@@ -42,6 +43,7 @@ jobs:
           node --check build012-productization.js
           node --check build014-workout-execution.js
           node --check build016-adventure-visual.js
+          node --check build017-fuel.js
           node --check sw.js
           node --check tools/build-training-catalog.mjs
           node --check tools/validate-fitness-data.mjs
@@ -49,6 +51,7 @@ jobs:
           node --check tools/test-adaptive-core.mjs
           node --check tools/test-intelligence-core.mjs
           node --check tools/test-workout-execution-core.mjs
+          node --check tools/test-nutrition-core.mjs
           node --check tools/test-device-ingestion.mjs
           node --check tools/test-device-driven-progress.mjs
           node --check tools/test-remote-sync.mjs
@@ -70,11 +73,13 @@ jobs:
           test -s build012.css
           test -s build014.css
           test -s build016.css
+          test -s build017.css
           test -s app.js
           test -s training-core.mjs
           test -s adaptive-core.mjs
           test -s intelligence-core.mjs
           test -s workout-execution-core.mjs
+          test -s nutrition-core.mjs
           test -s storage.js
           test -s ingestion.js
           test -s build003-integration.js
@@ -95,7 +100,9 @@ jobs:
           test -s build012-productization.js
           test -s build014-workout-execution.js
           test -s build016-adventure-visual.js
+          test -s build017-fuel.js
           test -s tools/test-adventure-visual-core.mjs
+          test -s tools/test-nutrition-core.mjs
           test -s manifest.webmanifest
           test -s sw.js
           test -s assets/z2f-icon-180.png
@@ -138,17 +145,23 @@ jobs:
           grep -q 'build012-productization.js' build011-adventure.js
           grep -q 'build014-workout-execution.js' build012-productization.js
           grep -q 'build016-adventure-visual.js' build012-productization.js
+          grep -q 'build017-fuel.js' build016-adventure-visual.js
           grep -q 'workout-execution-core.mjs' build014-workout-execution.js
-          grep -q 'zero2fit-shell-v16-adventure' sw.js
+          grep -q 'zero2fit-shell-v17-fuel' sw.js
           grep -q 'build016-adventure-visual.js' sw.js
           grep -q 'adventure-visual-core.mjs' sw.js
+          grep -q 'build017-fuel.js' sw.js
+          grep -q 'nutrition-core.mjs' sw.js
+          grep -q 'build017.css' sw.js
           grep -Fq 'nav-item[data-page="nutrition"]' build012.css
           grep -q 'serviceWorker.register' build012-productization.js
           grep -q -- '--z15-blue:#3f7df4' build012.css
           grep -q -- '--z15-bg:#f5f7fb' build012.css
           if grep -q '#b7f34a' build016.css; then echo 'Build 016 must not reintroduce the fluorescent lime theme.'; exit 1; fi
-          grep -q '#070b09' build006.css
-          grep -q '#b7f34a' build006.css
+          if grep -q '#b7f34a\|#070b09' build017.css; then echo 'Build 017 Fuel must stay on the clean theme.'; exit 1; fi
+          grep -q 'zero2fit-fuel-v2' build017-fuel.js
+          grep -q 'nutrition_entry' build017-fuel.js
+          grep -q 'No target set' build017-fuel.js
           grep -q 'progress_photos' storage.js
           grep -q 'raw_photos_included: false' storage.js
           grep -q 'device_source_observations' supabase/schema.sql
@@ -176,6 +189,9 @@ jobs:
 
       - name: Test guided workout execution core
         run: node tools/test-workout-execution-core.mjs
+
+      - name: Test Fuel nutrition core
+        run: node tools/test-nutrition-core.mjs
 
       - name: Test personal intelligence
         run: node tools/test-intelligence-core.mjs
