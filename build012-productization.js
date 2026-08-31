@@ -27,7 +27,7 @@ function ensureMeta() {
   }
   const metas = [
     ['apple-mobile-web-app-capable','yes'],
-    ['apple-mobile-web-app-status-bar-style','black-translucent'],
+    ['apple-mobile-web-app-status-bar-style','default'],
     ['apple-mobile-web-app-title','Zero2Fit'],
     ['mobile-web-app-capable','yes']
   ];
@@ -330,3 +330,4 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 else init();
 
 import('./build014-workout-execution.js').catch(error => console.warn('Zero2Fit Build 014 guided workout execution failed to load', error));
+import('./build016-adventure-visual.js').catch(error => console.warn('Zero2Fit Build 016 Adventure visual extension failed to load', error));
