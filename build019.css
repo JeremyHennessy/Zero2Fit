@@ -1,0 +1,36 @@
+/* Build 019 — Fuel joins the existing authenticated private-sync path. */
+body.build004.build019-fuel-sync .z19-fuel-sync {
+  display:grid;
+  grid-template-columns:9px minmax(0,1fr);
+  align-items:start;
+  gap:9px;
+  margin-top:10px;
+  padding:10px 11px;
+  border:1px solid #dfe7ef;
+  border-radius:13px;
+  background:linear-gradient(135deg,#f8fbff,#f8fcfb);
+}
+body.build004.build019-fuel-sync .z19-sync-dot {
+  width:9px;
+  height:9px;
+  margin-top:3px;
+  border-radius:50%;
+  background:#a8b4c3;
+  box-shadow:0 0 0 4px rgba(168,180,195,.12);
+}
+body.build004.build019-fuel-sync .z19-fuel-sync[data-state="ready"] .z19-sync-dot {
+  background:var(--z15-blue);
+  box-shadow:0 0 0 4px rgba(63,125,244,.12);
+}
+body.build004.build019-fuel-sync .z19-fuel-sync[data-state="signed-in"] .z19-sync-dot {
+  background:var(--z15-teal);
+  box-shadow:0 0 0 4px rgba(26,169,154,.13);
+}
+body.build004.build019-fuel-sync .z19-fuel-sync > div { display:grid; gap:2px; min-width:0; }
+body.build004.build019-fuel-sync .z19-fuel-sync strong { color:#334b66; font-size:10px; }
+body.build004.build019-fuel-sync .z19-fuel-sync small { color:#7d8b9d; font-size:9.5px; line-height:1.45; }
+
+@media (max-width:820px) {
+  body.build004.build019-fuel-sync .z19-fuel-sync { margin-top:8px; padding:9px 10px; }
+  body.build004.build019-fuel-sync .z19-fuel-sync small { font-size:9px; }
+}
