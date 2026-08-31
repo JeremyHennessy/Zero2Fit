@@ -2,7 +2,7 @@
   "sources": {
     "exerciseCatalog": {
       "repository": "yuhonas/free-exercise-db",
-      "commit": "b0eed061e1c832b3ed815fbaa4b45b3cdc14df49",
+      "commit": "a859101d633a01c4a1a920d6a8ce41dabba0705f",
       "license": "Unlicense / public domain",
       "sourceUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json"
     },
@@ -15,10 +15,10 @@
     }
   },
   "counts": {
-    "exercises": 873,
+    "exercises": 876,
     "metActivities": 1111,
     "homeCompatibleExercises": 188,
-    "fullGymCompatibleExercises": 873
+    "fullGymCompatibleExercises": 876
   },
   "reconciliation": {
     "publishedReportedTotal": 1114,
@@ -34,7 +34,7 @@
     "machine": 67,
     "other": 122,
     "foam_roller": 11,
-    "kettlebell": 53,
+    "kettlebell": 56,
     "dumbbell": 123,
     "cable_machine": 81,
     "barbell": 170,
@@ -49,14 +49,14 @@
     "adductors": 13,
     "quadriceps": 148,
     "biceps": 53,
-    "shoulders": 127,
+    "shoulders": 129,
     "chest": 84,
     "middle back": 34,
     "calves": 28,
     "glutes": 22,
     "lower back": 27,
     "lats": 38,
-    "triceps": 71,
+    "triceps": 73,
     "traps": 15,
     "forearms": 25,
     "neck": 8,
@@ -68,7 +68,7 @@
     "elbow_flexion": 50,
     "plyometric": 61,
     "vertical_push": 16,
-    "shoulder_isolation": 78,
+    "shoulder_isolation": 80,
     "push_other": 43,
     "posterior_chain": 36,
     "horizontal_pull": 39,
@@ -79,7 +79,7 @@
     "knee_flexion": 5,
     "vertical_pull": 18,
     "hip_adduction": 2,
-    "elbow_extension": 35,
+    "elbow_extension": 36,
     "squat": 50,
     "lunge": 12,
     "pull_other": 22,
