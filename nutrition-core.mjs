@@ -136,7 +136,8 @@ export function migrateNutritionState(input = {}) {
 }
 
 export function summarizeDay(entries = [], targets = {}) {
-  const normalized = entries.map((entry, index) => normalizeMealEntry(entry, { day:entry?.day, index }));
+  const source = Array.isArray(entries) ? entries : [];
+  const normalized = source.map((entry, index) => normalizeMealEntry(entry, { day:entry?.day, index }));
   const totals = normalized.reduce((sum, entry) => ({
     calories:sum.calories + entry.calories,
     protein:sum.protein + entry.protein,
@@ -290,7 +291,7 @@ export function nutritionConsistency(meals = {}, { now = Date.now(), days = 7 } 
   const size = Math.max(1, Math.round(finite(days, 7)));
   const keys = Array.from({ length:size }, (_, index) => addDays(end, -(size - 1 - index)));
   const normalized = normalizeMealMap(meals);
-  const summaries = keys.map(day => ({ day, ...summarizeDay(normalized[day] || {}) }));
+  const summaries = keys.map(day => ({ day, ...summarizeDay(normalized[day] || []) }));
   const logged = summaries.filter(row => row.count > 0);
   const average = key => logged.length ? logged.reduce((sum,row) => sum + row.totals[key], 0) / logged.length : null;
   return {
