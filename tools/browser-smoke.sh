@@ -126,6 +126,14 @@ assert_dom 'HealthKit acceptance'
 assert_dom 'Private-store infrastructure self-test'
 assert_dom 'Run local checks'
 assert_dom './build026.css'
+assert_dom 'id="z28HealthKitEvidence"' 'Build 028 HealthKit evidence matrix'
+assert_dom 'Physical HealthKit evidence · Build 028'
+assert_dom 'Resolve the source before you verify it.'
+assert_dom 'Observed HealthKit bundle'
+assert_dom 'Physical background delivery confirmed'
+assert_dom 'Trust boundary:'
+assert_dom 'Save evidence locally'
+assert_dom './build028.css'
 
 if grep -Fq 'Supabase remains disabled until authenticated RLS is configured and tested.' "$DOM_FILE"; then echo 'Stale pre-private-sync Supabase copy is still rendered.' >&2; exit 1; fi
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then echo 'Workout catalog load failed in browser.' >&2; exit 1; fi
@@ -142,6 +150,6 @@ if grep -q 'Zero2Fit Build 017 Fuel extension failed to load' "$DOM_FILE"; then 
 if grep -q 'Food lookup is not configured' "$DOM_FILE"; then echo 'Build 018 food lookup configuration failed.' >&2; exit 1; fi
 if grep -q 'Zero2Fit Build 019 Fuel sync extension failed to load' "$DOM_FILE"; then echo 'Build 019 Fuel private-sync module failed in browser.' >&2; exit 1; fi
 if grep -q 'Zero2Fit Build 021 workout continuity extension failed to load' "$DOM_FILE"; then echo 'Build 021 workout-continuity module failed in browser.' >&2; exit 1; fi
-if grep -q 'Zero2Fit Build 022 loader failed to load\|Zero2Fit Build 022 private photo continuity failed to load\|Zero2Fit Build 022/024 private continuity failed to load\|Zero2Fit Build 022/024/026 private continuity failed to load' "$DOM_FILE"; then echo 'Build 022/024/026 private continuity modules failed in browser.' >&2; exit 1; fi
+if grep -q 'Zero2Fit Build 022 loader failed to load\|Zero2Fit Build 022 private photo continuity failed to load\|Zero2Fit Build 022/024 private continuity failed to load\|Zero2Fit Build 022/024/026 private continuity failed to load\|Zero2Fit Build 022/024/026/028 private continuity failed to load' "$DOM_FILE"; then echo 'Build 022/024/026/028 private continuity modules failed in browser.' >&2; exit 1; fi
 
-echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution + private set/load continuity, devices, Build 024 private-store acceptance + Build 026 cross-browser/physical guide, clean iPhone UI, Fuel + food lookup + private sync, adaptive/personal intelligence, RPG adventure, private progress-photo continuity, PWA/productization, and private-sync shell rendered."
+echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution + private set/load continuity, devices, Build 024 private-store acceptance + Build 026 cross-browser guide + Build 028 HealthKit evidence gate, clean iPhone UI, Fuel + food lookup + private sync, adaptive/personal intelligence, RPG adventure, private progress-photo continuity, PWA/productization, and private-sync shell rendered."
