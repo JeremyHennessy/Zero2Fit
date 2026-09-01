@@ -1,3 +1,4 @@
+// Supersedes zero2fit-shell-v21-workout-sync.
 const CACHE = 'zero2fit-shell-v22-photo-sync';
 const SHELL = [
   './', './index.html', './styles.css', './build002.css', './build003.css', './build004.css', './build006.css', './build007.css', './build012.css', './build014.css', './build016.css', './build017.css', './build018.css', './build019.css', './build021.css', './build022.css',
