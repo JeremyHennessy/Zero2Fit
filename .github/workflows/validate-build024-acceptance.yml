@@ -1,0 +1,47 @@
+name: Validate Build 024 Acceptance
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check Build 024 syntax and wiring
+        run: |
+          node --check acceptance-core.mjs
+          node --check build024-private-acceptance.js
+          node --check tools/test-acceptance-core.mjs
+          test -s acceptance-core.mjs
+          test -s build024-private-acceptance.js
+          test -s build024.css
+          test -s tools/test-acceptance-core.mjs
+          grep -q 'build024-private-acceptance.js' build022-loader.js
+          grep -q 'zero2fit-shell-v24-private-acceptance' sw.js
+          grep -q 'acceptance-core.mjs' sw.js
+          grep -q 'build024-private-acceptance.js' sw.js
+          grep -q 'build024.css' sw.js
+          grep -q 'normalized_events' build024-private-acceptance.js
+          grep -q 'user_preferences' build024-private-acceptance.js
+          grep -q 'workout_sessions' build024-private-acceptance.js
+          grep -q 'workout_sets' build024-private-acceptance.js
+          grep -q 'progress_photo_sessions' build024-private-acceptance.js
+          grep -q 'progress_photo_assets' build024-private-acceptance.js
+          grep -q '/storage/v1/object/authenticated/progress-photos/' build024-private-acceptance.js
+          grep -q 'Anonymous application-table access blocked' build024-private-acceptance.js
+          grep -q 'cleanupProbe' build024-private-acceptance.js
+          grep -q 'remote.syncNow' build024-private-acceptance.js
+          grep -q 'zero2fit_acceptance_v1' acceptance-core.mjs
+          if grep -q '#b7f34a\|#070b09' build024.css; then echo 'Build 024 must stay on the clean theme.'; exit 1; fi
+          if grep -q 'service_role\|sb_secret_' build024-private-acceptance.js acceptance-core.mjs; then echo 'Build 024 must not use privileged credentials.'; exit 1; fi
+
+      - name: Test acceptance core
+        run: node tools/test-acceptance-core.mjs
