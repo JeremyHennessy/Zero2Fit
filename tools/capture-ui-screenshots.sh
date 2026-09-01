@@ -33,42 +33,54 @@ fi
 capture() {
   local label="$1" width="$2" height="$3" name="$4" query="$5"
   local file="$OUT_DIR/${label}-${name}.png"
-  local profile="${RUNNER_TEMP:-/tmp}/z2f-chrome-${label}-${name}-$$"
   local target="http://127.0.0.1:${PORT}/?${query}"
   if [[ "$query" == path:* ]]; then
     target="http://127.0.0.1:${PORT}/${query#path:}"
   fi
-  rm -rf "$profile"
 
-  set +e
-  timeout --signal=TERM --kill-after=5s 35s "$CHROME" \
-    --headless=new \
-    --no-sandbox \
-    --disable-gpu \
-    --disable-dev-shm-usage \
-    --disable-background-networking \
-    --disable-component-update \
-    --no-first-run \
-    --no-default-browser-check \
-    --hide-scrollbars \
-    --user-data-dir="$profile" \
-    --virtual-time-budget=6000 \
-    --window-size="$width,$height" \
-    --screenshot="$file" \
-    "$target" >/dev/null 2>&1
-  local chrome_status=$?
-  set -e
+  local attempt chrome_status profile
+  for attempt in 1 2; do
+    profile="${RUNNER_TEMP:-/tmp}/z2f-chrome-${label}-${name}-${attempt}-$$"
+    rm -rf "$profile" "$file"
 
-  rm -rf "$profile"
-  if [[ ! -s "$file" ]]; then
-    echo "Screenshot failed for ${label}-${name}; Chrome exit ${chrome_status}." >&2
-    return "${chrome_status:-1}"
-  fi
-  if [[ "$chrome_status" -ne 0 ]]; then
-    echo "Chrome exit ${chrome_status} after producing ${file}; accepting verified non-empty screenshot."
-  else
-    echo "Captured $file"
-  fi
+    set +e
+    timeout --signal=TERM --kill-after=5s 35s "$CHROME" \
+      --headless=new \
+      --no-sandbox \
+      --disable-gpu \
+      --disable-dev-shm-usage \
+      --disable-background-networking \
+      --disable-component-update \
+      --no-first-run \
+      --no-default-browser-check \
+      --hide-scrollbars \
+      --user-data-dir="$profile" \
+      --virtual-time-budget=6000 \
+      --window-size="$width,$height" \
+      --screenshot="$file" \
+      "$target" >/dev/null 2>&1
+    chrome_status=$?
+    set -e
+
+    rm -rf "$profile"
+    if [[ -s "$file" ]]; then
+      if [[ "$chrome_status" -ne 0 ]]; then
+        echo "Chrome exit ${chrome_status} after producing ${file}; accepting verified non-empty screenshot."
+      elif [[ "$attempt" -eq 2 ]]; then
+        echo "Captured $file on retry."
+      else
+        echo "Captured $file"
+      fi
+      return 0
+    fi
+
+    if [[ "$attempt" -eq 1 ]]; then
+      echo "Screenshot attempt 1 failed for ${label}-${name}; Chrome exit ${chrome_status}. Retrying once with a fresh profile." >&2
+    fi
+  done
+
+  echo "Screenshot failed for ${label}-${name} after 2 attempts; final Chrome exit ${chrome_status}." >&2
+  return "${chrome_status:-1}"
 }
 
 capture iphone 393 852 today 'qaPage=today'

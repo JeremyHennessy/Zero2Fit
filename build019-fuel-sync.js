@@ -203,3 +203,5 @@ function init() {
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true });
 else init();
+
+import('./build021-workout-sync.js').catch(error => console.warn('Zero2Fit Build 021 workout continuity extension failed to load', error));

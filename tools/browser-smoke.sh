@@ -124,10 +124,15 @@ assert_dom './build018.css'
 assert_dom 'id="z19FuelSync"' 'Build 019 Fuel private-sync strip'
 assert_dom 'Fuel private sync'
 assert_dom 'Fuel history is local + backup.'
-assert_dom 'Fuel history, saved meals and explicit nutrition targets'
 assert_dom 'Browser storage remains the local cache.'
 assert_dom 'full Fuel store'
 assert_dom './build019.css'
+
+assert_dom 'id="z21WorkoutSyncStatus"' 'Build 021 workout-continuity strip'
+assert_dom 'Workout continuity'
+assert_dom 'Workout history is local + backup.'
+assert_dom 'completed workout sessions and set/load history'
+assert_dom './build021.css'
 
 if grep -Fq 'Supabase remains disabled until authenticated RLS is configured and tested.' "$DOM_FILE"; then
   echo 'Stale pre-private-sync Supabase copy is still rendered.' >&2
@@ -199,4 +204,9 @@ if grep -q 'Zero2Fit Build 019 Fuel sync extension failed to load' "$DOM_FILE"; 
   exit 1
 fi
 
-echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution, devices, clean iPhone UI, Fuel 2.0 + food lookup + private-sync shell, adaptive/personal intelligence, RPG adventure v2 + visual battlefield, PWA/productization, progress-photo modules, and private-sync shell rendered."
+if grep -q 'Zero2Fit Build 021 workout continuity extension failed to load' "$DOM_FILE"; then
+  echo 'Build 021 workout-continuity module failed in browser.' >&2
+  exit 1
+fi
+
+echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution + private set/load continuity, devices, clean iPhone UI, Fuel 2.0 + food lookup + private sync, adaptive/personal intelligence, RPG adventure v2 + visual battlefield, PWA/productization, progress-photo modules, and private-sync shell rendered."

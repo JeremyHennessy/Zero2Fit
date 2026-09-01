@@ -24,6 +24,7 @@ jobs:
           node --check workout-execution-core.mjs
           node --check nutrition-core.mjs
           node --check food-lookup-core.mjs
+          node --check workout-sync-core.mjs
           node --check storage.js
           node --check ingestion.js
           node --check build003-integration.js
@@ -47,6 +48,7 @@ jobs:
           node --check build017-fuel.js
           node --check build018-food-lookup.js
           node --check build019-fuel-sync.js
+          node --check build021-workout-sync.js
           node --check sw.js
           node --check tools/build-training-catalog.mjs
           node --check tools/validate-fitness-data.mjs
@@ -59,6 +61,7 @@ jobs:
           node --check tools/test-device-ingestion.mjs
           node --check tools/test-device-driven-progress.mjs
           node --check tools/test-remote-sync.mjs
+          node --check tools/test-workout-sync.mjs
           node --check tools/test-adventure-core.mjs
           node --check tools/test-adventure-visual-core.mjs
           node --check tools/test-photo-core.mjs
@@ -80,6 +83,7 @@ jobs:
           test -s build017.css
           test -s build018.css
           test -s build019.css
+          test -s build021.css
           test -s app.js
           test -s training-core.mjs
           test -s adaptive-core.mjs
@@ -87,6 +91,7 @@ jobs:
           test -s workout-execution-core.mjs
           test -s nutrition-core.mjs
           test -s food-lookup-core.mjs
+          test -s workout-sync-core.mjs
           test -s storage.js
           test -s ingestion.js
           test -s build003-integration.js
@@ -110,9 +115,11 @@ jobs:
           test -s build017-fuel.js
           test -s build018-food-lookup.js
           test -s build019-fuel-sync.js
+          test -s build021-workout-sync.js
           test -s tools/test-adventure-visual-core.mjs
           test -s tools/test-nutrition-core.mjs
           test -s tools/test-food-lookup-core.mjs
+          test -s tools/test-workout-sync.mjs
           test -s manifest.webmanifest
           test -s sw.js
           test -s assets/z2f-icon-180.png
@@ -159,8 +166,9 @@ jobs:
           grep -q 'build016-adventure-visual.js' build012-productization.js
           grep -q 'build017-fuel.js' build016-adventure-visual.js
           grep -q 'build019-fuel-sync.js' build018-food-lookup.js
+          grep -q 'build021-workout-sync.js' build019-fuel-sync.js
           grep -q 'workout-execution-core.mjs' build014-workout-execution.js
-          grep -q 'zero2fit-shell-v19-fuel-sync' sw.js
+          grep -q 'zero2fit-shell-v21-workout-sync' sw.js
           grep -q 'build016-adventure-visual.js' sw.js
           grep -q 'adventure-visual-core.mjs' sw.js
           grep -q 'build017-fuel.js' sw.js
@@ -171,6 +179,9 @@ jobs:
           grep -q 'build018.css' sw.js
           grep -q 'build019-fuel-sync.js' sw.js
           grep -q 'build019.css' sw.js
+          grep -q 'workout-sync-core.mjs' sw.js
+          grep -q 'build021-workout-sync.js' sw.js
+          grep -q 'build021.css' sw.js
           grep -Fq 'nav-item[data-page="nutrition"]' build012.css
           grep -q 'serviceWorker.register' build012-productization.js
           grep -q -- '--z15-blue:#3f7df4' build012.css
@@ -179,6 +190,7 @@ jobs:
           if grep -q '#b7f34a\|#070b09' build017.css; then echo 'Build 017 Fuel must stay on the clean theme.'; exit 1; fi
           if grep -q '#b7f34a\|#070b09' build018.css; then echo 'Build 018 lookup must stay on the clean theme.'; exit 1; fi
           if grep -q '#b7f34a\|#070b09' build019.css; then echo 'Build 019 Fuel sync must stay on the clean theme.'; exit 1; fi
+          if grep -q '#b7f34a\|#070b09' build021.css; then echo 'Build 021 workout sync must stay on the clean theme.'; exit 1; fi
           grep -q 'zero2fit-fuel-v2' build017-fuel.js
           grep -q 'nutrition_entry' build017-fuel.js
           grep -q 'No target set' build017-fuel.js
@@ -194,6 +206,10 @@ jobs:
           grep -q 'hydrateFuelHistory' remote-sync.js
           grep -q 'z19FuelSync' build019-fuel-sync.js
           grep -q 'Food history is local + backup\|Fuel history is local + backup' build019-fuel-sync.js
+          grep -q 'workout_sessions' build021-workout-sync.js
+          grep -q 'workout_sets' build021-workout-sync.js
+          grep -q 'zero2fit-workout-sync-meta-v1' build021-workout-sync.js
+          grep -q 'syncWorkoutContinuity' build021-workout-sync.js
           grep -q 'search_terms' supabase/functions/food-lookup/index.ts
           grep -q '/api/v3/product/' supabase/functions/food-lookup/index.ts
           grep -q 'Zero2Fit/0.18' supabase/functions/food-lookup/index.ts
@@ -203,6 +219,8 @@ jobs:
           grep -q 'raw_photos_included: false' storage.js
           grep -q 'device_source_observations' supabase/schema.sql
           grep -q 'device_source_verifications' supabase/schema.sql
+          grep -q 'workout_sessions' supabase/schema.sql
+          grep -q 'workout_sets' supabase/schema.sql
           grep -q 'source_verification_id' device-core.mjs
           grep -q '"version": 2' data/adventure_catalog.json
           grep -q '"materials"' data/adventure_catalog.json
@@ -244,6 +262,9 @@ jobs:
 
       - name: Test private sync contract
         run: node tools/test-remote-sync.mjs
+
+      - name: Test workout private sync continuity
+        run: node tools/test-workout-sync.mjs
 
       - name: Test full RPG adventure engine
         run: node tools/test-adventure-core.mjs
