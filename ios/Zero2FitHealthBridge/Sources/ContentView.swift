@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var model = BridgeViewModel()
+    private let healthKitEvidenceURL = URL(string: "https://jeremyhennessy.github.io/Zero2Fit/?activation=healthkit")!
 
     var body: some View {
         NavigationStack {
@@ -117,6 +118,19 @@ struct ContentView: View {
                                         .foregroundStyle(.secondary)
                                 }
                             }
+                        }
+
+                        if model.isSignedIn {
+                            Link(destination: healthKitEvidenceURL) {
+                                Label("Open Zero2Fit HealthKit evidence", systemImage: "arrow.up.right.square")
+                            }
+                            Text("Opens the live web evidence matrix. The handoff URL contains only activation=healthkit—no source bundle ID, health value, verification result or credential.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Text("Sign in and sync these observations privately before opening the web evidence matrix.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
                     }
                 }
