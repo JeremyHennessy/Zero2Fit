@@ -226,3 +226,5 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 else init();
 
 window.Zero2FitWorkoutSync = { syncWorkoutContinuity, pullWorkoutRows };
+
+import('./build022-loader.js').catch(error => console.warn('Zero2Fit Build 022 loader failed to load', error));
