@@ -14,7 +14,7 @@ struct SourceMetricSnapshot: Identifiable, Equatable, Sendable {
         guard let latestValue else { return "No recent value" }
         switch latestValue {
         case .number(let value):
-            let digits = metricType == "steps" ? 0 : (abs(value) >= 100 ? 0 : 1)
+            let digits = Self.fractionDigits(for: metricType)
             let formatted = value.formatted(.number.precision(.fractionLength(digits)))
             return unit.map { "\(formatted) \($0)" } ?? formatted
         case .text(let value):
@@ -28,6 +28,19 @@ struct SourceMetricSnapshot: Identifiable, Equatable, Sendable {
             parts.append("latest \(date.formatted(date: .abbreviated, time: .shortened))")
         }
         return parts.joined(separator: " · ")
+    }
+
+    static func fractionDigits(for metricType: String) -> Int {
+        switch metricType {
+        case "steps", "heart_rate", "resting_heart_rate", "active_energy", "exercise_time":
+            return 0
+        case "walking_running_distance":
+            return 2
+        case "weight", "body_fat_percentage", "bmi", "lean_body_mass", "hrv_sdnn", "spo2", "vo2_max":
+            return 1
+        default:
+            return 1
+        }
     }
 
     static func prettyValue(_ value: String) -> String {
