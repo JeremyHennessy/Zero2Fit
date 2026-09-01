@@ -4,25 +4,26 @@ This file is the concise technical checkpoint for future Zero2Fit work. It disti
 
 ## Production application checkpoint
 
-**Last functional application build:** Build 022 — `75ad9e664b82405706302ccb80a5b6e47de2c678`
+**Last functional application build:** Build 024 — `6bf6531c08e21f0070a63e8ac5d72b242e6fca58`
 
-Build 023 is documentation-only and may place a newer commit on `main` without changing the application runtime. Use the Build 022 SHA above when comparing functional application behavior.
+Build 025 is documentation-only and may place a newer commit on `main` without changing the application runtime. Use the Build 024 SHA above when comparing functional application behavior.
 
 Production target:
 
 `https://jeremyhennessy.github.io/Zero2Fit/`
 
-Build 022 post-merge verification on the exact functional SHA:
+Build 024 post-merge verification on the exact functional SHA:
 
 | Gate | Run | Result |
 |---|---:|---|
-| Validate Zero2Fit | `33458760424` | success |
-| Build 022 focused photo-sync validation | `33458760396` | success |
-| Visual QA Screenshots | `33458760380` | success |
-| Sync fitness reference data | `33458760299` | success |
-| Pages build and deployment | `33458759720` | success |
+| Validate Zero2Fit | `33460298228` | success |
+| Build 024 focused private-acceptance validation | `33460298374` | success |
+| Build 022 focused photo-sync validation | `33460298232` | success |
+| Visual QA Screenshots | `33460298214` | success |
+| Sync fitness reference data | `33460298243` | success |
+| Pages build and deployment | `33460297789` | success |
 
-Reference sync did not advance `main` after Build 022.
+Reference sync did not advance `main` after Build 024.
 
 ## Current product surface
 
@@ -30,7 +31,7 @@ Daily iPhone navigation:
 
 **Today · Train · Fuel · Adventure · Progress**
 
-Devices, private sync, backup and setup live under Settings rather than occupying a daily navigation slot.
+Devices, private sync, backup, source verification and private-account acceptance live under Settings rather than occupying a daily navigation slot.
 
 Current visual system:
 
@@ -140,6 +141,26 @@ Implemented and software-verified through Build 022:
 
 Human two-browser blob round-trip still belongs to Build 020.
 
+### Build 024 private-account acceptance harness
+
+Implemented and software-verified:
+
+- appears only in the signed-in private-sync panel
+- uses the public Supabase publishable key plus the real authenticated user JWT; no privileged key
+- verifies authenticated account identity
+- verifies anonymous application-table REST access is rejected
+- exercises normalized-event insert → select → update → delete
+- snapshots, writes, reads and restores the existing user-preferences row
+- exercises linked workout-session/workout-set insert/read/update/delete behavior
+- exercises progress-photo session/asset ownership and Storage-path metadata
+- uploads a tiny object to `progress-photos/<user>/acceptance/...`, downloads it, deletes it and verifies it is no longer readable
+- cleans synthetic probe data even if a check fails
+- runs the real fully wrapped `Sync now` pipeline only after probe cleanup
+- persists `settings.zero2fit_acceptance_v1` only after every infrastructure check passes
+- records a local per-browser acceptance result
+
+The harness is intentionally **one-browser infrastructure acceptance**. A second browser using the same real account is still required to prove account reconstruction/continuity. Because the live project still has zero auth users, the authenticated harness has not yet been human-executed.
+
 ## Reference data
 
 Current generated catalogs:
@@ -194,7 +215,7 @@ Active Edge Functions:
 
 - `food-lookup` — version 1 — **ACTIVE**
 
-Latest live personal-data counts before Build 023:
+Latest live personal-data counts after Build 024 deployment:
 
 | Resource | Rows/users |
 |---|---:|
@@ -210,22 +231,21 @@ This zero-data state is why software-private-sync completeness must not be confu
 
 ## Build 020 — required real-account acceptance
 
-**Status: pending.**
+**Status: pending, but now instrumented by Build 024.**
 
 A real Zero2Fit personal account still needs to be created through the application. Do not invent credentials in development automation.
 
 Required acceptance sequence:
 
-1. create/sign into the real private account;
-2. log one manual food;
-3. log one Open Food Facts item;
-4. save a meal;
-5. set explicit nutrition targets;
-6. run Sync Now;
-7. sign into a second browser/session and prove reconstruction;
-8. delete an entry and clear a day, sync both directions and prove tombstones prevent reappearance;
-9. complete a workout, sync, and prove set/load history and adaptive recommendation survive the second browser;
-10. capture a progress photo, sync, retrieve it in the second browser, delete it and prove blob + metadata deletion propagate.
+1. create/sign into the real private account on browser/device A;
+2. run **Run acceptance self-test** and require every Build 024 infrastructure check to pass;
+3. sign into the same account on browser/device B and run the acceptance self-test there;
+4. log one manual food and one Open Food Facts item, save a meal and set explicit nutrition targets on A;
+5. run Sync Now and prove Fuel reconstruction on B;
+6. delete an entry / clear a day and prove tombstones prevent reappearance after bidirectional sync;
+7. complete a workout on A, sync and prove set/load history plus the adaptive recommendation survive on B;
+8. capture a progress photo on A, sync, retrieve it on B, delete it and prove blob + metadata deletion propagate;
+9. retain the Build 024 cloud acceptance marker as infrastructure evidence, separate from the human continuity evidence above.
 
 ## Physical iPhone / HealthKit acceptance
 
