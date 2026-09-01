@@ -40,7 +40,7 @@ jobs:
           grep -q 'healthkit_value_parity' build026-activation-guide.js
           grep -q 'page.prepend(panel)' build026-qa-focus.js
           grep -q "capture iphone 393 852 activation" tools/capture-ui-screenshots.sh
-          grep -q 'Expected 15 screenshots' tools/capture-ui-screenshots.sh
+          grep -Eq 'Expected [1-9][0-9]* screenshots' tools/capture-ui-screenshots.sh
           if grep -q '#b7f34a\|#070b09' build026.css; then echo 'Build 026 must stay on the clean theme.'; exit 1; fi
           if grep -q 'service_role\|sb_secret_' build026-activation-guide.js activation-guide-core.mjs; then echo 'Build 026 must not use privileged credentials.'; exit 1; fi
 

@@ -18,7 +18,46 @@ done
 CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
 if [[ -z "$CHROME" ]]; then echo 'No Chrome/Chromium executable found on runner.' >&2; exit 1; fi
 
-"$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=18000 --dump-dom "http://127.0.0.1:${PORT}/" >"$DOM_FILE"
+capture_dom() {
+  local attempt chrome_status profile
+  for attempt in 1 2; do
+    profile="${RUNNER_TEMP:-/tmp}/z2f-smoke-profile-${attempt}-$$"
+    rm -rf "$profile" "$DOM_FILE"
+    set +e
+    timeout --signal=TERM --kill-after=5s 30s "$CHROME" \
+      --headless=new \
+      --no-sandbox \
+      --disable-gpu \
+      --disable-dev-shm-usage \
+      --disable-background-networking \
+      --disable-component-update \
+      --no-first-run \
+      --no-default-browser-check \
+      --user-data-dir="$profile" \
+      --virtual-time-budget=22000 \
+      --dump-dom "http://127.0.0.1:${PORT}/" >"$DOM_FILE" 2>/dev/null
+    chrome_status=$?
+    set -e
+    rm -rf "$profile"
+
+    if [[ "$chrome_status" -eq 0 ]] && [[ -s "$DOM_FILE" ]] && grep -Fq 'id="z11AdventureStatus"' "$DOM_FILE" && grep -Fq 'id="z28HealthKitEvidence"' "$DOM_FILE"; then
+      if [[ "$attempt" -eq 2 ]]; then echo 'Browser smoke DOM completed on bounded retry.'; fi
+      return 0
+    fi
+
+    if [[ "$attempt" -eq 1 ]]; then
+      echo "Browser smoke attempt 1 did not reach all late-module markers (Chrome exit ${chrome_status}); retrying once with a fresh profile." >&2
+    fi
+  done
+
+  if [[ ! -s "$DOM_FILE" ]]; then
+    echo "Browser smoke could not produce a DOM after two attempts; final Chrome exit ${chrome_status}." >&2
+    exit 1
+  fi
+  echo 'Browser smoke second attempt produced a DOM but not every late-module sentinel; detailed assertions will identify the missing marker.' >&2
+}
+
+capture_dom
 
 assert_dom() {
   local needle="$1" label="${2:-$1}"
@@ -126,6 +165,14 @@ assert_dom 'HealthKit acceptance'
 assert_dom 'Private-store infrastructure self-test'
 assert_dom 'Run local checks'
 assert_dom './build026.css'
+assert_dom 'id="z28HealthKitEvidence"' 'Build 028 HealthKit evidence matrix'
+assert_dom 'Physical HealthKit evidence · Build 028'
+assert_dom 'Resolve the source before you verify it.'
+assert_dom 'Observed HealthKit bundle'
+assert_dom 'Physical background delivery confirmed'
+assert_dom 'Trust boundary:'
+assert_dom 'Save evidence locally'
+assert_dom './build028.css'
 
 if grep -Fq 'Supabase remains disabled until authenticated RLS is configured and tested.' "$DOM_FILE"; then echo 'Stale pre-private-sync Supabase copy is still rendered.' >&2; exit 1; fi
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then echo 'Workout catalog load failed in browser.' >&2; exit 1; fi
@@ -142,6 +189,6 @@ if grep -q 'Zero2Fit Build 017 Fuel extension failed to load' "$DOM_FILE"; then 
 if grep -q 'Food lookup is not configured' "$DOM_FILE"; then echo 'Build 018 food lookup configuration failed.' >&2; exit 1; fi
 if grep -q 'Zero2Fit Build 019 Fuel sync extension failed to load' "$DOM_FILE"; then echo 'Build 019 Fuel private-sync module failed in browser.' >&2; exit 1; fi
 if grep -q 'Zero2Fit Build 021 workout continuity extension failed to load' "$DOM_FILE"; then echo 'Build 021 workout-continuity module failed in browser.' >&2; exit 1; fi
-if grep -q 'Zero2Fit Build 022 loader failed to load\|Zero2Fit Build 022 private photo continuity failed to load\|Zero2Fit Build 022/024 private continuity failed to load\|Zero2Fit Build 022/024/026 private continuity failed to load' "$DOM_FILE"; then echo 'Build 022/024/026 private continuity modules failed in browser.' >&2; exit 1; fi
+if grep -q 'Zero2Fit Build 022 loader failed to load\|Zero2Fit Build 022 private photo continuity failed to load\|Zero2Fit Build 022/024 private continuity failed to load\|Zero2Fit Build 022/024/026 private continuity failed to load\|Zero2Fit Build 022/024/026/028 private continuity failed to load' "$DOM_FILE"; then echo 'Build 022/024/026/028 private continuity modules failed in browser.' >&2; exit 1; fi
 
-echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution + private set/load continuity, devices, Build 024 private-store acceptance + Build 026 cross-browser/physical guide, clean iPhone UI, Fuel + food lookup + private sync, adaptive/personal intelligence, RPG adventure, private progress-photo continuity, PWA/productization, and private-sync shell rendered."
+echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution + private set/load continuity, devices, Build 024 private-store acceptance + Build 026 cross-browser guide + Build 028 HealthKit evidence gate, clean iPhone UI, Fuel + food lookup + private sync, adaptive/personal intelligence, RPG adventure, private progress-photo continuity, PWA/productization, and private-sync shell rendered."

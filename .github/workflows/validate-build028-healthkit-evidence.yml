@@ -1,0 +1,53 @@
+name: Validate Build 028 HealthKit Evidence
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  healthkit-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check Build 028 syntax and wiring
+        run: |
+          node --check healthkit-evidence-core.mjs
+          node --check build028-healthkit-evidence.js
+          node --check build028-verification-guard.js
+          node --check build028-qa-focus.js
+          node --check tools/test-healthkit-evidence-core.mjs
+          test -s healthkit-evidence-core.mjs
+          test -s build028-healthkit-evidence.js
+          test -s build028-verification-guard.js
+          test -s build028-qa-focus.js
+          test -s build028.css
+          test -s tools/test-healthkit-evidence-core.mjs
+          grep -q 'healthkit_acceptance_evidence' healthkit-evidence-core.mjs
+          grep -q 'Steps.*primary:true' healthkit-evidence-core.mjs
+          grep -q 'Weight.*primary:true' healthkit-evidence-core.mjs
+          grep -q "'matched','not_provided','mismatch'" healthkit-evidence-core.mjs
+          grep -q 'Physical HealthKit evidence' build028-healthkit-evidence.js
+          grep -q 'verificationReadiness' build028-healthkit-evidence.js
+          grep -q '__z28Wrapped' build028-healthkit-evidence.js
+          grep -q 'saveEvidence' build028-verification-guard.js
+          grep -q 'build028-verification-guard.js' build022-loader.js
+          grep -q 'build028-qa-focus.js' build022-loader.js
+          grep -q 'zero2fit-shell-v28-healthkit-evidence' sw.js
+          grep -q 'healthkit-evidence-core.mjs' sw.js
+          grep -q 'build028-healthkit-evidence.js' sw.js
+          grep -q 'build028-verification-guard.js' sw.js
+          grep -q 'build028-qa-focus.js' sw.js
+          grep -q "capture iphone 393 852 healthkit-evidence" tools/capture-ui-screenshots.sh
+          grep -q 'Expected 16 screenshots' tools/capture-ui-screenshots.sh
+          if grep -q '#b7f34a\|#070b09' build028.css; then echo 'Build 028 must stay on the clean theme.'; exit 1; fi
+          if grep -q 'service_role\|sb_secret_' build028-healthkit-evidence.js build028-verification-guard.js healthkit-evidence-core.mjs; then echo 'Build 028 must not use privileged credentials.'; exit 1; fi
+          if grep -q 'heart_rate_value\|weight_value\|sleep_value' healthkit-evidence-core.mjs build028-healthkit-evidence.js; then echo 'Build 028 evidence must remain status-only, not health-value storage.'; exit 1; fi
+
+      - name: Test physical HealthKit evidence model
+        run: node tools/test-healthkit-evidence-core.mjs
