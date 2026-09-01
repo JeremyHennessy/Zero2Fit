@@ -17,6 +17,10 @@
       .then(() => import('./build026-activation-guide.js'))
       .then(() => import('./build026-qa-focus.js'))
       .then(() => import('./build028-healthkit-evidence.js'))
+      .then(() => Promise.all([
+        import('./build028-verification-guard.js'),
+        import('./build028-qa-focus.js')
+      ]))
       .catch(error => console.warn('Zero2Fit Build 022/024/026/028 private continuity failed to load', error));
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load, { once:true });
