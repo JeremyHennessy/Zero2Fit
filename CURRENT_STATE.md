@@ -4,27 +4,28 @@ This file is the concise technical checkpoint for future Zero2Fit work. It disti
 
 ## Production application checkpoint
 
-**Last functional application build:** Build 026 — `405cff4391b2161bd1738f75cc1427da9583cb70`
+**Last functional application build:** Build 028 — `7607697ce0eec3c49a1256b99d20b54090edf1f8`
 
-Build 027 is documentation-only and may place a newer commit on `main` without changing application runtime. Use the Build 026 SHA above when comparing functional behavior.
+Build 029 is documentation-only and may place a newer commit on `main` without changing application runtime. Use the Build 028 SHA above when comparing functional behavior.
 
 Production target:
 
 `https://jeremyhennessy.github.io/Zero2Fit/`
 
-Build 026 post-merge verification on the exact functional SHA:
+Build 028 post-merge verification on the exact functional SHA:
 
 | Gate | Run | Result |
 |---|---:|---|
-| Validate Zero2Fit | `33461498731` | success |
-| Build 022 focused photo-sync validation | `33461498810` | success |
-| Build 024 private-account acceptance validation | `33461498793` | success |
-| Build 026 activation-guide validation | `33461498707` | success |
-| Visual QA Screenshots | `33461498790` | success |
-| Sync fitness reference data | `33461498735` | success |
-| Pages build and deployment | `33461498107` | success |
+| Validate Zero2Fit | `33523923393` | success |
+| Build 022 focused photo-sync validation | `33523923370` | success |
+| Build 024 private-account acceptance validation | `33523923408` | success |
+| Build 026 activation-guide validation | `33523923565` | success |
+| Build 028 HealthKit-evidence validation | `33523923467` | success |
+| Visual QA Screenshots | `33523923373` | success |
+| Sync fitness reference data | `33523923517` | success |
+| Pages build and deployment | `33523922448` | success |
 
-Reference sync did not advance `main` after Build 026.
+Reference sync did not advance `main` after Build 028.
 
 ## Current product surface
 
@@ -32,7 +33,7 @@ Daily iPhone navigation:
 
 **Today · Train · Fuel · Adventure · Progress**
 
-Devices, private sync, backup, source verification, private-account self-test and the Activation Guide live under Settings rather than occupying a daily navigation slot.
+Devices, private sync, backup, source verification, private-account self-test, Activation Guide and physical HealthKit evidence live under Settings rather than occupying a daily navigation slot.
 
 Current visual system:
 
@@ -176,12 +177,37 @@ Implemented and software-verified:
 - browser snapshots contain counts/statuses/signatures only; they do not publish weight, food names, heart-rate values, sleep values or other health measurements
 - compares two browser snapshots to establish Fuel reconstruction, Fuel deletion propagation, workout-history reconstruction/matching signatures, photo upload→other-browser download and photo deletion propagation
 - keeps second-browser adaptive-target confirmation as explicit human evidence because matching history alone cannot prove the rendered recommendation was visually checked
-- keeps source-app→Apple Health→Zero2Fit value parity, physical HealthKit background delivery and RENPHO underside-model label as explicit physical evidence
 - manual acceptance evidence never creates source verification records and never creates Fitness XP or RPG progression
 - exact Zepp/RENPHO bundle verification remains the only source-mapping authority for permanent device XP
 - dedicated iPhone Activation Guide screenshot is part of the permanent visual-regression suite
 
 Build 026 makes the remaining acceptance work measurable; it does **not** fabricate the real account, second browser or physical-device evidence.
+
+### Build 028 — structured physical HealthKit evidence gate
+
+Implemented and software-verified:
+
+- shows a dedicated **Physical HealthKit evidence** matrix under Devices
+- uses the exact HealthKit source bundle observations already emitted by the native bridge; it does not guess vendor bundle IDs
+- keeps **candidate bundle selection separate from source verification**
+- Zepp/Amazfit matrix covers Steps, heart rate, resting heart rate, HRV SDNN, sleep/stages, workouts and active energy
+- RENPHO matrix covers Weight and body-composition metrics
+- each physical metric resolves as **Pending / Matched / Not provided / Mismatch**
+- `Matched` is valid only when the candidate bundle actually wrote the relevant metric
+- `Not provided` is valid only when the candidate bundle did not write that metric
+- any mismatch or unresolved metric blocks exact source verification
+- Zepp requires a physically matched **Steps** anchor before verification readiness
+- RENPHO requires a physically matched **Weight** anchor before verification readiness
+- Zepp and RENPHO cannot use the same candidate source bundle
+- physical background delivery and the exact RENPHO underside-model label remain separate explicit evidence
+- physical evidence is stored as status/source metadata only; the parity evidence record does **not** store the numerical health values compared
+- Build 026's coarse physical flags are derived from the structured evidence matrix rather than independent duplicate checkboxes
+- existing Verify Zepp / Verify RENPHO actions are disabled until the corresponding matrix is ready
+- the current structured evidence is privately persisted before an evidence-approved source verification is allowed to proceed
+- evidence itself never creates a source verification, permanent Fitness XP or RPG progression
+- a dedicated iPhone HealthKit-evidence screenshot is part of the permanent visual-regression suite
+
+Build 028 materially strengthens the trust boundary, but with zero live source observations it correctly remains pending and does not invent Zepp/RENPHO source identities.
 
 ## Reference data
 
@@ -210,6 +236,8 @@ RENPHO scale → RENPHO Health → Apple Health / HealthKit → Zero2FitHealthBr
 
 Historical RENPHO CSV and Apple Health XML import paths remain supported.
 
+The native HealthKit bridge already records exact `source.name` and `source.bundleIdentifier` for each event and uploads per-bundle/per-metric source observations with sample counts and observation timestamps.
+
 Permanent device-driven Fitness XP requires:
 
 - `source_provider = healthkit_bridge`
@@ -218,7 +246,7 @@ Permanent device-driven Fitness XP requires:
 - explicit Zero2Fit source verification record
 - source verification status `verified`
 
-Apple Health/source-name text or a Build 026 manual checkbox alone is never sufficient authorization for permanent Fitness XP.
+Apple Health/source-name text, an Activation Guide checkbox or a Build 028 candidate bundle is never sufficient authorization for permanent Fitness XP.
 
 ## Supabase / private storage
 
@@ -236,7 +264,7 @@ Active Edge Functions:
 
 - `food-lookup` — version 1 — **ACTIVE**
 
-Latest live personal-data counts checked **September 1, 2026 after Build 026 deployment**:
+Latest live personal-data counts checked **September 1, 2026 after Build 028 deployment**:
 
 | Resource | Rows/users |
 |---|---:|
@@ -254,7 +282,7 @@ This zero-data state is why software-private-sync completeness must not be descr
 
 ## Build 020 — required real-account acceptance
 
-**Status: pending, now fully instrumented by Builds 024 and 026.**
+**Status: pending, instrumented by Builds 024 and 026.**
 
 A real Zero2Fit personal account still needs to be created through the application. Do not invent credentials in development automation.
 
@@ -274,27 +302,20 @@ Required acceptance sequence:
 
 ## Physical iPhone / HealthKit acceptance
 
-**Status: pending.**
+**Status: pending, instrumented by Build 028.**
 
-Required physical-device evidence:
+Required physical sequence:
 
-1. exact Zepp HKSource display name + bundle ID;
-2. exact RENPHO Health HKSource display name + bundle ID;
-3. metric categories each source actually writes;
-4. representative parity through source app → Apple Health → Zero2Fit for:
-   - steps
-   - weight
-   - body composition
-   - heart rate
-   - resting HR
-   - HRV
-   - sleep/stages
-   - workouts
-   - active energy
-5. physical background-delivery behavior;
-6. RENPHO underside model label.
-
-The Build 026 guide displays these checkpoints and can store the explicitly human-observed acceptance state, but it cannot discover those physical facts by itself.
+1. run the native HealthKit bridge on the real iPhone while signed into the real private account;
+2. confirm exact source observations appear for the bundle IDs actually written by Zepp and RENPHO Health;
+3. in Build 028, select the correct observed candidate bundle for Zepp and the correct observed candidate for RENPHO;
+4. compare representative source-app → Apple Health → Zero2Fit values and resolve each matrix row as Matched / Not provided / Mismatch;
+5. require Zepp Steps and RENPHO Weight to be physically matched;
+6. resolve any mismatch rather than overriding the gate;
+7. physically confirm background delivery;
+8. record the exact RENPHO underside-model label;
+9. only after the matrix is ready, use the separate existing Verify Zepp / Verify RENPHO actions for the exact selected bundles;
+10. run private sync again and confirm verified native events receive the trusted source-verification metadata expected by the permanent-XP trust contract.
 
 Until those checks occur, Zepp/RENPHO source mappings must remain unverified for permanent device XP.
 
@@ -306,7 +327,9 @@ Current complementary gates include:
 - Build 022 focused photo-sync validation
 - Build 024 private-account acceptance harness validation
 - Build 026 activation-guide model/wiring validation
-- **15 deterministic visual screenshots**, including dedicated iPhone Photos and Activation Guide captures, with one bounded fresh-profile retry for transient Chrome failures
+- Build 028 structured HealthKit-evidence model/trust-boundary validation
+- **16 deterministic visual screenshots**, including dedicated iPhone Photos, Activation Guide and HealthKit-evidence captures, with one bounded fresh-profile retry for transient headless-Chrome failures
+- browser smoke uses one bounded fresh-profile DOM retry when late-module sentinels are missing; the second attempt still fails on exact missing markers rather than masking regressions
 - fitness reference-data sync/normalization with commit-on-change only
 - native HealthKit bridge simulator compilation
 - GitHub Pages build/deployment on `main`
