@@ -26,7 +26,7 @@ export function acceptanceProbeRows({ userId, runId, now, ids }) {
       source_device:'browser',
       source_record_id:runId,
       imported_at:now,
-      provenance_status:'acceptance-probe',
+      provenance_status:'user-entered',
       confidence:'verified-software-probe',
       metadata:{ acceptance_probe:true, run_id:runId, phase:'insert' }
     },
