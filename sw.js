@@ -1,4 +1,4 @@
-// Supersedes zero2fit-shell-v26-activation-guide (which superseded zero2fit-shell-v24-private-acceptance).
+// Supersedes zero2fit-shell-v26-activation-guide, zero2fit-shell-v24-private-acceptance, zero2fit-shell-v22-photo-sync, and zero2fit-shell-v21-workout-sync.
 const CACHE = 'zero2fit-shell-v28-healthkit-evidence';
 const SHELL = [
   './', './index.html', './styles.css', './build002.css', './build003.css', './build004.css', './build006.css', './build007.css', './build012.css', './build014.css', './build016.css', './build017.css', './build018.css', './build019.css', './build021.css', './build022.css', './build024.css', './build026.css', './build028.css',
