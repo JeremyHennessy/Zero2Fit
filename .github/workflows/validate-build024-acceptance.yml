@@ -30,6 +30,13 @@ jobs:
           grep -q 'adaptive_second_browser_confirmed' build024-acceptance.js
           grep -q 'healthkit_value_parity' build024-acceptance.js
           grep -q 'zero2fit-qa-acceptance' qa-acceptance-fixture.html
+          grep -q 'build024-acceptance.js' build022-loader.js
+          grep -q 'zero2fit-shell-v24-activation-acceptance' sw.js
+          grep -q 'acceptance-core.mjs' sw.js
+          grep -q 'build024-acceptance.js' sw.js
+          grep -q 'build024.css' sw.js
+          grep -q "capture iphone 393 852 acceptance" tools/capture-ui-screenshots.sh
+          grep -q 'Expected 15 screenshots' tools/capture-ui-screenshots.sh
           if grep -q '#b7f34a\|#070b09' build024.css; then echo 'Build 024 must stay on the clean theme.'; exit 1; fi
           if grep -q 'service_role\|sb_secret_' build024-acceptance.js acceptance-core.mjs; then echo 'Build 024 must not use privileged credentials.'; exit 1; fi
 
