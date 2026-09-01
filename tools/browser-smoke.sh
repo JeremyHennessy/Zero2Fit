@@ -113,6 +113,13 @@ assert_dom 'Private photo continuity'
 assert_dom 'Raw photos remain in this browser until you sign in under Data and use Sync now.'
 assert_dom 'Raw images stay out of JSON backups'
 assert_dom './build022.css'
+assert_dom 'id="z24Acceptance"' 'Build 024 activation acceptance panel'
+assert_dom 'Activation &amp; acceptance · Build 024'
+assert_dom 'Finish the real-world setup without guessing.'
+assert_dom 'Private account acceptance'
+assert_dom 'HealthKit acceptance'
+assert_dom 'Run local checks'
+assert_dom './build024.css'
 
 if grep -Fq 'Supabase remains disabled until authenticated RLS is configured and tested.' "$DOM_FILE"; then echo 'Stale pre-private-sync Supabase copy is still rendered.' >&2; exit 1; fi
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then echo 'Workout catalog load failed in browser.' >&2; exit 1; fi
@@ -130,5 +137,6 @@ if grep -q 'Food lookup is not configured' "$DOM_FILE"; then echo 'Build 018 foo
 if grep -q 'Zero2Fit Build 019 Fuel sync extension failed to load' "$DOM_FILE"; then echo 'Build 019 Fuel private-sync module failed in browser.' >&2; exit 1; fi
 if grep -q 'Zero2Fit Build 021 workout continuity extension failed to load' "$DOM_FILE"; then echo 'Build 021 workout-continuity module failed in browser.' >&2; exit 1; fi
 if grep -q 'Zero2Fit Build 022 loader failed to load\|Zero2Fit Build 022 private photo continuity failed to load' "$DOM_FILE"; then echo 'Build 022 photo-continuity module failed in browser.' >&2; exit 1; fi
+if grep -q 'Zero2Fit Build 022/024 private continuity extension failed to load' "$DOM_FILE"; then echo 'Build 024 activation acceptance module failed in browser.' >&2; exit 1; fi
 
-echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution + private set/load continuity, devices, clean iPhone UI, Fuel + food lookup + private sync, adaptive/personal intelligence, RPG adventure, private progress-photo continuity, PWA/productization, and private-sync shell rendered."
+echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution + private set/load continuity, devices + activation acceptance, clean iPhone UI, Fuel + food lookup + private sync, adaptive/personal intelligence, RPG adventure, private progress-photo continuity, PWA/productization, and private-sync shell rendered."
