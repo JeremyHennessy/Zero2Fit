@@ -1,0 +1,44 @@
+name: Validate Build 025 Activation Guide
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  activation-guide:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check Build 025 syntax and wiring
+        run: |
+          node --check activation-guide-core.mjs
+          node --check build025-activation-guide.js
+          node --check tools/test-activation-guide-core.mjs
+          test -s activation-guide-core.mjs
+          test -s build025-activation-guide.js
+          test -s build025.css
+          test -s tools/test-activation-guide-core.mjs
+          grep -q 'acceptance_browser_snapshot' activation-guide-core.mjs
+          grep -q 'zero2fit_acceptance_v1' activation-guide-core.mjs
+          grep -q 'build025-activation-guide.js' build022-loader.js
+          grep -q 'zero2fit-shell-v25-activation-guide' sw.js
+          grep -q 'activation-guide-core.mjs' sw.js
+          grep -q 'build025-activation-guide.js' sw.js
+          grep -q 'build025.css' sw.js
+          grep -q 'Run checks + sync' build025-activation-guide.js
+          grep -q 'adaptive_second_browser_confirmed' build025-activation-guide.js
+          grep -q 'healthkit_value_parity' build025-activation-guide.js
+          grep -q "qaFocus') !== 'activation'" build025-activation-guide.js
+          grep -q "capture iphone 393 852 activation" tools/capture-ui-screenshots.sh
+          grep -q 'Expected 15 screenshots' tools/capture-ui-screenshots.sh
+          if grep -q '#b7f34a\|#070b09' build025.css; then echo 'Build 025 must stay on the clean theme.'; exit 1; fi
+          if grep -q 'service_role\|sb_secret_' build025-activation-guide.js activation-guide-core.mjs; then echo 'Build 025 must not use privileged credentials.'; exit 1; fi
+
+      - name: Test activation guide model
+        run: node tools/test-activation-guide-core.mjs
