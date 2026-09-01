@@ -21,6 +21,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Check native acceptance-console contract
+        working-directory: ios/Zero2FitHealthBridge
+        run: |
+          test -s Sources/SourceAcceptanceSummary.swift
+          test -s Tools/TestSourceAcceptanceSummary.swift
+          grep -q 'Physical source acceptance console' Sources/ContentView.swift
+          grep -q 'Capture + sync last 24 hours' Sources/ContentView.swift
+          grep -q 'Last background delivery' Sources/ContentView.swift
+          grep -q 'Copy bundle ID' Sources/ContentView.swift
+          grep -q 'sourceSummaries' Sources/BridgeViewModel.swift
+          grep -q 'lastBackgroundSyncAt' Sources/BridgeViewModel.swift
+          grep -q 'sourceBundleId' Sources/SourceAcceptanceSummary.swift
+          grep -q 'latestValue' Sources/SourceAcceptanceSummary.swift
+          if grep -R -n 'verifySource\|verification_id\|source_verification_status' Sources/ContentView.swift Sources/BridgeViewModel.swift Sources/SourceAcceptanceSummary.swift; then
+            echo 'Native acceptance console must not create or simulate source verification.'
+            exit 1
+          fi
+
+      - name: Test native source acceptance summary model
+        working-directory: ios/Zero2FitHealthBridge
+        run: |
+          xcrun swiftc \
+            Sources/BridgeModels.swift \
+            Sources/SourceAcceptanceSummary.swift \
+            Tools/TestSourceAcceptanceSummary.swift \
+            -o /tmp/zero2fit-source-acceptance-test
+          /tmp/zero2fit-source-acceptance-test
+
       - name: Install XcodeGen
         run: brew install xcodegen
 
