@@ -104,11 +104,14 @@ async function syncWorkoutContinuity() {
   const merged = mergeWorkoutRows(localRows, remoteRows);
   await upsertWorkoutRows(merged);
   const hydrated = hydrateWorkoutState(localState, merged, localMeta);
+  const completedSessionCount = merged.sessions.filter(row => Boolean(row.completed_at)).length;
+  hydrated.state.completedWorkouts = Math.max(Number(hydrated.state.completedWorkouts || 0), completedSessionCount);
   writeState(hydrated.state);
   writeMeta(hydrated.editMeta);
   return {
     workout_sessions:merged.sessions.length,
     workout_sets:merged.sets.length,
+    workout_completed_sessions:completedSessionCount,
     workout_remote_sessions:remoteRows.sessions.length,
     workout_remote_sets:remoteRows.sets.length
   };
