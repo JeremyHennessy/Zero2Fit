@@ -118,6 +118,14 @@ assert_dom 'Private-account acceptance'
 assert_dom 'Run acceptance self-test'
 assert_dom 'One-browser infrastructure acceptance only.'
 assert_dom './build024.css'
+assert_dom 'id="z26ActivationGuide"' 'Build 026 activation guide'
+assert_dom 'Activation guide · Build 026'
+assert_dom 'Finish real-account and iPhone acceptance.'
+assert_dom 'Real-account acceptance'
+assert_dom 'HealthKit acceptance'
+assert_dom 'Private-store infrastructure self-test'
+assert_dom 'Run local checks'
+assert_dom './build026.css'
 
 if grep -Fq 'Supabase remains disabled until authenticated RLS is configured and tested.' "$DOM_FILE"; then echo 'Stale pre-private-sync Supabase copy is still rendered.' >&2; exit 1; fi
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then echo 'Workout catalog load failed in browser.' >&2; exit 1; fi
@@ -134,6 +142,6 @@ if grep -q 'Zero2Fit Build 017 Fuel extension failed to load' "$DOM_FILE"; then 
 if grep -q 'Food lookup is not configured' "$DOM_FILE"; then echo 'Build 018 food lookup configuration failed.' >&2; exit 1; fi
 if grep -q 'Zero2Fit Build 019 Fuel sync extension failed to load' "$DOM_FILE"; then echo 'Build 019 Fuel private-sync module failed in browser.' >&2; exit 1; fi
 if grep -q 'Zero2Fit Build 021 workout continuity extension failed to load' "$DOM_FILE"; then echo 'Build 021 workout-continuity module failed in browser.' >&2; exit 1; fi
-if grep -q 'Zero2Fit Build 022 loader failed to load\|Zero2Fit Build 022 private photo continuity failed to load\|Zero2Fit Build 022/024 private continuity failed to load' "$DOM_FILE"; then echo 'Build 022/024 private continuity modules failed in browser.' >&2; exit 1; fi
+if grep -q 'Zero2Fit Build 022 loader failed to load\|Zero2Fit Build 022 private photo continuity failed to load\|Zero2Fit Build 022/024 private continuity failed to load\|Zero2Fit Build 022/024/026 private continuity failed to load' "$DOM_FILE"; then echo 'Build 022/024/026 private continuity modules failed in browser.' >&2; exit 1; fi
 
-echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution + private set/load continuity, devices, Build 024 private-account acceptance shell, clean iPhone UI, Fuel + food lookup + private sync, adaptive/personal intelligence, RPG adventure, private progress-photo continuity, PWA/productization, and private-sync shell rendered."
+echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution + private set/load continuity, devices, Build 024 private-store acceptance + Build 026 cross-browser/physical guide, clean iPhone UI, Fuel + food lookup + private sync, adaptive/personal intelligence, RPG adventure, private progress-photo continuity, PWA/productization, and private-sync shell rendered."
