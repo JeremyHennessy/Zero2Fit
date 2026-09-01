@@ -1,0 +1,46 @@
+name: Validate Build 031 Activation Handoff
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  activation-handoff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check Build 031 syntax and wiring
+        run: |
+          node --check activation-handoff-core.mjs
+          node --check build031-activation-handoff.js
+          node --check tools/test-activation-handoff-core.mjs
+          bash -n tools/test-activation-handoff-browser.sh
+          test -s activation-handoff-core.mjs
+          test -s build031-activation-handoff.js
+          test -s build031.css
+          test -s tools/test-activation-handoff-core.mjs
+          test -s tools/test-activation-handoff-browser.sh
+          grep -q 'build031-activation-handoff.js' build022-loader.js
+          grep -q 'zero2fit-shell-v31-activation-handoff' sw.js
+          grep -q 'activation-handoff-core.mjs' sw.js
+          grep -q 'build031-activation-handoff.js' sw.js
+          grep -q 'build031.css' sw.js
+          grep -Fq 'https://jeremyhennessy.github.io/Zero2Fit/?activation=healthkit' ios/Zero2FitHealthBridge/Sources/ContentView.swift
+          grep -q 'Link(destination: healthKitEvidenceURL)' ios/Zero2FitHealthBridge/Sources/ContentView.swift
+          grep -q 'data.zero2fitActivationHandoff\|zero2fitActivationHandoff' build031-activation-handoff.js
+          grep -q 'Opened from Zero2Fit Bridge' build031-activation-handoff.js
+          grep -q "history.replaceState" build031-activation-handoff.js
+          if grep -q 'service_role\|sb_secret_' activation-handoff-core.mjs build031-activation-handoff.js; then echo 'Build 031 must not use privileged credentials.'; exit 1; fi
+          if grep -Eiq 'activation=healthkit[^" ]*(bundle|source|weight|heart|sleep|token|email|user)' ios/Zero2FitHealthBridge/Sources/ContentView.swift; then echo 'Native activation URL must not carry source IDs, health values, credentials or identity.'; exit 1; fi
+
+      - name: Test privacy-safe handoff model
+        run: node tools/test-activation-handoff-core.mjs
+
+      - name: Test browser handoff
+        run: bash tools/test-activation-handoff-browser.sh
