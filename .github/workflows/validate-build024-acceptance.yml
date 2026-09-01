@@ -1,0 +1,37 @@
+name: Validate Build 024 Acceptance
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check Build 024 syntax and files
+        run: |
+          node --check acceptance-core.mjs
+          node --check build024-acceptance.js
+          node --check tools/test-acceptance-core.mjs
+          test -s acceptance-core.mjs
+          test -s build024-acceptance.js
+          test -s build024.css
+          test -s qa-acceptance-fixture.html
+          test -s tools/test-acceptance-core.mjs
+          grep -q 'acceptance_probe' acceptance-core.mjs
+          grep -q 'Run checks + sync' build024-acceptance.js
+          grep -q 'adaptive_second_browser_confirmed' build024-acceptance.js
+          grep -q 'healthkit_value_parity' build024-acceptance.js
+          grep -q 'zero2fit-qa-acceptance' qa-acceptance-fixture.html
+          if grep -q '#b7f34a\|#070b09' build024.css; then echo 'Build 024 must stay on the clean theme.'; exit 1; fi
+          if grep -q 'service_role\|sb_secret_' build024-acceptance.js acceptance-core.mjs; then echo 'Build 024 must not use privileged credentials.'; exit 1; fi
+
+      - name: Test activation acceptance model
+        run: node tools/test-acceptance-core.mjs
