@@ -2,7 +2,7 @@ import Foundation
 
 @main
 struct TestSourceAcceptanceSummary {
-    static func main() throws {
+    static func main() {
         let observations = [
             SourceObservation(
                 sourceBundleId: "com.example.zepp",
@@ -46,16 +46,16 @@ struct TestSourceAcceptanceSummary {
         let summaries = SourceAcceptanceSummaryBuilder.build(events: events, observations: observations)
         require(summaries.count == 2, "Expected two grouped bundles")
 
-        let zepp = try requireValue(summaries.first { $0.sourceBundleId == "com.example.zepp" }, "Missing Zepp summary")
+        let zepp = requireValue(summaries.first { $0.sourceBundleId == "com.example.zepp" }, "Missing Zepp summary")
         require(zepp.displayName == "Zepp", "Expected Zepp source name")
         require(zepp.totalSamples == 3, "Expected aggregated Zepp sample count")
         require(zepp.metrics.map(\.metricType) == ["steps", "heart_rate"], "Expected metric priority ordering")
-        let steps = try requireValue(zepp.metrics.first { $0.metricType == "steps" }, "Missing steps metric")
+        let steps = requireValue(zepp.metrics.first { $0.metricType == "steps" }, "Missing steps metric")
         require(steps.latestValue == .number(250), "Expected latest steps value")
         require(steps.sampleCount == 2, "Expected observation sample count")
         require(steps.valueText.contains("250"), "Expected formatted latest steps value")
 
-        let renpho = try requireValue(summaries.first { $0.sourceBundleId == "com.example.renpho" }, "Missing RENPHO summary")
+        let renpho = requireValue(summaries.first { $0.sourceBundleId == "com.example.renpho" }, "Missing RENPHO summary")
         require(renpho.metrics.first?.metricType == "weight", "Expected weight metric")
         require(renpho.metrics.first?.valueText.contains("100.5") == true, "Expected latest weight value")
 
@@ -83,22 +83,27 @@ struct TestSourceAcceptanceSummary {
             importedAt: at,
             provenanceStatus: "observed",
             confidence: "measured",
-            metadata: BridgeMetadata(sourceName: name, sourceBundleId: bundle)
+            metadata: BridgeMetadata(
+                sourceName: name,
+                sourceBundleId: bundle,
+                sourceVersion: nil,
+                aggregation: nil,
+                date: nil,
+                bridgeTransportVerified: true,
+                activityType: nil,
+                totalEnergyBurned: nil,
+                totalEnergyUnit: nil,
+                originalUnit: nil
+            )
         )
     }
 
     private static func require(_ condition: @autoclosure () -> Bool, _ message: String) {
-        if !condition() {
-            fputs("Test failed: \(message)\n", stderr)
-            exit(1)
-        }
+        if !condition() { fatalError(message) }
     }
 
-    private static func requireValue<T>(_ value: T?, _ message: String) throws -> T {
-        guard let value else {
-            fputs("Test failed: \(message)\n", stderr)
-            exit(1)
-        }
+    private static func requireValue<T>(_ value: T?, _ message: String) -> T {
+        guard let value else { fatalError(message) }
         return value
     }
 }
