@@ -18,7 +18,46 @@ done
 CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
 if [[ -z "$CHROME" ]]; then echo 'No Chrome/Chromium executable found on runner.' >&2; exit 1; fi
 
-"$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=18000 --dump-dom "http://127.0.0.1:${PORT}/" >"$DOM_FILE"
+capture_dom() {
+  local attempt chrome_status profile
+  for attempt in 1 2; do
+    profile="${RUNNER_TEMP:-/tmp}/z2f-smoke-profile-${attempt}-$$"
+    rm -rf "$profile" "$DOM_FILE"
+    set +e
+    timeout --signal=TERM --kill-after=5s 30s "$CHROME" \
+      --headless=new \
+      --no-sandbox \
+      --disable-gpu \
+      --disable-dev-shm-usage \
+      --disable-background-networking \
+      --disable-component-update \
+      --no-first-run \
+      --no-default-browser-check \
+      --user-data-dir="$profile" \
+      --virtual-time-budget=22000 \
+      --dump-dom "http://127.0.0.1:${PORT}/" >"$DOM_FILE" 2>/dev/null
+    chrome_status=$?
+    set -e
+    rm -rf "$profile"
+
+    if [[ "$chrome_status" -eq 0 ]] && [[ -s "$DOM_FILE" ]] && grep -Fq 'id="z11AdventureStatus"' "$DOM_FILE" && grep -Fq 'id="z28HealthKitEvidence"' "$DOM_FILE"; then
+      if [[ "$attempt" -eq 2 ]]; then echo 'Browser smoke DOM completed on bounded retry.'; fi
+      return 0
+    fi
+
+    if [[ "$attempt" -eq 1 ]]; then
+      echo "Browser smoke attempt 1 did not reach all late-module markers (Chrome exit ${chrome_status}); retrying once with a fresh profile." >&2
+    fi
+  done
+
+  if [[ ! -s "$DOM_FILE" ]]; then
+    echo "Browser smoke could not produce a DOM after two attempts; final Chrome exit ${chrome_status}." >&2
+    exit 1
+  fi
+  echo 'Browser smoke second attempt produced a DOM but not every late-module sentinel; detailed assertions will identify the missing marker.' >&2
+}
+
+capture_dom
 
 assert_dom() {
   local needle="$1" label="${2:-$1}"
