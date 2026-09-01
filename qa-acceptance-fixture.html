@@ -1,7 +1,13 @@
 <!doctype html>
-<meta charset="utf-8">
-<title>Zero2Fit Acceptance QA</title>
-<script>
-  sessionStorage.setItem('zero2fit-qa-acceptance', '1');
-  location.replace('./?qaPage=data');
-</script>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Zero2Fit Acceptance QA</title>
+  <style>html,body,iframe{margin:0;width:100%;height:100%;border:0;background:#f5f7fb}body{overflow:hidden}iframe{display:block}</style>
+  <script>sessionStorage.setItem('zero2fit-qa-acceptance', '1');</script>
+</head>
+<body>
+  <iframe src="./?qaPage=data" title="Zero2Fit acceptance verification"></iframe>
+</body>
+</html>
