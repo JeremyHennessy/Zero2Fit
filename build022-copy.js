@@ -4,13 +4,14 @@
     const status = window.Zero2FitRemoteSync?.status?.() || { configured:false, signed_in:false };
     const rows = [...document.querySelectorAll('#z10ThenNow .data-row')];
     const photoRow = rows.find(row => row.children?.[0]?.textContent?.trim() === 'Progress photos');
-    if (photoRow?.children?.[3]) {
-      photoRow.children[3].textContent = status.signed_in
-        ? 'Private + local timeline'
-        : status.configured
-          ? 'Local cache · private-sync ready'
-          : 'Local timeline';
-    }
+    const target = photoRow?.children?.[3];
+    if (!target) return;
+    const next = status.signed_in
+      ? 'Private + local timeline'
+      : status.configured
+        ? 'Local cache · private-sync ready'
+        : 'Local timeline';
+    if (target.textContent !== next) target.textContent = next;
   }
   window.addEventListener('zero2fit:remote-session', () => setTimeout(update, 20));
   window.addEventListener('zero2fit:remote-sync', () => setTimeout(update, 60));
