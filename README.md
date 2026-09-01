@@ -33,6 +33,7 @@ Zero2Fit currently provides:
 - authenticated private Supabase sync with Row Level Security for normalized events, Fuel history/preferences, workout session/set history and progress-photo metadata/blobs
 - a signed-in Build 024 private-account self-test that verifies the live RLS/CRUD/Storage/sync path without privileged credentials and cleans its synthetic probes automatically
 - a Build 026 **Activation Guide** that tracks actual two-browser continuity plus physical HealthKit/hardware acceptance without weakening the device trust boundary
+- a Build 028 **Physical HealthKit evidence** matrix that structures source-bundle and per-metric parity evidence before exact Zepp/RENPHO verification is allowed
 - RENPHO CSV, Apple Health XML and normalized HealthKit JSON import paths
 - native iPhone HealthKit companion source under `ios/Zero2FitHealthBridge`
 - exact HealthKit source-bundle observation plus explicit Zepp/RENPHO verification before device data can authorize permanent Fitness XP
@@ -48,9 +49,10 @@ Zero2Fit currently provides:
 - **Build 021 — workout private continuity:** completed workout sessions and set/load history use the existing RLS-protected workout tables. Deterministic testing proves restored history still drives the adaptive next-load recommendation.
 - **Build 022 — progress-photo private continuity:** aligned photo blobs and metadata use the existing private `progress-photos` bucket and RLS-protected photo tables; deletion tombstones prevent removed photos from reappearing.
 - **Build 024 — private-account infrastructure self-test:** self-cleaning authenticated probes cover identity, anonymous-access rejection, normalized-event CRUD, preferences preservation, workout tables, photo metadata, private Storage and the fully wrapped Sync Now pipeline. The cloud marker is written only after every probe passes.
-- **Build 026 — cross-browser + physical Activation Guide:** reads the Build 024 cloud marker, publishes privacy-minimized per-browser acceptance snapshots, compares two browsers for Fuel/workout/photo reconstruction and deletion propagation, and separately records the few physical-device facts that software cannot prove.
+- **Build 026 — cross-browser + physical Activation Guide:** reads the Build 024 cloud marker, publishes privacy-minimized per-browser acceptance snapshots, compares two browsers for Fuel/workout/photo reconstruction and deletion propagation, and separates software-derived acceptance from physical-device evidence.
+- **Build 028 — structured HealthKit evidence gate:** maps the exact observed HealthKit bundle candidates to a provider-specific parity matrix, blocks mismatched/unresolved sources, requires Zepp Steps and RENPHO Weight as physical anchors, stores status/source evidence without the compared health values, and only then permits the separate exact-source verification action.
 
-Builds 019/021/022 implement the continuity layer. Build 024 verifies one-browser private infrastructure. Build 026 makes the remaining two-browser and physical acceptance work explicit and machine-checkable. None of these builds invent the real account or physical-device evidence.
+Builds 019/021/022 implement the continuity layer. Build 024 verifies one-browser private infrastructure. Build 026 makes the remaining two-browser acceptance measurable. Build 028 makes the physical source-verification evidence explicit and fail-closed. None of these builds invent the real account, source bundle IDs or physical-device evidence.
 
 ## Device path — HealthKit bridge
 
@@ -77,9 +79,13 @@ RENPHO scale
 
 Historical RENPHO CSV and Apple Health `export.xml` imports remain supported.
 
-The native bridge deliberately does **not** guess vendor bundle identifiers. It captures exact HealthKit source names/bundle IDs from the physical iPhone into `device_source_observations`. The Devices page requires explicit verification of the exact matching bundle before those bridge events can participate in permanent device Fitness XP.
+The native bridge deliberately does **not** guess vendor bundle identifiers. It captures exact HealthKit `source.name` and `source.bundleIdentifier` values from the physical iPhone and records per-bundle/per-metric source observations with sample counts and observation timestamps.
 
-An Apple Health import whose `sourceName` merely contains `Zepp`, `Amazfit`, `Apple Watch` or `iPhone` is **not** trusted for permanent progression. Build 026 manual acceptance checkboxes also do not create a verification record.
+Build 028 then requires the actual observed bundle to be selected as the Zepp or RENPHO **candidate** and physically evaluated. Candidate selection is not verification. `Matched` is only valid when the bundle actually wrote that metric, `Not provided` is only valid when it did not, and any mismatch/unresolved row blocks verification. Zepp requires matched Steps; RENPHO requires matched Weight.
+
+Only after the structured evidence is ready can the existing explicit Verify Zepp / Verify RENPHO action proceed. The evidence record is privately persisted first. The separate source-verification row remains the only route by which matching native events can qualify for permanent device Fitness XP.
+
+An Apple Health import whose `sourceName` merely contains `Zepp`, `Amazfit`, `Apple Watch` or `iPhone` is **not** trusted for permanent progression. Build 026/028 acceptance state also does not itself create a verification record.
 
 See:
 
@@ -109,7 +115,9 @@ Build 024's acceptance harness uses only the publishable key + authenticated use
 
 Build 026 adds one `acceptance_browser_snapshot` per browser through the existing normalized-event path. The snapshot contains browser-random ID, counts/statuses/signatures and acceptance flags only—not food names, body measurements, heart-rate values, sleep values or other health measurements.
 
-At the latest live check after Build 026, the Supabase project still contained **0 auth users and 0 personal user-data rows**, including zero source observations/verifications. Software implementation therefore remains ahead of real-account activation.
+Build 028 adds `healthkit_acceptance_evidence` to the same private normalized-event timeline. That record stores source IDs and physical-check statuses, but not the numerical weight/HR/sleep/etc. values used for human comparison.
+
+At the latest live check after Build 028, the Supabase project still contained **0 auth users and 0 personal user-data/source-observation/source-verification rows**. Software implementation therefore remains ahead of real-account activation.
 
 ## Researched fitness reference data
 
@@ -159,7 +167,7 @@ Adaptive progression uses the same stored set/load history that Build 021 mirror
 
 Real fitness activity is the authority for permanent Fitness XP/attributes. Adventure progression can award game gear/materials but cannot fabricate Fitness XP.
 
-Device-based permanent progression requires a verified native source mapping and continues to use date/duration/deduplication/per-day safeguards. Historical imports and acceptance snapshots do not retroactively create game progression.
+Device-based permanent progression requires a verified native source mapping and continues to use date/duration/deduplication/per-day safeguards. Historical imports, acceptance snapshots and physical evidence records do not retroactively create game progression.
 
 ## Progress photos
 
@@ -179,7 +187,9 @@ The repository currently uses multiple complementary gates:
 - `.github/workflows/validate-build022-photo-sync.yml` — focused progress-photo path/RLS/client-contract/tombstone validation
 - `.github/workflows/validate-build024-acceptance.yml` — focused private-account infrastructure self-test validation
 - `.github/workflows/validate-build026-activation-guide.yml` — focused cross-browser/physical acceptance model and wiring validation
-- `.github/workflows/visual-qa.yml` — **15 deterministic screenshots**, including dedicated iPhone Progress → Photos and Activation Guide screens, with one bounded fresh-profile retry for transient headless-Chrome failures
+- `.github/workflows/validate-build028-healthkit-evidence.yml` — focused source/metric evidence, verification-gate and privacy validation
+- `.github/workflows/visual-qa.yml` — **16 deterministic screenshots**, including dedicated iPhone Progress → Photos, Activation Guide and HealthKit-evidence screens, with one bounded fresh-profile retry for transient headless-Chrome failures
+- browser smoke itself now uses one bounded fresh-profile retry when late-module sentinels are missing; the second attempt still fails on exact missing markers
 - `.github/workflows/sync-fitness-data.yml` — source refresh/normalization with commit-on-change only
 - `.github/workflows/validate-healthkit-bridge.yml` — XcodeGen generation and iOS simulator compilation for the native HealthKit companion
 - GitHub Pages build/deploy on `main`
@@ -223,12 +233,16 @@ Once the account exists:
 
 ### Physical iPhone / HealthKit
 
-Software/simulator validation cannot establish what the real iPhone contains. Before native device data is allowed to drive permanent progression, the physical device must establish:
+Software/simulator validation cannot establish what the real iPhone contains. Build 028 now guides the physical sequence:
 
-1. the exact Zepp HealthKit source name/bundle ID and metric categories actually written;
-2. the exact RENPHO Health source name/bundle ID and metric categories actually written;
-3. representative value agreement through source app → Apple Health → Zero2Fit for steps, weight/body composition, heart rate, resting HR, HRV, sleep, workouts and active energy;
-4. physical-device background delivery;
-5. the RENPHO underside model label.
+1. run the native HealthKit bridge on the real iPhone while signed into the real private account;
+2. wait for exact source observations to appear;
+3. select the actual Zepp and RENPHO candidate bundle IDs in the Build 028 matrix;
+4. compare representative source-app → Apple Health → Zero2Fit values and resolve every relevant metric as Matched / Not provided / Mismatch;
+5. require Zepp Steps and RENPHO Weight to be matched;
+6. resolve every mismatch rather than overriding the gate;
+7. confirm physical background delivery and enter the exact RENPHO underside model label;
+8. only when the provider matrix reports ready, perform the separate explicit Verify Zepp / Verify RENPHO action;
+9. private sync again and confirm the verification metadata is applied to matching native events.
 
-Build 026 displays and records these physical checkpoints, but it does not infer them. Until those checks occur, source names remain evidence only and unverified native device records cannot earn permanent device Fitness XP.
+Until those checks occur, source names remain evidence only and unverified native device records cannot earn permanent device Fitness XP.
