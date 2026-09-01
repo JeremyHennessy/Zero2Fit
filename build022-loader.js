@@ -14,7 +14,8 @@
       import('./build022-copy.js')
     ])
       .then(() => import('./build024-private-acceptance.js'))
-      .catch(error => console.warn('Zero2Fit Build 022/024 private continuity failed to load', error));
+      .then(() => import('./build025-activation-guide.js'))
+      .catch(error => console.warn('Zero2Fit Build 022/024/025 private continuity failed to load', error));
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load, { once:true });
   else load();
