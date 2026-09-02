@@ -67,6 +67,22 @@ final class SupabaseBridgeClient {
         return (bundle.normalizedEvents.count, bundle.sourceObservations.count)
     }
 
+    func fetchActivationStatus() async throws -> RemoteActivationStatus {
+        guard let session = try await restoreSession() else { throw SupabaseBridgeError.notSignedIn }
+        async let observations: [SourceObservation] = getREST(
+            path: "/rest/v1/device_source_observations?select=source_bundle_id,source_name,metric_type,sample_count,first_observed_at,last_observed_at,last_sync_at,metadata&order=last_sync_at.desc",
+            accessToken: session.accessToken
+        )
+        async let verifications: [RemoteSourceVerification] = getREST(
+            path: "/rest/v1/device_source_verifications?select=verification_id,provider,source_bundle_id,source_name,metric_types,verified_at&order=verified_at.desc",
+            accessToken: session.accessToken
+        )
+        return try await RemoteActivationStatus(
+            observations: observations,
+            verifications: verifications
+        )
+    }
+
     private func uploadEvents(_ events: [BridgeEvent], userId: String, accessToken: String) async throws {
         for chunk in events.chunked(into: 200) {
             let rows = chunk.map { event in
@@ -151,6 +167,14 @@ final class SupabaseBridgeClient {
         request.setValue(publishableKey, forHTTPHeaderField: "apikey")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try encoder.encode(body)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        try validate(response: response, data: data)
+        return try decoder.decode(Response.self, from: data)
+    }
+
+    private func getREST<Response: Decodable>(path: String, accessToken: String) async throws -> Response {
+        var request = authorizedRequest(path: path, method: "GET", accessToken: accessToken)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
         let (data, response) = try await URLSession.shared.data(for: request)
         try validate(response: response, data: data)
         return try decoder.decode(Response.self, from: data)

@@ -14,20 +14,35 @@ final class BridgeViewModel: ObservableObject {
     @Published var observations: [SourceObservation] = []
     @Published var sourceSummaries: [SourceBundleSummary] = []
     @Published var lastBackgroundSyncAt: Date?
+    @Published var activationReadiness = ActivationReadinessBuilder.build(
+        isSignedIn: false,
+        healthAuthorized: false,
+        localSourceBundleCount: 0,
+        remoteStatus: nil,
+        lastBackgroundSyncAt: nil
+    )
 
     private let bridge = HealthKitBridge()
     private let client = SupabaseBridgeClient.shared
     private let lastBackgroundSyncKey = "zero2fit.healthbridge.lastBackgroundSyncAt"
+    private var remoteActivationStatus: RemoteActivationStatus?
 
     func restore() async {
         if let date = UserDefaults.standard.object(forKey: lastBackgroundSyncKey) as? Date {
             lastBackgroundSyncAt = date
         }
+        rebuildActivationReadiness()
         do {
             if let session = try await client.restoreSession() {
                 isSignedIn = true
                 email = session.user.email ?? email
-                status = "Signed in to private sync."
+                do {
+                    try await refreshActivationStatusFromServer()
+                    status = "Signed in to private sync. Activation status refreshed."
+                } catch {
+                    rebuildActivationReadiness()
+                    status = "Signed in to private sync. Activation status refresh failed: \(error.localizedDescription)"
+                }
             }
         } catch {
             status = error.localizedDescription
@@ -38,9 +53,13 @@ final class BridgeViewModel: ObservableObject {
         await run {
             let immediateSession = try await client.signUp(email: email, password: password)
             isSignedIn = immediateSession
-            status = immediateSession
-                ? "Private account created and signed in."
-                : "Account created. Check your email if confirmation is required, then sign in."
+            if immediateSession {
+                try await refreshActivationStatusFromServer()
+                status = "Private account created and signed in. Activation status refreshed."
+            } else {
+                rebuildActivationReadiness()
+                status = "Account created. Check your email if confirmation is required, then sign in."
+            }
         }
     }
 
@@ -49,6 +68,7 @@ final class BridgeViewModel: ObservableObject {
             let session = try await client.signIn(email: email, password: password)
             isSignedIn = true
             email = session.user.email ?? email
+            try await refreshActivationStatusFromServer()
             status = "Signed in. Authorize HealthKit, then sync."
         }
     }
@@ -58,6 +78,8 @@ final class BridgeViewModel: ObservableObject {
         await client.signOut()
         bridge.stopBackgroundObservation()
         isSignedIn = false
+        remoteActivationStatus = nil
+        rebuildActivationReadiness()
         isBusy = false
         status = "Signed out."
     }
@@ -66,6 +88,7 @@ final class BridgeViewModel: ObservableObject {
         await run {
             try await bridge.requestAuthorization()
             healthAuthorized = true
+            rebuildActivationReadiness()
             try await bridge.startBackgroundObservation { [weak self] in
                 await self?.backgroundSync()
             }
@@ -79,10 +102,22 @@ final class BridgeViewModel: ObservableObject {
             apply(bundle)
             if isSignedIn {
                 let result = try await client.upload(bundle)
+                try await refreshActivationStatusFromServer()
                 status = "Synced \(result.events) events and \(result.observations) source observations. Use the web HealthKit evidence matrix before verifying Zepp or RENPHO."
             } else {
                 status = "Captured \(bundle.normalizedEvents.count) events locally in memory. Sign in to upload them privately."
             }
+        }
+    }
+
+    func refreshActivationStatus() async {
+        await run {
+            guard isSignedIn else { throw SupabaseBridgeError.notSignedIn }
+            try await refreshActivationStatusFromServer()
+            let readiness = activationReadiness
+            status = readiness.isComplete
+                ? "Activation readiness complete. Both exact source verifications and physical background delivery are detected."
+                : "Activation readiness refreshed: \(readiness.completedCount) of \(readiness.totalCount) checkpoints complete."
         }
     }
 
@@ -113,6 +148,22 @@ final class BridgeViewModel: ObservableObject {
             events: bundle.normalizedEvents,
             observations: bundle.sourceObservations
         )
+        rebuildActivationReadiness()
+    }
+
+    private func refreshActivationStatusFromServer() async throws {
+        remoteActivationStatus = try await client.fetchActivationStatus()
+        rebuildActivationReadiness()
+    }
+
+    private func rebuildActivationReadiness() {
+        activationReadiness = ActivationReadinessBuilder.build(
+            isSignedIn: isSignedIn,
+            healthAuthorized: healthAuthorized,
+            localSourceBundleCount: sourceSummaries.count,
+            remoteStatus: remoteActivationStatus,
+            lastBackgroundSyncAt: lastBackgroundSyncAt
+        )
     }
 
     private func backgroundSync() async {
@@ -124,6 +175,8 @@ final class BridgeViewModel: ObservableObject {
             let completedAt = Date()
             lastBackgroundSyncAt = completedAt
             UserDefaults.standard.set(completedAt, forKey: lastBackgroundSyncKey)
+            try? await refreshActivationStatusFromServer()
+            rebuildActivationReadiness()
             status = "Background HealthKit update synced at \(completedAt.formatted(date: .omitted, time: .shortened))."
         } catch {
             status = "Background sync: \(error.localizedDescription)"
