@@ -25,17 +25,33 @@ jobs:
         working-directory: ios/Zero2FitHealthBridge
         run: |
           test -s Sources/SourceAcceptanceSummary.swift
+          test -s Sources/ActivationStatus.swift
           test -s Tools/TestSourceAcceptanceSummary.swift
+          test -s Tools/TestActivationReadiness.swift
           grep -q 'Physical source acceptance console' Sources/ContentView.swift
+          grep -q 'Activation readiness' Sources/ContentView.swift
+          grep -q 'Refresh private activation status' Sources/ContentView.swift
           grep -q 'Capture + sync last 24 hours' Sources/ContentView.swift
           grep -q 'Last background delivery' Sources/ContentView.swift
           grep -q 'Copy bundle ID' Sources/ContentView.swift
           grep -q 'sourceSummaries' Sources/BridgeViewModel.swift
+          grep -q 'activationReadiness' Sources/BridgeViewModel.swift
+          grep -q 'refreshActivationStatus' Sources/BridgeViewModel.swift
           grep -q 'lastBackgroundSyncAt' Sources/BridgeViewModel.swift
+          grep -q 'fetchActivationStatus' Sources/SupabaseBridgeClient.swift
+          grep -q '/rest/v1/device_source_verifications?select=' Sources/SupabaseBridgeClient.swift
+          grep -q 'method: "GET"' Sources/SupabaseBridgeClient.swift
           grep -q 'sourceBundleId' Sources/SourceAcceptanceSummary.swift
           grep -q 'latestValue' Sources/SourceAcceptanceSummary.swift
-          if grep -R -n 'verifySource\|verification_id\|source_verification_status' Sources/ContentView.swift Sources/BridgeViewModel.swift Sources/SourceAcceptanceSummary.swift; then
-            echo 'Native acceptance console must not create or simulate source verification.'
+          grep -q 'observedBundleIds.contains' Sources/ActivationStatus.swift
+          grep -q 'verification(for: "zepp")' Sources/ActivationStatus.swift
+          grep -q 'verification(for: "renpho")' Sources/ActivationStatus.swift
+          if grep -R -n 'verifySource\|source_verification_status' Sources/ContentView.swift Sources/BridgeViewModel.swift Sources/SourceAcceptanceSummary.swift Sources/ActivationStatus.swift; then
+            echo 'Native activation UI must not create or simulate source verification.'
+            exit 1
+          fi
+          if grep -q '/rest/v1/device_source_verifications?on_conflict' Sources/SupabaseBridgeClient.swift; then
+            echo 'Native bridge must never POST/upsert source verification rows.'
             exit 1
           fi
 
@@ -48,6 +64,16 @@ jobs:
             Tools/TestSourceAcceptanceSummary.swift \
             -o /tmp/zero2fit-source-acceptance-test
           /tmp/zero2fit-source-acceptance-test
+
+      - name: Test native activation readiness model
+        working-directory: ios/Zero2FitHealthBridge
+        run: |
+          xcrun swiftc \
+            Sources/BridgeModels.swift \
+            Sources/ActivationStatus.swift \
+            Tools/TestActivationReadiness.swift \
+            -o /tmp/zero2fit-activation-readiness-test
+          /tmp/zero2fit-activation-readiness-test
 
       - name: Install XcodeGen
         run: brew install xcodegen
