@@ -27,6 +27,42 @@ struct ContentView: View {
                     }
                 }
 
+                Section("Activation readiness") {
+                    HStack {
+                        Label(
+                            model.activationReadiness.isComplete ? "Physical activation complete" : "Physical activation in progress",
+                            systemImage: model.activationReadiness.isComplete ? "checkmark.seal.fill" : "checklist"
+                        )
+                        Spacer()
+                        Text("\(model.activationReadiness.completedCount)/\(model.activationReadiness.totalCount)")
+                            .font(.headline.monospacedDigit())
+                    }
+
+                    ForEach(model.activationReadiness.checkpoints) { checkpoint in
+                        HStack(alignment: .top, spacing: 10) {
+                            Image(systemName: checkpoint.complete ? "checkmark.circle.fill" : "circle")
+                                .foregroundStyle(checkpoint.complete ? .green : .secondary)
+                                .padding(.top, 2)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(checkpoint.label)
+                                    .font(.subheadline.weight(.semibold))
+                                Text(checkpoint.detail)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+
+                    Button("Refresh private activation status") {
+                        Task { await model.refreshActivationStatus() }
+                    }
+                    .disabled(model.isBusy || !model.isSignedIn)
+
+                    Text("This checklist is read-only for source verification. It may detect an exact verification already created by the gated web workflow, but the iPhone companion cannot create, modify or infer one.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+
                 Section("HealthKit capture") {
                     Button(model.healthAuthorized ? "HealthKit authorized" : "Authorize HealthKit") {
                         Task { await model.authorizeHealthKit() }
