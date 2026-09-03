@@ -1,0 +1,72 @@
+name: Apply Build040 Storage Metadata Check
+
+on:
+  push:
+    branches: [fix/build024-storage-metadata-delete-check]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: fix/build024-storage-metadata-delete-check
+      - name: Replace cached body deletion oracle with Storage metadata check
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('build024-private-acceptance.js')
+          text = path.read_text()
+          old = """async function storageMissing(path) {
+            const session = currentSession();
+            const url = `${apiBase}/storage/v1/object/authenticated/progress-photos/${encodedPath(path)}`;
+            for (let attempt = 0; attempt < 10; attempt += 1) {
+              const cacheNonce = `${Date.now()}-${attempt}`;
+              const response = await fetch(`${url}?cacheNonce=${encodeURIComponent(cacheNonce)}`, {
+                cache:'no-store',
+                headers:{ apikey:publishableKey, Authorization:`Bearer ${session.access_token}` }
+              });
+              if (!response.ok) return true;
+              if (attempt < 9) await new Promise(resolve => setTimeout(resolve, 150));
+            }
+            return false;
+          }
+          """
+          new = """async function storageMissing(path) {
+            const session = currentSession();
+            const url = `${apiBase}/storage/v1/object/info/authenticated/progress-photos/${encodedPath(path)}`;
+            for (let attempt = 0; attempt < 20; attempt += 1) {
+              const cacheNonce = `${Date.now()}-${attempt}`;
+              const response = await fetch(`${url}?cacheNonce=${encodeURIComponent(cacheNonce)}`, {
+                cache:'no-store',
+                headers:{ apikey:publishableKey, Authorization:`Bearer ${session.access_token}` }
+              });
+              if (response.ok) {
+                if (attempt < 19) await new Promise(resolve => setTimeout(resolve, 150));
+                continue;
+              }
+              const payload = await parseResponse(response);
+              const statusCode = Number(payload?.statusCode || response.status || 0);
+              const message = String(payload?.message || payload?.error || payload?.error_code || '');
+              if (statusCode === 404 || /not[ _-]?found|object not found/i.test(message)) return true;
+              throw new Error(message || `Storage metadata check failed: ${response.status}`);
+            }
+            return false;
+          }
+          """
+          if old not in text:
+            raise SystemExit('Expected Build039 storageMissing block not found; aborting without changes.')
+          path.write_text(text.replace(old, new, 1))
+          PY
+          node --check build024-private-acceptance.js
+          grep -q '/storage/v1/object/info/authenticated/progress-photos/' build024-private-acceptance.js
+          git rm .github/workflows/apply-build040-storage-metadata-check.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add build024-private-acceptance.js
+          git commit -m 'Build 040: verify Storage deletion via object metadata'
+          git push origin HEAD:fix/build024-storage-metadata-delete-check
