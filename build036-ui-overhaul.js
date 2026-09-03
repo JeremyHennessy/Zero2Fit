@@ -134,6 +134,8 @@ function z36EnhanceTrain() {
   focus?.classList.add('z36-focus');
   const context = document.getElementById('trainingContextCard');
   if (context) z36Disclosure(context,'Workout setup','Location, duration and today’s substitutions','train-setup');
+  const setupDisclosure = document.querySelector('.z36-disclosure[data-z36="train-setup"]');
+  if (focus && setupDisclosure && focus.closest('.z36-disclosure') === setupDisclosure) setupDisclosure.before(focus);
   const continuity = document.getElementById('z21WorkoutSyncStatus');
   if (continuity) z36Disclosure(continuity,'Workout history','Private continuity and sync status','workout-sync');
 }
@@ -247,6 +249,14 @@ function z36EnhanceSettings() {
   z36Text(sheet.querySelector('h2'),'Settings');
 }
 
+function z36ApplyQaFocus() {
+  const params = new URLSearchParams(location.search);
+  const focus = params.get('qaFocus');
+  if (focus === 'activation') document.querySelector('.z36-disclosure[data-z36="activation"]')?.setAttribute('open','');
+  if (focus === 'healthkitEvidence') document.querySelector('.z36-disclosure[data-z36="health-sources"]')?.setAttribute('open','');
+  if (focus === 'fuelAdd' && document.getElementById('z17Fuel')) z36SetFuelSheet(true);
+}
+
 function z36EnhanceSaveFeedback() {
   document.querySelectorAll('[data-z17-save]').forEach(button => {
     const saved = button.disabled;
@@ -269,6 +279,7 @@ function z36Enhance() {
   z36EnhanceDevices();
   z36EnhanceSettings();
   z36EnhanceSaveFeedback();
+  z36ApplyQaFocus();
 }
 
 function z36Schedule() {

@@ -44,6 +44,7 @@ capture iphone 393 852 today 'qaPage=today'
 capture iphone 393 852 train 'qaPage=train'
 capture iphone 393 852 adventure 'qaPage=character&qaFocus=frontier'
 capture iphone 393 852 fuel 'path:qa-fuel-fixture.html?page=nutrition'
+capture iphone 393 852 fuel-add 'qaPage=nutrition&qaFocus=fuelAdd'
 capture iphone 393 852 progress 'path:qa-fuel-fixture.html?page=journey'
 capture iphone 393 852 photos 'path:qa-photos-fixture.html'
 capture iphone 393 852 devices 'qaPage=data'
@@ -59,5 +60,5 @@ capture desktop 1440 1000 progress 'path:qa-fuel-fixture.html?page=journey'
 capture desktop 1440 1000 devices 'qaPage=data'
 
 count="$(find "$OUT_DIR" -name '*.png' | wc -l)"
-if [[ "$count" -ne 16 ]]; then echo "Expected 16 screenshots, found ${count}." >&2; exit 1; fi
+if [[ "$count" -ne 17 ]]; then echo "Expected 17 screenshots, found ${count}." >&2; exit 1; fi
 echo "UI screenshot set complete: ${count} images."
