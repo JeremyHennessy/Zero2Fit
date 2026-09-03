@@ -10,7 +10,8 @@
     './build028-healthkit-evidence.js',
     './build028-verification-guard.js',
     './build028-qa-focus.js',
-    './build031-activation-handoff.js'
+    './build031-activation-handoff.js',
+    './build036-ui-overhaul.js'
   ];
 
   function load() {
