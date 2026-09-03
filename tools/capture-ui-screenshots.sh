@@ -59,6 +59,7 @@ capture desktop 1440 1000 fuel 'path:qa-fuel-fixture.html?page=nutrition'
 capture desktop 1440 1000 progress 'path:qa-fuel-fixture.html?page=journey'
 capture desktop 1440 1000 devices 'qaPage=data'
 
+# Expected 16 screenshots before Build036; Build036 adds an explicit Add Food interaction capture.
 count="$(find "$OUT_DIR" -name '*.png' | wc -l)"
 if [[ "$count" -ne 17 ]]; then echo "Expected 17 screenshots, found ${count}." >&2; exit 1; fi
 echo "UI screenshot set complete: ${count} images."
