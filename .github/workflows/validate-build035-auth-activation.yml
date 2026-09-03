@@ -1,0 +1,33 @@
+name: Validate Build 035 Auth Activation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  auth-activation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate auth activation syntax
+        run: |
+          node --check zero2fit-config.js
+          node --check auth-activation-core.mjs
+          node --check build035-auth-activation.js
+          node --check tools/test-auth-activation-core.mjs
+
+      - name: Test auth activation contract
+        run: node tools/test-auth-activation-core.mjs
+
+      - name: Check activation wiring
+        run: |
+          grep -q "build035-auth-activation.js" zero2fit-config.js
+          grep -q "redirect_to=" build035-auth-activation.js
+          grep -q "zero2fit-supabase-session-v1" auth-activation-core.mjs
+          grep -q "email rate limit exceeded" auth-activation-core.mjs
