@@ -19,7 +19,6 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
-
           p = Path('build022-photo-sync.js')
           s = p.read_text()
           old = """function init() {\n  if (initialized) return;\n  if (!remote || !storage?.getProgressPhotos || !document.querySelector('.z8-photo-module')) return setTimeout(init, 100);\n  initialized = true;\n  ensureStylesheet();\n  document.body.classList.add('build022-photo-sync');\n  wrapLocalDelete();\n  wrapSyncNow();\n  bindStatus();\n  renderStatus();\n  setTimeout(renderStatus, 700);\n}\n"""
@@ -27,26 +26,16 @@ jobs:
           if old not in s:
               raise SystemExit('Expected Build022 init block not found')
           p.write_text(s.replace(old, new, 1))
-
-          v = Path('.github/workflows/validate-build022-photo-sync.yml')
-          t = v.read_text()
-          needle = "          grep -q 'raw_photos_included: false' storage.js\n"
-          addition = "          grep -q 'raw_photos_included: false' storage.js\n          grep -q 'waitForPhotoStatusUi' build022-photo-sync.js\n          if grep -Fq \"!remote || !storage?.getProgressPhotos || !document.querySelector('.z8-photo-module')\" build022-photo-sync.js; then echo 'Build 022 operational readiness must not depend on Progress photo UI.'; exit 1; fi\n"
-          if needle not in t:
-              raise SystemExit('Expected Build022 validation insertion point not found')
-          v.write_text(t.replace(needle, addition, 1))
-      - name: Verify patch
+      - name: Verify focused patch
         run: |
           node --check build022-photo-sync.js
           grep -q 'waitForPhotoStatusUi' build022-photo-sync.js
           grep -q 'if (!remote || !storage?.getProgressPhotos) return setTimeout(init, 100);' build022-photo-sync.js
           if grep -Fq "!remote || !storage?.getProgressPhotos || !document.querySelector('.z8-photo-module')" build022-photo-sync.js; then exit 1; fi
-      - name: Remove temporary workflow
-        run: rm .github/workflows/apply-build041-photo-readiness.yml
-      - name: Commit focused fix
+      - name: Commit production file only
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add build022-photo-sync.js .github/workflows/validate-build022-photo-sync.yml .github/workflows/apply-build041-photo-readiness.yml
+          git add build022-photo-sync.js
           git commit -m 'Build 041: decouple photo sync readiness from Progress UI'
           git push origin HEAD:fix/build022-operational-readiness
