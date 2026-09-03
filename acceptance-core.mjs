@@ -113,6 +113,7 @@ export function acceptanceMarker(existing, userId, result) {
       ...(existing?.settings || {}),
       zero2fit_acceptance_v1:{
         version:ACCEPTANCE_VERSION,
+        passed:true,
         passed_at:result.finished_at,
         run_id:result.run_id,
         build:'024',

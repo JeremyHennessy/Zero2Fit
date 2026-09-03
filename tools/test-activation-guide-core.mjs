@@ -54,12 +54,13 @@ assert.equal(photoResult.ever_deleted_remote,true);
 
 const infra=privateAcceptanceEvidence(
   {passed:false,run_id:'local-old'},
-  {settings:{zero2fit_acceptance_v1:{passed:true,run_id:'cloud-good',finished_at:'2026-09-01T02:00:00Z',checks:[1,2,3]}}}
+  {settings:{zero2fit_acceptance_v1:{run_id:'cloud-good',passed_at:'2026-09-01T02:00:00Z',checks:[{status:'pass'},{status:'pass'},{status:'pass'}]}}}
 );
 assert.equal(infra.passed,true);
 assert.equal(infra.cloud_passed,true);
 assert.equal(infra.run_id,'cloud-good');
 assert.equal(infra.check_count,3);
+assert.equal(infra.finished_at,'2026-09-01T02:00:00Z');
 
 const devices=deviceEvidence(
   [{source_bundle_id:'zepp.bundle',metric_type:'steps'},{source_bundle_id:'renpho.bundle',metric_type:'weight'}],

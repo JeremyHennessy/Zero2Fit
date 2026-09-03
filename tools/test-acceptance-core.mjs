@@ -62,6 +62,7 @@ const result = { run_id:runId, finished_at:now, passed:true, checks };
 const marker = acceptanceMarker(existing, userId, result);
 assert.equal(marker.settings.keep_me, true);
 assert.equal(marker.settings.zero2fit_acceptance_v1.version, ACCEPTANCE_VERSION);
+assert.equal(marker.settings.zero2fit_acceptance_v1.passed, true);
 assert.equal(marker.settings.zero2fit_acceptance_v1.build, '024');
 assert.equal(marker.settings.zero2fit_acceptance_v1.checks.length, 2);
 assert.match(acceptanceDisplay(result), /2\/2 checks passed/);
