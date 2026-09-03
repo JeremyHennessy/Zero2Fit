@@ -1,0 +1,70 @@
+name: Apply Build026 Marker Compatibility Fix
+
+on:
+  push:
+    branches: [fix/build026-acceptance-marker-compat]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: fix/build026-acceptance-marker-compat
+      - name: Apply focused compatibility fix
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p=Path('activation-guide-core.mjs')
+          s=p.read_text()
+          old="""  const cloud = preferenceRow?.settings?.zero2fit_acceptance_v1 || null;\n  const localPassed = Boolean(localResult?.passed);\n  const cloudPassed = Boolean(cloud?.passed);\n  return {\n    passed:Boolean(localPassed || cloudPassed),\n    local_passed:localPassed,\n    cloud_passed:cloudPassed,\n    run_id:cloud?.run_id || localResult?.run_id || null,\n    finished_at:cloud?.finished_at || localResult?.finished_at || null,\n    check_count:Array.isArray(cloud?.checks) ? cloud.checks.length : Array.isArray(localResult?.checks) ? localResult.checks.length : 0\n  };\n"""
+          new="""  const cloud = preferenceRow?.settings?.zero2fit_acceptance_v1 || null;\n  const localPassed = Boolean(localResult?.passed);\n  const cloudChecks = Array.isArray(cloud?.checks) ? cloud.checks : [];\n  const legacyCloudPassed = Boolean(cloud?.passed_at && cloudChecks.length > 0 && cloudChecks.every(check => check?.status === 'pass'));\n  const cloudPassed = Boolean(cloud?.passed === true || legacyCloudPassed);\n  return {\n    passed:Boolean(localPassed || cloudPassed),\n    local_passed:localPassed,\n    cloud_passed:cloudPassed,\n    run_id:cloud?.run_id || localResult?.run_id || null,\n    finished_at:cloud?.finished_at || cloud?.passed_at || localResult?.finished_at || null,\n    check_count:cloudChecks.length || (Array.isArray(localResult?.checks) ? localResult.checks.length : 0)\n  };\n"""
+          if old not in s: raise SystemExit('privateAcceptanceEvidence block not found')
+          p.write_text(s.replace(old,new,1))
+
+          p=Path('acceptance-core.mjs')
+          s=p.read_text()
+          old="""        version:ACCEPTANCE_VERSION,\n        passed_at:result.finished_at,\n"""
+          new="""        version:ACCEPTANCE_VERSION,\n        passed:true,\n        passed_at:result.finished_at,\n"""
+          if old not in s: raise SystemExit('acceptance marker block not found')
+          p.write_text(s.replace(old,new,1))
+
+          p=Path('tools/test-activation-guide-core.mjs')
+          s=p.read_text()
+          old="""  {settings:{zero2fit_acceptance_v1:{passed:true,run_id:'cloud-good',finished_at:'2026-09-01T02:00:00Z',checks:[1,2,3]}}}\n"""
+          new="""  {settings:{zero2fit_acceptance_v1:{run_id:'cloud-good',passed_at:'2026-09-01T02:00:00Z',checks:[{status:'pass'},{status:'pass'},{status:'pass'}]}}}\n"""
+          if old not in s: raise SystemExit('activation guide legacy marker fixture not found')
+          s=s.replace(old,new,1)
+          marker="assert.equal(infra.check_count,3);"
+          if marker not in s: raise SystemExit('activation guide infra assertion marker not found')
+          s=s.replace(marker, marker+"\nassert.equal(infra.finished_at,'2026-09-01T02:00:00Z');",1)
+          p.write_text(s)
+
+          p=Path('tools/test-acceptance-core.mjs')
+          s=p.read_text()
+          marker="assert.equal(marker.settings.zero2fit_acceptance_v1.version, ACCEPTANCE_VERSION);"
+          if marker not in s: raise SystemExit('acceptance core marker assertion not found')
+          s=s.replace(marker, marker+"\nassert.equal(marker.settings.zero2fit_acceptance_v1.passed, true);",1)
+          p.write_text(s)
+      - name: Verify
+        run: |
+          node --check activation-guide-core.mjs
+          node --check acceptance-core.mjs
+          node --check tools/test-activation-guide-core.mjs
+          node --check tools/test-acceptance-core.mjs
+          node tools/test-activation-guide-core.mjs
+          node tools/test-acceptance-core.mjs
+          grep -q 'legacyCloudPassed' activation-guide-core.mjs
+          grep -q 'passed:true' acceptance-core.mjs
+      - name: Commit production files only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add activation-guide-core.mjs acceptance-core.mjs tools/test-activation-guide-core.mjs tools/test-acceptance-core.mjs
+          git commit -m 'Recognize existing Build024 acceptance markers in Build026'
+          git push origin HEAD:fix/build026-acceptance-marker-compat
