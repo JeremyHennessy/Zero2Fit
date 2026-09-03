@@ -1,0 +1,79 @@
+name: Apply Build024 Storage Cache Fix
+
+on:
+  push:
+    branches: [fix/build024-storage-delete-cache-probe]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout fix branch
+        uses: actions/checkout@v6
+        with:
+          ref: fix/build024-storage-delete-cache-probe
+
+      - name: Repair acceptance Storage delete verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('build024-private-acceptance.js')
+          text = path.read_text()
+
+          old_cache = "      'cache-control':'60',"
+          new_cache = "      'cache-control':'0',"
+          if text.count(old_cache) != 1:
+              raise SystemExit(f'Expected exactly one probe cache-control line, found {text.count(old_cache)}')
+          text = text.replace(old_cache, new_cache, 1)
+
+          old_missing = """async function storageMissing(path) {
+            const session = currentSession();
+            const url = `${apiBase}/storage/v1/object/authenticated/progress-photos/${encodedPath(path)}`;
+            for (let attempt = 0; attempt < 10; attempt += 1) {
+              const response = await fetch(url, {
+                headers:{ apikey:publishableKey, Authorization:`Bearer ${session.access_token}` }
+              });
+              if (!response.ok) return true;
+              if (attempt < 9) await new Promise(resolve => setTimeout(resolve, 150));
+            }
+            return false;
+          }"""
+          new_missing = """async function storageMissing(path) {
+            const session = currentSession();
+            const url = `${apiBase}/storage/v1/object/authenticated/progress-photos/${encodedPath(path)}`;
+            for (let attempt = 0; attempt < 10; attempt += 1) {
+              const cacheNonce = `${Date.now()}-${attempt}`;
+              const response = await fetch(`${url}?cacheNonce=${encodeURIComponent(cacheNonce)}`, {
+                cache:'no-store',
+                headers:{ apikey:publishableKey, Authorization:`Bearer ${session.access_token}` }
+              });
+              if (!response.ok) return true;
+              if (attempt < 9) await new Promise(resolve => setTimeout(resolve, 150));
+            }
+            return false;
+          }"""
+          if text.count(old_missing) != 1:
+              raise SystemExit(f'Expected exactly one storageMissing block, found {text.count(old_missing)}')
+          text = text.replace(old_missing, new_missing, 1)
+          path.write_text(text)
+          PY
+
+          node --check build024-private-acceptance.js
+          grep -Fq "'cache-control':'0'" build024-private-acceptance.js
+          grep -Fq "cache:'no-store'" build024-private-acceptance.js
+          grep -Fq 'cacheNonce=' build024-private-acceptance.js
+          git diff --check
+          git diff -- build024-private-acceptance.js
+
+          rm .github/workflows/apply-build024-storage-cache-fix.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add build024-private-acceptance.js .github/workflows/apply-build024-storage-cache-fix.yml
+          git commit -m 'Build 039: bypass cache in Storage delete acceptance probe'
+          git push origin HEAD:fix/build024-storage-delete-cache-probe
