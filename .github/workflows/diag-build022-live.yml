@@ -1,0 +1,30 @@
+name: Diagnose Live Build022 Readiness
+
+on:
+  push:
+    branches: [fix/build024-storage-metadata-delete-check]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe live Zero2Fit DOM
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://jeremyhennessy.github.io/Zero2Fit/?qaPage=data&diag=z22-${GITHUB_SHA}"
+          PROFILE="$(mktemp -d)"
+          chromium --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage \
+            --user-data-dir="$PROFILE" --virtual-time-budget=20000 --dump-dom "$URL" \
+            > /tmp/live.html 2>/tmp/chrome.log || true
+          echo '=== MARKERS ==='
+          for marker in z4PhotoTrackerPreview z8-photo-module z22PhotoSyncStatus z24Acceptance z26ActivationGuide z28HealthKitEvidence; do
+            if grep -q "$marker" /tmp/live.html; then echo "$marker=PRESENT"; else echo "$marker=MISSING"; fi
+          done
+          echo '=== RELEVANT CONSOLE/LOAD ERRORS ==='
+          grep -Ei 'Zero2Fit|error|failed|build022|build008' /tmp/chrome.log | tail -80 || true
+          echo '=== DOM SIZE ==='
+          wc -c /tmp/live.html
