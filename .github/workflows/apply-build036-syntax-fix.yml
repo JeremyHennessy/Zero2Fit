@@ -1,0 +1,38 @@
+name: Apply Build036 Syntax Fix
+on:
+  push:
+    branches: [fix/build020-build036-syntax-regression]
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout fix branch
+        uses: actions/checkout@v6
+        with:
+          ref: fix/build020-build036-syntax-regression
+          fetch-depth: 0
+      - name: Repair malformed Build024 cleanup calls and remove bootstrap workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('build024-private-acceptance.js')
+          text = path.read_text()
+          needle = "headers:{ Prefer:'return=minimal' }));"
+          replacement = "headers:{ Prefer:'return=minimal' } }));"
+          count = text.count(needle)
+          if count != 5:
+              raise SystemExit(f'Expected exactly 5 malformed cleanup calls, found {count}. Refusing broad replacement.')
+          text = text.replace(needle, replacement)
+          path.write_text(text)
+          PY
+          node --check build024-private-acceptance.js
+          git rm .github/workflows/apply-build036-syntax-fix.yml
+          git config user.name 'Jeremy Hennessy'
+          git config user.email 'jeremy.hennessy@gmail.com'
+          git add build024-private-acceptance.js
+          git commit -m 'Build 038: repair Build036 acceptance syntax regression'
+          git push origin HEAD:fix/build020-build036-syntax-regression
