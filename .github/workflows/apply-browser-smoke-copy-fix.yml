@@ -1,0 +1,36 @@
+name: Apply Browser Smoke Copy Fix
+
+on:
+  push:
+    branches: [fix/build026-acceptance-marker-compat]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: fix/build026-acceptance-marker-compat
+      - name: Align stale smoke assertion
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('tools/browser-smoke.sh')
+          s=p.read_text()
+          old="assert_dom 'One-browser infrastructure acceptance only.'"
+          new="assert_dom 'One-browser core infrastructure acceptance only.'"
+          if old not in s: raise SystemExit('stale browser-smoke assertion not found')
+          p.write_text(s.replace(old,new,1))
+      - name: Verify and commit
+        run: |
+          bash -n tools/browser-smoke.sh
+          grep -Fq "One-browser core infrastructure acceptance only." tools/browser-smoke.sh
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/browser-smoke.sh
+          git commit -m 'Align browser smoke with deferred photo acceptance copy'
+          git push origin HEAD:fix/build026-acceptance-marker-compat
