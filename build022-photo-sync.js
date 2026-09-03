@@ -340,9 +340,14 @@ function bindStatus() {
   window.addEventListener('focus', renderStatus);
 }
 
+function waitForPhotoStatusUi() {
+  if (!document.querySelector('.z8-photo-module')) return setTimeout(waitForPhotoStatusUi, 100);
+  renderStatus();
+}
+
 function init() {
   if (initialized) return;
-  if (!remote || !storage?.getProgressPhotos || !document.querySelector('.z8-photo-module')) return setTimeout(init, 100);
+  if (!remote || !storage?.getProgressPhotos) return setTimeout(init, 100);
   initialized = true;
   ensureStylesheet();
   document.body.classList.add('build022-photo-sync');
@@ -350,6 +355,7 @@ function init() {
   wrapSyncNow();
   bindStatus();
   renderStatus();
+  waitForPhotoStatusUi();
   setTimeout(renderStatus, 700);
 }
 
