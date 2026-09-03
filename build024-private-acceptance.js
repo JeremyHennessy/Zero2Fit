@@ -119,15 +119,22 @@ async function storageRemove(paths = []) {
 
 async function storageMissing(path) {
   const session = currentSession();
-  const url = `${apiBase}/storage/v1/object/authenticated/progress-photos/${encodedPath(path)}`;
-  for (let attempt = 0; attempt < 10; attempt += 1) {
+  const url = `${apiBase}/storage/v1/object/info/authenticated/progress-photos/${encodedPath(path)}`;
+  for (let attempt = 0; attempt < 20; attempt += 1) {
     const cacheNonce = `${Date.now()}-${attempt}`;
     const response = await fetch(`${url}?cacheNonce=${encodeURIComponent(cacheNonce)}`, {
       cache:'no-store',
       headers:{ apikey:publishableKey, Authorization:`Bearer ${session.access_token}` }
     });
-    if (!response.ok) return true;
-    if (attempt < 9) await new Promise(resolve => setTimeout(resolve, 150));
+    if (response.ok) {
+      if (attempt < 19) await new Promise(resolve => setTimeout(resolve, 150));
+      continue;
+    }
+    const payload = await parseResponse(response);
+    const statusCode = Number(payload?.statusCode || response.status || 0);
+    const message = String(payload?.message || payload?.error || payload?.error_code || '');
+    if (statusCode === 404 || /not[ _-]?found|object not found/i.test(message)) return true;
+    throw new Error(message || `Storage metadata check failed: ${response.status}`);
   }
   return false;
 }
