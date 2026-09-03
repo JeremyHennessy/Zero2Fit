@@ -1,0 +1,36 @@
+name: Apply Build 036 HTML Sentinel
+
+on:
+  push:
+    branches: [ui/modern-overhaul-20260903]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ui/modern-overhaul-20260903
+      - name: Fix serialized DOM assertion
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('tools/browser-smoke.sh')
+          s=p.read_text()
+          old="assert_dom 'Health & data' 'Build 036 Devices heading'"
+          new="assert_dom 'Health &amp; data' 'Build 036 Devices heading'"
+          if old not in s: raise SystemExit('Build 036 Devices assertion not found')
+          p.write_text(s.replace(old,new,1))
+      - name: Verify and commit
+        run: |
+          bash -n tools/browser-smoke.sh
+          grep -Fq "Health &amp; data" tools/browser-smoke.sh
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/browser-smoke.sh
+          git commit -m 'Match Build 036 Devices heading in serialized DOM'
+          git push origin HEAD:ui/modern-overhaul-20260903
