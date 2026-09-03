@@ -156,11 +156,11 @@ async function restorePreference(existing, userId) {
 async function cleanupProbe(rows) {
   const safe = async operation => { try { await operation(); } catch {} };
   await safe(() => storageRemove([rows.storagePath]));
-  await safe(() => dbRest(`progress_photo_assets?photo_id=eq.${encodeURIComponent(rows.photoAsset.photo_id)}`, { method:'DELETE', headers:{ Prefer:'return=minimal' }));
-  await safe(() => dbRest(`progress_photo_sessions?session_id=eq.${encodeURIComponent(rows.photoSession.session_id)}`, { method:'DELETE', headers:{ Prefer:'return=minimal' }));
-  await safe(() => dbRest(`workout_sets?set_id=eq.${encodeURIComponent(rows.workoutSet.set_id)}`, { method:'DELETE', headers:{ Prefer:'return=minimal' }));
-  await safe(() => dbRest(`workout_sessions?session_id=eq.${encodeURIComponent(rows.workoutSession.session_id)}`, { method:'DELETE', headers:{ Prefer:'return=minimal' }));
-  await safe(() => dbRest(`normalized_events?event_id=eq.${encodeURIComponent(rows.eventId)}`, { method:'DELETE', headers:{ Prefer:'return=minimal' }));
+  await safe(() => dbRest(`progress_photo_assets?photo_id=eq.${encodeURIComponent(rows.photoAsset.photo_id)}`, { method:'DELETE', headers:{ Prefer:'return=minimal' } }));
+  await safe(() => dbRest(`progress_photo_sessions?session_id=eq.${encodeURIComponent(rows.photoSession.session_id)}`, { method:'DELETE', headers:{ Prefer:'return=minimal' } }));
+  await safe(() => dbRest(`workout_sets?set_id=eq.${encodeURIComponent(rows.workoutSet.set_id)}`, { method:'DELETE', headers:{ Prefer:'return=minimal' } }));
+  await safe(() => dbRest(`workout_sessions?session_id=eq.${encodeURIComponent(rows.workoutSession.session_id)}`, { method:'DELETE', headers:{ Prefer:'return=minimal' } }));
+  await safe(() => dbRest(`normalized_events?event_id=eq.${encodeURIComponent(rows.eventId)}`, { method:'DELETE', headers:{ Prefer:'return=minimal' } }));
 }
 
 async function runAcceptanceSelfTest() {
