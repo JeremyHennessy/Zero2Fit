@@ -1,29 +1,24 @@
 (() => {
   'use strict';
-  let attempts = 0;
+
+  const modules = [
+    './build022-photo-sync.js',
+    './build022-copy.js',
+    './build024-private-acceptance.js',
+    './build026-activation-guide.js',
+    './build026-qa-focus.js',
+    './build028-healthkit-evidence.js',
+    './build028-verification-guard.js',
+    './build028-qa-focus.js',
+    './build031-activation-handoff.js'
+  ];
+
   function load() {
-    const workoutWrapped = Boolean(window.Zero2FitRemoteSync?.syncNow?.__z21Wrapped);
-    const photosReady = Boolean(document.querySelector('.z8-photo-module'));
-    if ((!workoutWrapped || !photosReady) && attempts < 200) {
-      attempts += 1;
-      setTimeout(load, 100);
-      return;
+    for (const path of modules) {
+      import(path).catch(error => console.warn(`Zero2Fit private continuity module failed to load: ${path}`, error));
     }
-    Promise.all([
-      import('./build022-photo-sync.js'),
-      import('./build022-copy.js')
-    ])
-      .then(() => import('./build024-private-acceptance.js'))
-      .then(() => import('./build026-activation-guide.js'))
-      .then(() => import('./build026-qa-focus.js'))
-      .then(() => import('./build028-healthkit-evidence.js'))
-      .then(() => Promise.all([
-        import('./build028-verification-guard.js'),
-        import('./build028-qa-focus.js')
-      ]))
-      .then(() => import('./build031-activation-handoff.js'))
-      .catch(error => console.warn('Zero2Fit Build 022/024/026/028/031 private continuity failed to load', error));
   }
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load, { once:true });
   else load();
 })();
