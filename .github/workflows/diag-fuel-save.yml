@@ -10,6 +10,7 @@ permissions:
 jobs:
   diagnose:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     steps:
       - uses: actions/checkout@v6
       - name: Inject browser probe into runner copy only
@@ -28,6 +29,8 @@ jobs:
               const button = row?.querySelector('[data-z17-save]');
               if (!button) return;
               done = true;
+              const rect = button.getBoundingClientRect();
+              const hit = document.elementFromPoint(Math.max(0, Math.min(innerWidth - 1, rect.left + rect.width / 2)), Math.max(0, Math.min(innerHeight - 1, rect.top + rect.height / 2)));
               button.click();
               setTimeout(() => {
                 const raw = localStorage.getItem('zero2fit-fuel-v2');
@@ -35,7 +38,7 @@ jobs:
                 const saved = Array.isArray(state.savedMeals) ? state.savedMeals : [];
                 const probe = document.createElement('pre');
                 probe.id = 'fuelSaveProbe';
-                probe.textContent = `PROBE_SAVED_COUNT=${saved.length};PROBE_HAS_COFFEE=${saved.some(item => item.name === 'Iced latte')};`;
+                probe.textContent = `PROBE_SAVED_COUNT=${saved.length};PROBE_HAS_COFFEE=${saved.some(item => item.name === 'Iced latte')};PROBE_HIT=${hit === button || button.contains(hit)};`;
                 document.body.appendChild(probe);
                 clearInterval(timer);
               }, 250);
@@ -60,8 +63,8 @@ jobs:
           trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
           sleep 1
           PROFILE="$(mktemp -d)"
-          chromium --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage \
-            --user-data-dir="$PROFILE" --virtual-time-budget=15000 --dump-dom \
+          timeout 40s chromium --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage \
+            --window-size=430,932 --user-data-dir="$PROFILE" --virtual-time-budget=15000 --dump-dom \
             'http://127.0.0.1:4173/qa-fuel-fixture.html?page=nutrition' \
             > /tmp/dom.html 2>/tmp/chrome.log || true
           grep -o 'PROBE_[^<]*' /tmp/dom.html || true
