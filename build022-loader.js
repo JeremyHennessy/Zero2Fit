@@ -10,12 +10,17 @@
     './build028-healthkit-evidence.js',
     './build028-verification-guard.js',
     './build028-qa-focus.js',
-    './build031-activation-handoff.js'
+    './build031-activation-handoff.js',
+    './build036-ui-overhaul.js'
   ];
 
-  function load() {
+  async function load() {
     for (const path of modules) {
-      import(path).catch(error => console.warn(`Zero2Fit private continuity module failed to load: ${path}`, error));
+      try {
+        await import(path);
+      } catch (error) {
+        console.warn(`Zero2Fit private continuity module failed to load: ${path}`, error);
+      }
     }
   }
 
