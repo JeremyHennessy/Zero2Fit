@@ -76,7 +76,7 @@ async function storageUpload(path, blob) {
       apikey:publishableKey,
       Authorization:`Bearer ${session.access_token}`,
       'Content-Type':blob.type || 'image/jpeg',
-      'cache-control':'60',
+      'cache-control':'0',
       'x-upsert':'true'
     },
     body:blob
@@ -121,7 +121,9 @@ async function storageMissing(path) {
   const session = currentSession();
   const url = `${apiBase}/storage/v1/object/authenticated/progress-photos/${encodedPath(path)}`;
   for (let attempt = 0; attempt < 10; attempt += 1) {
-    const response = await fetch(url, {
+    const cacheNonce = `${Date.now()}-${attempt}`;
+    const response = await fetch(`${url}?cacheNonce=${encodeURIComponent(cacheNonce)}`, {
+      cache:'no-store',
       headers:{ apikey:publishableKey, Authorization:`Bearer ${session.access_token}` }
     });
     if (!response.ok) return true;
