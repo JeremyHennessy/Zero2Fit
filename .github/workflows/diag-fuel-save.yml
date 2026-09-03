@@ -1,0 +1,73 @@
+name: Diagnose Fuel Save Button
+
+on:
+  push:
+    branches: [diag/fuel-save-button-20260903]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Inject browser probe into runner copy only
+        shell: bash
+        run: |
+          cat >> index.html <<'EOF'
+          <script>
+          (() => {
+            let done = false;
+            const timer = setInterval(() => {
+              if (done) return;
+              const log = document.getElementById('z17MealLog');
+              if (!log) return;
+              const rows = [...log.querySelectorAll('.z17-meal-row')];
+              const row = rows.find(node => node.textContent.includes('Iced latte'));
+              const button = row?.querySelector('[data-z17-save]');
+              if (!button) return;
+              done = true;
+              button.click();
+              setTimeout(() => {
+                const raw = localStorage.getItem('zero2fit-fuel-v2');
+                const state = raw ? JSON.parse(raw) : {};
+                const saved = Array.isArray(state.savedMeals) ? state.savedMeals : [];
+                const probe = document.createElement('pre');
+                probe.id = 'fuelSaveProbe';
+                probe.textContent = `PROBE_SAVED_COUNT=${saved.length};PROBE_HAS_COFFEE=${saved.some(item => item.name === 'Iced latte')};`;
+                document.body.appendChild(probe);
+                clearInterval(timer);
+              }, 250);
+            }, 100);
+            setTimeout(() => {
+              if (done) return;
+              const probe = document.createElement('pre');
+              probe.id = 'fuelSaveProbe';
+              probe.textContent = 'PROBE_TIMEOUT';
+              document.body.appendChild(probe);
+              clearInterval(timer);
+            }, 10000);
+          })();
+          </script>
+          EOF
+      - name: Run browser probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 >/tmp/server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          sleep 1
+          PROFILE="$(mktemp -d)"
+          chromium --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage \
+            --user-data-dir="$PROFILE" --virtual-time-budget=15000 --dump-dom \
+            'http://127.0.0.1:4173/qa-fuel-fixture.html?page=nutrition' \
+            > /tmp/dom.html 2>/tmp/chrome.log || true
+          grep -o 'PROBE_[^<]*' /tmp/dom.html || true
+          if ! grep -q 'PROBE_HAS_COFFEE=true' /tmp/dom.html; then
+            echo 'Fuel save browser probe failed.'
+            tail -100 /tmp/chrome.log || true
+            exit 1
+          fi
+          echo 'Fuel save browser probe passed.'
