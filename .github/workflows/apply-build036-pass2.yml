@@ -1,0 +1,66 @@
+name: Apply Build 036 Pass 2
+
+on:
+  push:
+    branches: [ui/modern-overhaul-20260903]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ui/modern-overhaul-20260903
+      - name: Apply focused visual fixes
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p=Path('build036-ui-overhaul.js')
+          s=p.read_text()
+          old="""  const focus = document.getElementById('z14FocusCard');\n  focus?.classList.add('z36-focus');\n  const context = document.getElementById('trainingContextCard');\n  if (context) z36Disclosure(context,'Workout setup','Location, duration and today’s substitutions','train-setup');\n"""
+          new="""  const focus = document.getElementById('z14FocusCard');\n  focus?.classList.add('z36-focus');\n  const context = document.getElementById('trainingContextCard');\n  if (context) z36Disclosure(context,'Workout setup','Location, duration and today’s substitutions','train-setup');\n  const setupDisclosure = document.querySelector('.z36-disclosure[data-z36=\"train-setup\"]');\n  if (focus && setupDisclosure && focus.closest('.z36-disclosure') === setupDisclosure) setupDisclosure.before(focus);\n"""
+          if old not in s: raise SystemExit('train block not found')
+          s=s.replace(old,new,1)
+
+          marker="""function z36EnhanceSaveFeedback() {\n"""
+          insert="""function z36ApplyQaFocus() {\n  const params = new URLSearchParams(location.search);\n  const focus = params.get('qaFocus');\n  if (focus === 'activation') document.querySelector('.z36-disclosure[data-z36=\"activation\"]')?.setAttribute('open','');\n  if (focus === 'healthkitEvidence') document.querySelector('.z36-disclosure[data-z36=\"health-sources\"]')?.setAttribute('open','');\n  if (focus === 'fuelAdd' && document.getElementById('z17Fuel')) z36SetFuelSheet(true);\n}\n\n"""
+          if marker not in s: raise SystemExit('save feedback marker not found')
+          s=s.replace(marker,insert+marker,1)
+          old="""  z36EnhanceSettings();\n  z36EnhanceSaveFeedback();\n}\n"""
+          new="""  z36EnhanceSettings();\n  z36EnhanceSaveFeedback();\n  z36ApplyQaFocus();\n}\n"""
+          if old not in s: raise SystemExit('enhance tail not found')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+
+          p=Path('build036.css')
+          s=p.read_text()
+          s=s.replace("""  body.z36-ui #page-today .z36-sensors {\n    display:flex;\n    gap:6px;\n    overflow-x:auto;\n    padding:0 1px 2px;\n    scrollbar-width:none;\n    scroll-snap-type:x proximity;\n  }\n  body.z36-ui #page-today .z36-sensors::-webkit-scrollbar { display:none; }\n  body.z36-ui #page-today .z36-sensors .z4-sensor { flex:0 0 126px;min-height:64px;padding:9px 10px;scroll-snap-align:start; }\n  body.z36-ui #page-today .z36-sensors .z4-sensor-icon { width:27px;height:27px; }\n""","""  body.z36-ui #page-today .z36-sensors {\n    display:grid;\n    grid-template-columns:repeat(5,minmax(0,1fr));\n    gap:4px;\n    overflow:visible;\n    padding:0;\n  }\n  body.z36-ui #page-today .z36-sensors .z4-sensor {\n    min-width:0;min-height:62px;padding:6px 3px;display:grid;grid-template-columns:1fr;justify-items:center;text-align:center;gap:2px;\n  }\n  body.z36-ui #page-today .z36-sensors .z4-sensor-icon { width:24px;height:24px;border-radius:8px; }\n  body.z36-ui #page-today .z36-sensors .z4-sensor > div:last-child { min-width:0;width:100%; }\n  body.z36-ui #page-today .z36-sensors .z4-sensor span { display:block;font-size:6.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }\n  body.z36-ui #page-today .z36-sensors .z4-sensor strong { display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }\n  body.z36-ui #page-today .z36-sensors .z4-sensor small { display:none; }\n""")
+          s=s.replace("""  body.z36-ui #page-nutrition .z36-food-log { grid-column:1; }\n""","""  body.z36-ui #page-nutrition .z36-food-log { grid-column:1/-1; }\n  body.z36-ui #page-nutrition .z36-food-log .z17-meal-log { grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;column-gap:12px; }\n""")
+          s=s.replace("""  body.z36-ui #page-today .z36-sensors .z4-sensor { flex-basis:118px; }\n""","")
+          p.write_text(s)
+
+          p=Path('tools/capture-ui-screenshots.sh')
+          s=p.read_text()
+          old="""capture iphone 393 852 fuel 'path:qa-fuel-fixture.html?page=nutrition'\n"""
+          new="""capture iphone 393 852 fuel 'path:qa-fuel-fixture.html?page=nutrition'\ncapture iphone 393 852 fuel-add 'qaPage=nutrition&qaFocus=fuelAdd'\n"""
+          if old not in s: raise SystemExit('fuel capture marker not found')
+          s=s.replace(old,new,1)
+          s=s.replace("""if [[ \"$count\" -ne 16 ]]; then echo \"Expected 16 screenshots, found ${count}.\" >&2; exit 1; fi\n""","""if [[ \"$count\" -ne 17 ]]; then echo \"Expected 17 screenshots, found ${count}.\" >&2; exit 1; fi\n""")
+          p.write_text(s)
+      - name: Verify and commit
+        run: |
+          node --check build036-ui-overhaul.js
+          bash -n tools/capture-ui-screenshots.sh
+          node tools/test-build036-ui.mjs
+          grep -q 'fuel-add' tools/capture-ui-screenshots.sh
+          grep -q 'Expected 17 screenshots' tools/capture-ui-screenshots.sh
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add build036-ui-overhaul.js build036.css tools/capture-ui-screenshots.sh
+          git commit -m 'Refine Build 036 layout from visual QA'
+          git push origin HEAD:ui/modern-overhaul-20260903
