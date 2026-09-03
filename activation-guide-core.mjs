@@ -75,14 +75,16 @@ export function photoEvidence(photoMetadata = [], events = [], lastSync = {}, pr
 export function privateAcceptanceEvidence(localResult = null, preferenceRow = null) {
   const cloud = preferenceRow?.settings?.zero2fit_acceptance_v1 || null;
   const localPassed = Boolean(localResult?.passed);
-  const cloudPassed = Boolean(cloud?.passed);
+  const cloudChecks = Array.isArray(cloud?.checks) ? cloud.checks : [];
+  const legacyCloudPassed = Boolean(cloud?.passed_at && cloudChecks.length > 0 && cloudChecks.every(check => check?.status === 'pass'));
+  const cloudPassed = Boolean(cloud?.passed === true || legacyCloudPassed);
   return {
     passed:Boolean(localPassed || cloudPassed),
     local_passed:localPassed,
     cloud_passed:cloudPassed,
     run_id:cloud?.run_id || localResult?.run_id || null,
-    finished_at:cloud?.finished_at || localResult?.finished_at || null,
-    check_count:Array.isArray(cloud?.checks) ? cloud.checks.length : Array.isArray(localResult?.checks) ? localResult.checks.length : 0
+    finished_at:cloud?.finished_at || cloud?.passed_at || localResult?.finished_at || null,
+    check_count:cloudChecks.length || (Array.isArray(localResult?.checks) ? localResult.checks.length : 0)
   };
 }
 
