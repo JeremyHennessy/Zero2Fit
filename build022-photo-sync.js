@@ -270,7 +270,15 @@ function wrapSyncNow() {
   originalSyncNow = remote.syncNow.bind(remote);
   const wrapped = async (...args) => {
     const base = await originalSyncNow(...args);
-    const photos = await syncPhotoContinuity();
+    let photos;
+    try {
+      photos = { ...(await syncPhotoContinuity()), progress_photo_deferred:false };
+    } catch (error) {
+      photos = {
+        progress_photo_deferred:true,
+        progress_photo_error:String(error?.message || error || 'Progress-photo continuity unavailable')
+      };
+    }
     const result = { ...base, ...photos, synced_at:new Date().toISOString() };
     localStorage.setItem(LAST_SYNC_KEY, JSON.stringify(result));
     window.dispatchEvent(new CustomEvent('zero2fit:remote-sync', { detail:result }));

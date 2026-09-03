@@ -206,7 +206,6 @@ export function build020Steps({ account = {}, infrastructure = {}, fuel = {}, wo
     { id:'second-browser', label:'Second browser reconstructed Fuel', done:Boolean(cross.fuel_reconstructed && number(cross.browser_count) >= 2) },
     { id:'fuel-delete', label:'Fuel deletion tombstone propagated', done:Boolean(cross.fuel_deletion_propagated) },
     { id:'workout', label:'Workout history reconstructed + adaptive target checked', done:Boolean(cross.workout_reconstructed && cross.matching_workout_history && manual.adaptive_second_browser_confirmed), partial:Boolean(cross.workout_reconstructed && cross.matching_workout_history) },
-    { id:'photo', label:'Photo round-trip + deletion propagated', done:Boolean(cross.photo_round_trip && cross.photo_deletion_propagated), partial:Boolean(cross.photo_round_trip) }
   ];
 }
 
