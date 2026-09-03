@@ -87,9 +87,9 @@ assert.deepEqual(mergedManualEvidence([snapshotA,snapshotB],{renpho_model_label:
 });
 
 const steps=build020Steps({account:{signed_in:true},infrastructure:infra,fuel:fuelResult,workout:workoutResult,photos:photoResult,cross,manual:{adaptive_second_browser_confirmed:true}});
-assert.equal(steps.length,10);
+assert.equal(steps.length,9);
 assert.equal(steps.every(step=>step.done),true);
-assert.deepEqual(summarizeSteps(steps),{complete:10,partial:0,total:10,done:true});
+assert.deepEqual(summarizeSteps(steps),{complete:9,partial:0,total:9,done:true});
 
 const noInfra=build020Steps({account:{signed_in:true},infrastructure:{passed:false},fuel:fuelResult,cross:{}});
 assert.equal(noInfra.find(step=>step.id==='sync').done,false);

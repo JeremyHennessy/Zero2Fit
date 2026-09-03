@@ -173,7 +173,6 @@ async function cleanupProbe(rows) {
 }
 
 async function runAcceptanceSelfTest() {
-  await waitForPhotoContinuity();
   const user = await remote?.getUser?.();
   if (!user?.id) throw new Error('Sign in before running private-account acceptance.');
 
@@ -261,36 +260,16 @@ async function runAcceptanceSelfTest() {
       return 'Session FK, set read/update and cleanup passed.';
     });
 
-    await check('photo_metadata', 'Progress-photo metadata tables', async () => {
-      await dbRest('progress_photo_sessions?on_conflict=user_id,session_id', {
-        method:'POST', body:[rows.photoSession], headers:{ Prefer:'resolution=merge-duplicates,return=minimal' }
-      });
-      await dbRest('progress_photo_assets?on_conflict=user_id,photo_id', {
-        method:'POST', body:[rows.photoAsset], headers:{ Prefer:'resolution=merge-duplicates,return=minimal' }
-      });
-      const selected = await dbRest(`progress_photo_assets?photo_id=eq.${encodeURIComponent(rows.photoAsset.photo_id)}&select=user_id,session_id,storage_path,metadata`);
-      if (selected?.length !== 1 || selected[0].user_id !== user.id || selected[0].storage_path !== rows.storagePath) throw new Error('Progress-photo metadata did not round-trip.');
-      return 'Session/asset ownership and storage path passed.';
-    });
-
-    await check('storage_crud', 'Private progress-photo Storage', async () => {
-      const blob = tinyJpeg();
-      await storageUpload(rows.storagePath, blob);
-      const downloaded = await storageDownload(rows.storagePath);
-      if (downloaded.size !== blob.size) throw new Error(`Downloaded probe size ${downloaded.size} did not match upload size ${blob.size}.`);
-      await storageRemove([rows.storagePath]);
-      if (!(await storageMissing(rows.storagePath))) throw new Error('Deleted private Storage probe remained readable.');
-      await dbRest(`progress_photo_assets?photo_id=eq.${encodeURIComponent(rows.photoAsset.photo_id)}`, { method:'DELETE', headers:{ Prefer:'return=minimal' } });
-      await dbRest(`progress_photo_sessions?session_id=eq.${encodeURIComponent(rows.photoSession.session_id)}`, { method:'DELETE', headers:{ Prefer:'return=minimal' } });
-      return 'Authenticated upload → download → delete passed.';
-    });
+    // Progress-photo metadata and Storage continuity are intentionally deferred during activation.
 
     await cleanupProbe(rows);
 
     await check('full_sync', 'Zero2Fit full private sync', async () => {
       syncResult = await remote.syncNow();
       if (!syncResult?.synced_at || syncResult?.user_id !== user.id) throw new Error('Sync now did not return the authenticated user result.');
-      return `${Number(syncResult.pulled || 0)} events, ${Number(syncResult.workout_sessions || 0)} workout sessions, ${Number(syncResult.progress_photo_remote_assets || 0)} private photo assets reconciled.`;
+      return syncResult.progress_photo_deferred
+        ? `${Number(syncResult.pulled || 0)} events and ${Number(syncResult.workout_sessions || 0)} workout sessions reconciled · progress-photo continuity deferred.`
+        : `${Number(syncResult.pulled || 0)} events and ${Number(syncResult.workout_sessions || 0)} workout sessions reconciled.`;
     });
 
     const preMarkerSummary = summarizeChecks(checks);
@@ -373,12 +352,12 @@ function ensurePanel() {
       <div><span>Private-account acceptance</span><strong>Verify this browser against the live private store</strong></div>
       <span class="z24-badge" id="z24AcceptanceBadge">Not run</span>
     </div>
-    <p>This self-test creates uniquely tagged probe rows and one tiny private Storage object, verifies authenticated read/update/delete behavior, cleans the probes, then runs the real Zero2Fit Sync now pipeline. Existing Fuel preferences are restored before the full sync.</p>
+    <p>This self-test verifies the authenticated account, anonymous blocking, normalized events, preferences and workout continuity, cleans its probe rows, then runs the real Zero2Fit Sync now pipeline. Progress-photo cloud continuity is deferred and does not block activation.</p>
     <div class="z24-actions">
       <button class="z4-secondary" type="button" id="z24RunAcceptance">Run acceptance self-test</button>
     </div>
     <div class="z24-checks" id="z24AcceptanceChecks"></div>
-    <small id="z24AcceptanceNote">One-browser infrastructure acceptance only. Run the same account on a second browser later to complete cross-browser acceptance.</small>`;
+    <small id="z24AcceptanceNote">One-browser core infrastructure acceptance only. Progress-photo cloud continuity is deferred; run the same account on a second browser later for the remaining cross-browser checks.</small>`;
   signedIn.appendChild(panel);
 }
 
