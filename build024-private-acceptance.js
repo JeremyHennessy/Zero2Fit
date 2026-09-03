@@ -33,6 +33,14 @@ function currentSession() {
   return session;
 }
 
+async function waitForPhotoContinuity() {
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    if (remote?.syncNow?.__z22Wrapped) return;
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  throw new Error('Private photo continuity is still initializing. Wait a moment and run the self-test again.');
+}
+
 async function dbRest(path, { method = 'GET', body, headers = {} } = {}) {
   const session = currentSession();
   const response = await fetch(`${apiBase}/rest/v1/${path}`, {
@@ -156,6 +164,7 @@ async function cleanupProbe(rows) {
 }
 
 async function runAcceptanceSelfTest() {
+  await waitForPhotoContinuity();
   const user = await remote?.getUser?.();
   if (!user?.id) throw new Error('Sign in before running private-account acceptance.');
 
@@ -420,7 +429,7 @@ function bind() {
 
 function init() {
   if (initialized) return;
-  if (!remote || !remote.syncNow?.__z22Wrapped || !document.getElementById('z8PrivateSync')) return setTimeout(init, 100);
+  if (!remote || !document.getElementById('z8PrivateSync')) return setTimeout(init, 100);
   initialized = true;
   ensureStylesheet();
   ensurePanel();
