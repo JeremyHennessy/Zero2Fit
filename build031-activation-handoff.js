@@ -42,7 +42,7 @@ function activate() {
   }
   if (!nav || !page || !panel) return;
   nav.click();
-  setTimeout(() => finish(panel), 120);
+  finish(panel);
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', activate, { once: true });
@@ -53,6 +53,6 @@ window.Zero2FitActivationHandoff = {
   openHealthKitEvidence: () => {
     const panel = document.getElementById('z28HealthKitEvidence');
     document.querySelector('.nav-item[data-page="data"]')?.click();
-    if (panel) setTimeout(() => finish(panel), 60);
+    if (panel) finish(panel);
   }
 };
