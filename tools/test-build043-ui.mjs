@@ -18,10 +18,15 @@ for (const marker of [
   'manual_health_entry',
   'adventure_run',
   'Clear tuning history',
-  "link[href=\"./build043.css\"]"
+  "link[href=\"./build043.css\"]",
+  "const anchor = page.querySelector('.journey-hero') || document.getElementById('z40ProgressIntro');",
+  'if (anchor) anchor.after(panel);',
+  'else page.prepend(panel);'
 ]) {
   if (!js.includes(marker)) throw new Error(`Build 043 runtime missing marker: ${marker}`);
 }
+
+if (/;\s*else\s+[^{};\n]+;\s*else\b/.test(js)) throw new Error('Build 043 contains an invalid chained else fallback.');
 
 for (const marker of [
   'sanitizeMetadata',
