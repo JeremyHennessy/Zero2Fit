@@ -1,6 +1,4 @@
 /* Zero2Fit Build 040 — clean light blue/orange product system */
-@import url('./build040-pages.css');
-@import url('./build040-mobile.css');
 :root{
   --z40-bg:#f6f8fc;--z40-surface:#fff;--z40-soft:#eef4ff;--z40-warm:#fff4e8;
   --z40-ink:#14213a;--z40-muted:#66738b;--z40-line:#dce3ee;--z40-line2:#c9d3e1;
