@@ -12,7 +12,9 @@ for (const marker of [
   'zero2fit:daily-guidance',
   'zero2fit-fuel-v2',
   'data-workout-mode',
-  'z40AddFood'
+  'z40AddFood',
+  'if (intro) intro.after(card);',
+  'else if (brief) brief.before(card);'
 ]) {
   if (!js.includes(marker)) throw new Error(`Build 042 UI missing marker: ${marker}`);
 }
