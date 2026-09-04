@@ -13,11 +13,14 @@ const Z40_ICONS = {
 };
 
 function z40EnsureStyle() {
-  if (document.querySelector('link[href="./build040.css"]')) return;
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = './build040.css';
-  document.head.appendChild(link);
+  const hrefs = ['./build040.css','./build040-pages.css','./build040-mobile.css'];
+  hrefs.forEach(href => {
+    if (document.querySelector(`link[href="${href}"]`)) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+  });
 }
 
 function z40Page() {
