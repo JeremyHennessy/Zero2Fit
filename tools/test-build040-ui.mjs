@@ -43,6 +43,9 @@ const requiredCss = [
   'body.z40-rebuild .z40-today-grid{display:block!important;grid-template-columns:minmax(0,1fr)!important',
   'body.z40-rebuild .z40-exercise-list{grid-template-columns:minmax(0,1fr)!important',
   'body.z40-rebuild .z40-progress .content-grid{display:block!important;grid-template-columns:minmax(0,1fr)!important',
+  'body.z40-rebuild.build004 .z8-photo-workspace{display:block!important;grid-template-columns:minmax(0,1fr)!important',
+  'body.z40-rebuild.build004 .z8-controls{width:100%!important;min-width:0!important;max-width:100%!important',
+  'body.z40-rebuild.build004 .z8-session-photos{grid-template-columns:minmax(0,1fr)!important',
   '.z40-day-brief',
   '.z40-train-stage',
   '.z40-food-panel',
@@ -65,7 +68,9 @@ if (/^\s*@import/m.test(cssBase)) throw new Error('Build 040 base stylesheet mus
 if (!loader.includes("'./build040-blue-orange-ui.js'")) throw new Error('Build 040 loader wiring missing.');
 if (loader.includes("'./build038-product-rebuild.js'")) throw new Error('Build 040 must replace, not stack on, the Build 038 composition layer.');
 if (!sw.includes("'./build040.css'") || !sw.includes("'./build040-pages.css'") || !sw.includes("'./build040-mobile.css'") || !sw.includes("'./build040-blue-orange-ui.js'")) throw new Error('Build 040 offline assets missing.');
+if (!sw.includes('zero2fit-shell-v41-mobile-layout')) throw new Error('Build 041 mobile-layout cache version missing.');
 if (!sw.includes('zero2fit-shell-v40-blue-orange-ui')) throw new Error('Build 040 cache lineage marker missing.');
+if (!sw.includes("cache:'no-store'")) throw new Error('Presentation requests must bypass stale browser HTTP cache before updating the offline shell.');
 if (sw.includes("'./build038.css'") || sw.includes("'./build038-product-rebuild.js'")) throw new Error('Build 038 visual assets must not remain in the active offline shell.');
 
 if (!/\.sidebar\s*\{[\s\S]*?background:rgba\(255,255,255/.test(css)) throw new Error('Desktop shell must use a light header rather than the previous dark rail.');
