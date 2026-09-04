@@ -19,7 +19,7 @@ assert.ok(i43 >= 0 && i44 > i43 && i45 > i44, 'Build 045 must load after Builds 
 assert.match(sw, /zero2fit-shell-v45-fuel-friction/);
 assert.match(sw, /\.\/build045-fuel-friction\.js/);
 assert.match(sw, /\.\/build045\.css/);
-assert.match(smoke, /data-zero2fit-fuel-friction=\\?"ready/);
+assert.ok(smoke.includes('data-zero2fit-fuel-friction="ready"'));
 assert.match(smoke, /z45ToggleMeasurement/);
 assert.match(css, /z45-tuning-actions/);
 
@@ -34,6 +34,7 @@ assert.match(runtime, /outcome:logged \? 'logged' : 'abandoned'/);
 assert.match(runtime, /\['success','empty','error'\]/);
 assert.match(runtime, /Pause measurement/);
 assert.match(runtime, /Resume measurement/);
+assert.match(runtime, /Measurement is paused/);
 assert.match(runtime, /zero2fitFuelFriction = 'ready'/);
 
 // Build 045 may inspect local Fuel row count only to decide whether the panel completed.
@@ -51,8 +52,8 @@ assert.match(usageCore, /fuel_manual_reliance/);
 assert.match(usageCore, /fuel_panel_closed/);
 assert.match(usageCore, /fuel_lookup_result/);
 
+const allowList = usageCore.match(/const ALLOWED_METADATA = new Set\(\[([\s\S]*?)\]\);/)?.[1] || '';
 for (const forbidden of ['foodName','calories','weight','sourceBundle','query','barcode','protein','carbs','fat']) {
-  const allowList = usageCore.match(/const ALLOWED_METADATA = new Set\(\[([\s\S]*?)\]\);/)?.[1] || '';
   assert.ok(!allowList.includes(`'${forbidden}'`), `Sensitive field ${forbidden} must not enter usage metadata allow-list.`);
 }
 
