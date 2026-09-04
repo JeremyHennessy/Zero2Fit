@@ -1,0 +1,43 @@
+name: Validate Build 042 Daily Guidance
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  daily-guidance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check Build 042 syntax and wiring
+        run: |
+          node --check daily-guidance-core.mjs
+          node --check build042-daily-guidance.js
+          node --check tools/test-daily-guidance-core.mjs
+          node --check tools/test-build042-ui.mjs
+          test -s build042.css
+          test -s daily-guidance-core.mjs
+          test -s build042-daily-guidance.js
+          test -s tools/test-daily-guidance-core.mjs
+          test -s tools/test-build042-ui.mjs
+          grep -q 'build042-daily-guidance.js' build022-loader.js
+          grep -q 'zero2fit-shell-v42-daily-guidance' sw.js
+          grep -q 'daily-guidance-core.mjs' sw.js
+          grep -q 'build042.css' sw.js
+          grep -q 'build042-daily-guidance.js' sw.js
+          if grep -q 'service_role\|sb_secret_' daily-guidance-core.mjs build042-daily-guidance.js; then echo 'Build 042 must not use privileged credentials.'; exit 1; fi
+
+      - name: Test next-best-action model
+        run: node tools/test-daily-guidance-core.mjs
+
+      - name: Test Build 042 UI contract
+        run: node tools/test-build042-ui.mjs
+
+      - name: Browser smoke daily guidance
+        run: bash tools/browser-smoke-build042.sh
