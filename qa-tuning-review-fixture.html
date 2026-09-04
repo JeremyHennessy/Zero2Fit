@@ -5,10 +5,12 @@
 <script>
 (() => {
   const now = Date.now();
+  const DAY_MS = 86400000;
   const events = [];
   let sequence = 0;
   const add = (type, metadata = {}, offsetMinutes = 0) => {
-    const at = now - offsetMinutes * 60000 - sequence * 61;
+    const dayOffset = (sequence % 2) * DAY_MS;
+    const at = now - dayOffset - offsetMinutes * 60000 - sequence * 61;
     sequence += 1;
     const observedAt = new Date(at).toISOString();
     events.push({ id:`qa-tuning-review-${sequence}`, type, observedAt, day:observedAt.slice(0,10), metadata });
