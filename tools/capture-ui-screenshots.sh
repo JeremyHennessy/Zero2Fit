@@ -52,6 +52,16 @@ capture iphone 393 852 activation 'qaPage=data&qaFocus=activation'
 capture iphone 393 852 healthkit-evidence 'qaPage=data&qaFocus=healthkitEvidence'
 capture iphone 393 852 settings 'qaPage=today&qaSettings=1'
 
+# iPhone Pro Max class viewport used for the primary personal device acceptance pass.
+capture iphone430 430 932 today 'qaPage=today'
+capture iphone430 430 932 train 'qaPage=train'
+capture iphone430 430 932 adventure 'qaPage=character&qaFocus=frontier'
+capture iphone430 430 932 fuel 'path:qa-fuel-fixture.html?page=nutrition'
+capture iphone430 430 932 fuel-add 'qaPage=nutrition&qaFocus=fuelAdd'
+capture iphone430 430 932 progress 'path:qa-fuel-fixture.html?page=journey'
+capture iphone430 430 932 devices 'qaPage=data'
+capture iphone430 430 932 settings 'qaPage=today&qaSettings=1'
+
 capture desktop 1440 1000 today 'qaPage=today'
 capture desktop 1440 1000 train 'qaPage=train'
 capture desktop 1440 1000 adventure 'qaPage=character&qaFocus=frontier'
@@ -59,7 +69,7 @@ capture desktop 1440 1000 fuel 'path:qa-fuel-fixture.html?page=nutrition'
 capture desktop 1440 1000 progress 'path:qa-fuel-fixture.html?page=journey'
 capture desktop 1440 1000 devices 'qaPage=data'
 
-# Expected 16 screenshots before Build036; Build036 adds an explicit Add Food interaction capture.
+# Expected 16 screenshots before Build036; Build036 added Add Food interaction capture.
 count="$(find "$OUT_DIR" -name '*.png' | wc -l)"
-if [[ "$count" -ne 17 ]]; then echo "Expected 17 screenshots, found ${count}." >&2; exit 1; fi
+if [[ "$count" -ne 25 ]]; then echo "Expected 25 screenshots, found ${count}." >&2; exit 1; fi
 echo "UI screenshot set complete: ${count} images."
