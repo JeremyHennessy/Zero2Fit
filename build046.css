@@ -1,0 +1,6 @@
+/* Build 046 — compact tuning-signal review controls. */
+.z46-signal-review{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 2px 0;color:var(--z40-muted);font-size:.76rem;font-weight:750}
+.z46-signal-review[hidden]{display:none!important}
+.z46-signal-review button{border:0;background:transparent;color:var(--z40-blue);font:inherit;font-weight:850;min-height:34px;padding:6px 2px;cursor:pointer}
+.z46-signal-review button:focus-visible{outline:3px solid rgba(30,102,232,.22);outline-offset:3px;border-radius:8px}
+@media(max-width:860px){.z46-signal-review{font-size:.74rem}.z46-signal-review button{min-height:40px;padding:9px 2px}}
