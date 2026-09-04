@@ -82,10 +82,10 @@ function ensureCard() {
     </div>
     <div class="z42-status-row" id="z42StatusRow"></div>`;
 
-  const brief = document.querySelector('#page-today .z40-day-brief') || document.querySelector('#page-today .hero-grid');
   const intro = document.getElementById('z40TodayIntro');
-  if (brief) brief.after(card);
-  else if (intro) intro.after(card);
+  const brief = document.querySelector('#page-today .z40-day-brief') || document.querySelector('#page-today .hero-grid');
+  if (intro) intro.after(card);
+  else if (brief) brief.before(card);
   else page.prepend(card);
 
   card.querySelector('#z42ActionButton')?.addEventListener('click', act);
