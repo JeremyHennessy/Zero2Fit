@@ -74,18 +74,18 @@ export function normalizeUsageState(input = {}, { now = Date.now(), retentionDay
       return {
         id: String(event.id || `usage:${at}`),
         type: cleanString(event.type),
-        observedAt: new Date(at).toISOString(),
-        day: dayKey(at),
-        metadata: sanitizeMetadata(event.metadata || {})
+        observedAt:new Date(at).toISOString(),
+        day:dayKey(at),
+        metadata:sanitizeMetadata(event.metadata || {})
       };
     })
     .filter(Boolean)
     .sort((a, b) => eventTimestamp(a) - eventTimestamp(b))
     .slice(-Math.max(20, maxEvents));
   return {
-    version: USAGE_SCHEMA_VERSION,
+    version:USAGE_SCHEMA_VERSION,
     events:normalized,
-    updatedAt: input?.updatedAt || null
+    updatedAt:input?.updatedAt || null
   };
 }
 
@@ -166,6 +166,36 @@ export function deriveFrictionSignals(summary = {}) {
     });
   }
 
+  if (Number(workout.targetEdits || 0) >= 4) {
+    const loads = Number(workout.targetEditKinds?.load || 0);
+    const reps = Number(workout.targetEditKinds?.reps || 0);
+    signals.push({
+      key:'workout_target_edits',
+      severity:'medium',
+      title:'Workout targets are frequently edited',
+      detail:`${workout.targetEdits} set-target edits were recorded (${loads} load · ${reps} reps).`
+    });
+  }
+
+  const shortened = Number(workout.restOverrideMethods?.start_next || 0);
+  if (shortened >= 3) {
+    signals.push({
+      key:'rest_shortening',
+      severity:'medium',
+      title:'Default rest is often shortened',
+      detail:`Rest was ended early ${shortened} times in the measurement window.`
+    });
+  }
+
+  if (Number(workout.sessionsLeft || 0) >= 3 && Number(workout.sessionResumeRate || 0) < 0.5) {
+    signals.push({
+      key:'unfinished_sessions',
+      severity:'medium',
+      title:'Workouts are often left unfinished',
+      detail:`${workout.sessionsLeft} unfinished-session exits were recorded and ${workout.sessionsResumed || 0} were later resumed.`
+    });
+  }
+
   if (Number(fuel.panelOpened || 0) >= 4 && Number(fuel.entriesLogged || 0) / Math.max(1, fuel.panelOpened) < 0.65) {
     signals.push({
       key:'fuel_abandonment',
@@ -209,10 +239,15 @@ export function summarizeUsage(inputState = {}, { now = Date.now(), days = 14 } 
   const pageViews = tally(events, 'page_view', 'page');
   const modes = tally(events, 'workout_mode_selected', 'mode');
   const locations = tally(events, 'workout_location_selected', 'location');
+  const targetEditKinds = tally(events, 'workout_target_edited', 'kind');
+  const targetEditMethods = tally(events, 'workout_target_edited', 'method');
+  const restOverrideMethods = tally(events, 'workout_rest_override', 'method');
   const fuelMethods = tally(events, 'fuel_entry_logged', 'method');
   const adventureOutcomes = tally(events, 'adventure_run', 'outcome');
   const guidanceActions = tally(events, 'guidance_acted', 'action');
   const manualHealthKinds = tally(events, 'manual_health_entry', 'kind');
+  const sessionsLeft = countBy(events, 'workout_session_left');
+  const sessionsResumed = countBy(events, 'workout_session_resumed');
   const summary = {
     windowDays:Math.max(1, days),
     eventCount:events.length,
@@ -235,6 +270,15 @@ export function summarizeUsage(inputState = {}, { now = Date.now(), days = 14 } 
       skipRate:handledSets ? setsSkipped / handledSets : 0,
       substitutionsOpened:countBy(events, 'workout_substitute_opened'),
       substitutionsSelected:countBy(events, 'workout_substitute_selected'),
+      targetEdits:countBy(events, 'workout_target_edited'),
+      targetEditKinds,
+      targetEditMethods,
+      restOverrides:countBy(events, 'workout_rest_override'),
+      restOverrideMethods,
+      skipsResumed:countBy(events, 'workout_skips_resumed'),
+      sessionsLeft,
+      sessionsResumed,
+      sessionResumeRate:sessionsLeft ? Math.min(1, sessionsResumed / sessionsLeft) : 0,
       finishesRecorded:countBy(events, 'workout_finish', event => event.metadata?.outcome === 'recorded'),
       finishesBlocked:countBy(events, 'workout_finish', event => event.metadata?.outcome === 'blocked')
     },
