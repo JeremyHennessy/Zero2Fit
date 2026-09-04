@@ -1,0 +1,58 @@
+name: Validate Build 046 Tuning Review
+
+on:
+  pull_request:
+    paths:
+      - 'build043-usage-measurement.js'
+      - 'build046.css'
+      - 'sw.js'
+      - 'qa-tuning-review-fixture.html'
+      - 'tools/test-build046-tuning-review.mjs'
+      - 'tools/test-build046-tuning-review-browser.sh'
+      - 'tools/capture-build046-tuning-review.sh'
+      - 'tools/browser-smoke.sh'
+      - '.github/workflows/validate-build046-tuning-review.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'build043-usage-measurement.js'
+      - 'build046.css'
+      - 'sw.js'
+      - 'qa-tuning-review-fixture.html'
+      - 'tools/test-build046-tuning-review.mjs'
+      - 'tools/test-build046-tuning-review-browser.sh'
+      - 'tools/capture-build046-tuning-review.sh'
+      - 'tools/browser-smoke.sh'
+      - '.github/workflows/validate-build046-tuning-review.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  tuning-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check Build 046 syntax
+        run: |
+          node --check build043-usage-measurement.js
+          node --check tools/test-build046-tuning-review.mjs
+          bash -n tools/test-build046-tuning-review-browser.sh
+          bash -n tools/capture-build046-tuning-review.sh
+          bash -n tools/browser-smoke.sh
+          test -s qa-tuning-review-fixture.html
+      - name: Test Build 046 review contract
+        run: node tools/test-build046-tuning-review.mjs
+      - name: Test collapsed and expanded tuning review
+        run: bash tools/test-build046-tuning-review-browser.sh
+      - name: Capture tuning-review visual states
+        run: bash tools/capture-build046-tuning-review.sh build046-tuning-review-screenshots
+      - name: Upload tuning-review visual evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: build046-tuning-review-${{ github.sha }}
+          path: build046-tuning-review-screenshots
+          if-no-files-found: error
+          retention-days: 14
+      - name: Browser smoke Build 046 in full app
+        run: bash tools/browser-smoke.sh
