@@ -5,20 +5,16 @@
 <script>
 (() => {
   const now = Date.now();
+  const DAY_MS = 86400000;
   const outcomes = [
     'combat_wall','capability_gate','combat_wall','advancing',
     'combat_wall','capability_gate','combat_wall','capability_gate',
     'paused','content_complete'
   ];
+  const dayOffsets = [0,0,1,1,0,1,1,0,0,1];
   const events = outcomes.map((outcome, index) => {
-    const observedAt = new Date(now - (outcomes.length - index) * 60000).toISOString();
-    return {
-      id:`qa-adventure-friction-${index}`,
-      type:'adventure_run',
-      observedAt,
-      day:observedAt.slice(0,10),
-      metadata:{ outcome }
-    };
+    const observedAt = new Date(now - dayOffsets[index] * DAY_MS - (outcomes.length - index) * 60000).toISOString();
+    return { id:`qa-adventure-friction-${index}`, type:'adventure_run', observedAt, day:observedAt.slice(0,10), metadata:{ outcome } };
   });
   localStorage.setItem('zero2fit-usage-v1', JSON.stringify({ version:1, events, updatedAt:new Date(now).toISOString() }));
   localStorage.setItem('zero2fit-usage-settings-v1', JSON.stringify({ enabled:true, updatedAt:new Date(now).toISOString() }));
