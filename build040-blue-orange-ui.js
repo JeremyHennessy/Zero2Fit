@@ -254,7 +254,13 @@ function z40SetFuelPanel(open) {
   if (!panel) return;
   panel.hidden = !z40FuelOpen;
   document.body.classList.toggle('z40-food-open', z40FuelOpen);
-  if (z40FuelOpen) setTimeout(() => document.getElementById('z18Search')?.focus(), 80);
+  const foodCard = panel.querySelector('.z40-food-panel-card');
+  if (z40FuelOpen) {
+    if (foodCard) foodCard.scrollTop = 0;
+    if (window.matchMedia('(min-width:861px)').matches) {
+      setTimeout(() => document.getElementById('z18Search')?.focus({ preventScroll:true }), 80);
+    }
+  }
 }
 
 function z40MoveFuelTools() {
@@ -346,6 +352,7 @@ function z40Settings() {
   sheet.classList.add('z40-settings');
   z40SetText(sheet.querySelector('.eyebrow'),'ZERO2FIT');
   z40SetText(sheet.querySelector('h2'),'Settings & private sync');
+  z40SetText(sheet.querySelector('.z12-settings-meta'),'Online · offline shell supported. Devices are available from the main navigation and Settings.');
 }
 
 function z40CleanCopy() {
