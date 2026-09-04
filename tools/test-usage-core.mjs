@@ -4,7 +4,8 @@ import { sanitizeMetadata, recordUsageEvent, summarizeUsage, normalizeUsageState
 const now = Date.parse('2026-09-04T14:00:00Z');
 const clean = sanitizeMetadata({
   page:'Today Screen', method:'Quick Line', completeCount:12, delta:999,
-  backfilled:true, foodName:'Secret Food', calories:700, weight:230, sourceBundle:'com.vendor.secret'
+  backfilled:true, foodName:'Secret Food', calories:700, weight:230, sourceBundle:'com.vendor.secret',
+  query:'Greek yogurt', barcode:'0123456789012', protein:45, carbs:70, fat:12
 });
 assert.deepEqual(clean, { page:'today_screen', method:'quick_line', completeCount:4, delta:100, backfilled:true });
 
@@ -43,7 +44,18 @@ add('workout_session_resumed',{outcome:'resumed',source:'navigation'},51000);
 add('workout_session_left',{outcome:'incomplete',source:'background'},52000);
 add('workout_session_left',{outcome:'incomplete',source:'navigation'},53000);
 
-const summary = summarizeUsage(state,{now:now+60000,days:14});
+add('fuel_panel_closed',{outcome:'abandoned',method:'close_button'},54000);
+add('fuel_panel_closed',{outcome:'abandoned',method:'backdrop'},55000);
+add('fuel_panel_closed',{outcome:'abandoned',method:'escape'},56000);
+add('fuel_panel_closed',{outcome:'logged',method:'close_button'},57000);
+add('fuel_lookup_result',{method:'search',outcome:'success'},58000);
+add('fuel_lookup_result',{method:'search',outcome:'empty'},59000);
+add('fuel_lookup_result',{method:'barcode',outcome:'empty'},60000);
+add('fuel_lookup_result',{method:'search',outcome:'error'},61000);
+add('fuel_lookup_result',{method:'barcode',outcome:'error'},62000);
+for (let i=0;i<5;i++) add('fuel_entry_logged',{method:'manual'},63000+i*1000);
+
+const summary = summarizeUsage(state,{now:now+80000,days:14});
 assert.equal(summary.guidance.shown,4);
 assert.equal(summary.guidance.acted,1);
 assert.equal(summary.workout.setsCompleted,8);
@@ -57,7 +69,21 @@ assert.equal(summary.workout.skipsResumed,1);
 assert.equal(summary.workout.sessionsLeft,3);
 assert.equal(summary.workout.sessionsResumed,1);
 assert.equal(summary.workout.sessionResumeRate,1/3);
-assert.equal(summary.fuel.entriesLogged,2);
+
+assert.equal(summary.fuel.entriesLogged,7);
+assert.equal(summary.fuel.panelClosed,4);
+assert.equal(summary.fuel.panelAbandoned,3);
+assert.equal(summary.fuel.panelCompleted,1);
+assert.equal(summary.fuel.panelAbandonRate,0.75);
+assert.equal(summary.fuel.lookupResolved,5);
+assert.equal(summary.fuel.lookupSuccess,1);
+assert.equal(summary.fuel.lookupEmpty,2);
+assert.equal(summary.fuel.lookupErrors,2);
+assert.equal(summary.fuel.lookupSuccessRate,0.2);
+assert.equal(summary.fuel.manualEntries,5);
+assert.equal(summary.fuel.shortcutEntries,2);
+assert.equal(summary.fuel.manualEntryRate,5/7);
+
 assert.equal(summary.adventure.topOutcome,'combat_wall');
 assert.equal(summary.manualHealth.total,3);
 assert.ok(summary.signals.some(signal => signal.key === 'guidance_follow_through'));
@@ -66,9 +92,12 @@ assert.ok(summary.signals.some(signal => signal.key === 'substitution_demand'));
 assert.ok(summary.signals.some(signal => signal.key === 'workout_target_edits'));
 assert.ok(summary.signals.some(signal => signal.key === 'rest_shortening'));
 assert.ok(summary.signals.some(signal => signal.key === 'unfinished_sessions'));
-assert.ok(summary.signals.some(signal => signal.key === 'fuel_abandonment'));
+assert.ok(summary.signals.some(signal => signal.key === 'fuel_panel_abandonment'));
+assert.ok(summary.signals.some(signal => signal.key === 'fuel_lookup_friction'));
+assert.ok(summary.signals.some(signal => signal.key === 'fuel_manual_reliance'));
 assert.ok(summary.signals.some(signal => signal.key === 'quick_mode_preference'));
 assert.ok(summary.signals.some(signal => signal.key === 'manual_health_dependency'));
+assert.ok(!summary.signals.some(signal => signal.key === 'fuel_abandonment'));
 
 const pruned = normalizeUsageState({events:[
   {id:'old',type:'page_view',observedAt:'2025-01-01T00:00:00Z',metadata:{page:'today'}},
@@ -77,4 +106,4 @@ const pruned = normalizeUsageState({events:[
 assert.equal(pruned.events.length,1);
 assert.equal(pruned.events[0].id,'new');
 
-console.log('Build 044 usage-core friction tests passed.');
+console.log('Build 045 usage-core Fuel friction tests passed.');
