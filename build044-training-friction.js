@@ -1,6 +1,7 @@
 import * as usageCore from './usage-core.mjs';
 
 const USAGE_STORAGE_KEY = 'zero2fit-usage-v1';
+const USAGE_SETTINGS_KEY = 'zero2fit-usage-settings-v1';
 const APP_STORAGE_KEY = 'zero2fit-v1';
 const LIFECYCLE_TYPES = new Set(['workout_session_left','workout_session_resumed','workout_finish']);
 let lastLeaveAt = 0;
@@ -14,6 +15,10 @@ function readJson(key, fallback = {}) {
   }
 }
 
+function measurementEnabled() {
+  return readJson(USAGE_SETTINGS_KEY, { enabled:true })?.enabled !== false;
+}
+
 function readUsage() {
   return usageCore.normalizeUsageState(readJson(USAGE_STORAGE_KEY, {}));
 }
@@ -24,6 +29,7 @@ function writeUsage(state) {
 }
 
 function record(type, metadata = {}, options = {}) {
+  if (!measurementEnabled()) return null;
   const result = usageCore.recordUsageEvent(readUsage(), {
     type,
     metadata,

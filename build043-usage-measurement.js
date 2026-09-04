@@ -1,6 +1,7 @@
 import * as usageCore from './usage-core.mjs';
 
 const USAGE_STORAGE_KEY = 'zero2fit-usage-v1';
+const USAGE_SETTINGS_KEY = 'zero2fit-usage-settings-v1';
 const APP_STORAGE_KEY = 'zero2fit-v1';
 const FUEL_STORAGE_KEY = 'zero2fit-fuel-v2';
 const SESSION_KEY = 'zero2fit-usage-session-v1';
@@ -31,6 +32,10 @@ function readJson(key, fallback = {}) {
   }
 }
 
+function measurementEnabled() {
+  return readJson(USAGE_SETTINGS_KEY, { enabled:true })?.enabled !== false;
+}
+
 function writeUsage(state) {
   try { localStorage.setItem(USAGE_STORAGE_KEY, JSON.stringify(state)); }
   catch {}
@@ -41,6 +46,7 @@ function readUsage() {
 }
 
 function record(type, metadata = {}, options = {}) {
+  if (!measurementEnabled()) return null;
   const result = usageCore.recordUsageEvent(readUsage(), {
     type,
     metadata,
@@ -241,6 +247,14 @@ function methodLabel(value) {
   return ({quick_line:'Quick line',manual:'Manual',repeat:'Repeat last',saved:'Saved',reusable:'Recent/saved',open_food_facts:'Food database'})[value] || 'Not enough data';
 }
 
+function fuelDetail(fuel = {}) {
+  const parts = [];
+  if (fuel.entriesLogged) parts.push(`${fuel.entriesLogged} logs · ${fuel.shortcutEntries || 0} shortcuts`);
+  if (fuel.lookupResolved) parts.push(`${fuel.lookupSuccess || 0}/${fuel.lookupResolved} lookups usable`);
+  if (fuel.panelClosed) parts.push(`${fuel.panelAbandoned || 0}/${fuel.panelClosed} sessions abandoned`);
+  return parts.join(' · ') || 'Only interaction outcomes are measured, never what you ate.';
+}
+
 function ensurePanel() {
   const page = document.getElementById('page-journey');
   if (!page) return null;
@@ -301,7 +315,7 @@ function render() {
   document.getElementById('z43Mode').textContent = preferredMode ? `${preferredMode[0].toUpperCase()}${preferredMode.slice(1)} leads` : 'No pattern yet';
   document.getElementById('z43ModeDetail').textContent = modeSummary(summary.workout.modes);
   document.getElementById('z43FuelMethod').textContent = summary.fuel.preferredMethod ? methodLabel(summary.fuel.preferredMethod) : 'No pattern yet';
-  document.getElementById('z43FuelDetail').textContent = summary.fuel.entriesLogged ? `${summary.fuel.entriesLogged} logged entries measured by method.` : 'Only the logging method is measured, never what you ate.';
+  document.getElementById('z43FuelDetail').textContent = fuelDetail(summary.fuel);
 
   const list = document.getElementById('z43SignalList');
   if (!summary.eventCount) {

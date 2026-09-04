@@ -1,0 +1,74 @@
+name: Validate Build 045 Fuel Friction
+
+on:
+  pull_request:
+    paths:
+      - 'usage-core.mjs'
+      - 'build043-usage-measurement.js'
+      - 'build044-training-friction.js'
+      - 'build045-fuel-friction.js'
+      - 'build045.css'
+      - 'build022-loader.js'
+      - 'sw.js'
+      - 'qa-fuel-friction-fixture.html'
+      - 'tools/test-usage-core.mjs'
+      - 'tools/test-build045-fuel-friction.mjs'
+      - 'tools/test-build045-fuel-friction-browser.sh'
+      - 'tools/capture-build045-fuel-friction.sh'
+      - 'tools/browser-smoke.sh'
+      - '.github/workflows/validate-build045-fuel-friction.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'usage-core.mjs'
+      - 'build043-usage-measurement.js'
+      - 'build044-training-friction.js'
+      - 'build045-fuel-friction.js'
+      - 'build045.css'
+      - 'build022-loader.js'
+      - 'sw.js'
+      - 'qa-fuel-friction-fixture.html'
+      - 'tools/test-usage-core.mjs'
+      - 'tools/test-build045-fuel-friction.mjs'
+      - 'tools/test-build045-fuel-friction-browser.sh'
+      - 'tools/capture-build045-fuel-friction.sh'
+      - 'tools/browser-smoke.sh'
+      - '.github/workflows/validate-build045-fuel-friction.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fuel-friction:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check Build 045 syntax
+        run: |
+          node --check usage-core.mjs
+          node --check build043-usage-measurement.js
+          node --check build044-training-friction.js
+          node --check build045-fuel-friction.js
+          node --check tools/test-usage-core.mjs
+          node --check tools/test-build045-fuel-friction.mjs
+          bash -n tools/test-build045-fuel-friction-browser.sh
+          bash -n tools/capture-build045-fuel-friction.sh
+          bash -n tools/browser-smoke.sh
+          test -s qa-fuel-friction-fixture.html
+      - name: Test detailed Fuel friction model
+        run: node tools/test-usage-core.mjs
+      - name: Test Build 045 privacy and wiring contract
+        run: node tools/test-build045-fuel-friction.mjs
+      - name: Test populated Fuel friction signal states
+        run: bash tools/test-build045-fuel-friction-browser.sh
+      - name: Capture populated Fuel friction visual states
+        run: bash tools/capture-build045-fuel-friction.sh build045-fuel-friction-screenshots
+      - name: Upload populated Fuel friction visual evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: build045-fuel-friction-${{ github.sha }}
+          path: build045-fuel-friction-screenshots
+          if-no-files-found: error
+          retention-days: 14
+      - name: Browser smoke Build 045 in full app
+        run: bash tools/browser-smoke.sh

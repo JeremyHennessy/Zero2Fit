@@ -53,9 +53,9 @@ export function createUsageEvent({ type, metadata = {}, observedAt = Date.now(),
   return {
     id: id || `usage:${at}:${Math.random().toString(36).slice(2, 10)}`,
     type: cleanType,
-    observedAt: new Date(at).toISOString(),
-    day: dayKey(at),
-    metadata: sanitizeMetadata(metadata)
+    observedAt:new Date(at).toISOString(),
+    day:dayKey(at),
+    metadata:sanitizeMetadata(metadata)
   };
 }
 
@@ -72,8 +72,8 @@ export function normalizeUsageState(input = {}, { now = Date.now(), retentionDay
       const at = eventTimestamp(event);
       if (!at || at < cutoff || !event?.type) return null;
       return {
-        id: String(event.id || `usage:${at}`),
-        type: cleanString(event.type),
+        id:String(event.id || `usage:${at}`),
+        type:cleanString(event.type),
         observedAt:new Date(at).toISOString(),
         day:dayKey(at),
         metadata:sanitizeMetadata(event.metadata || {})
@@ -129,6 +129,10 @@ function tally(events, type, key) {
 
 function topEntry(map) {
   return Object.entries(map || {}).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0] || null;
+}
+
+function sumMap(map = {}) {
+  return Object.values(map).reduce((sum, value) => sum + Number(value || 0), 0);
 }
 
 export function deriveFrictionSignals(summary = {}) {
@@ -196,12 +200,38 @@ export function deriveFrictionSignals(summary = {}) {
     });
   }
 
-  if (Number(fuel.panelOpened || 0) >= 4 && Number(fuel.entriesLogged || 0) / Math.max(1, fuel.panelOpened) < 0.65) {
+  if (Number(fuel.panelClosed || 0) >= 4 && Number(fuel.panelAbandonRate || 0) >= 0.5) {
+    signals.push({
+      key:'fuel_panel_abandonment',
+      severity:'medium',
+      title:'Add Food sessions are often abandoned',
+      detail:`${fuel.panelAbandoned} of ${fuel.panelClosed} closed Add Food sessions ended without a new entry.`
+    });
+  } else if (!fuel.panelClosed && Number(fuel.panelOpened || 0) >= 4 && Number(fuel.entriesLogged || 0) / Math.max(1, fuel.panelOpened) < 0.65) {
     signals.push({
       key:'fuel_abandonment',
       severity:'medium',
       title:'Fuel entry is opened more often than it is completed',
       detail:`${fuel.entriesLogged} food entries were logged after ${fuel.panelOpened} Add Food opens.`
+    });
+  }
+
+  if (Number(fuel.lookupResolved || 0) >= 4 && Number(fuel.lookupSuccessRate || 0) < 0.5) {
+    const unsuccessful = Number(fuel.lookupEmpty || 0) + Number(fuel.lookupErrors || 0);
+    signals.push({
+      key:'fuel_lookup_friction',
+      severity:'medium',
+      title:'Food lookup often misses a usable result',
+      detail:`${unsuccessful} of ${fuel.lookupResolved} resolved lookups were empty or failed.`
+    });
+  }
+
+  if (Number(fuel.entriesLogged || 0) >= 6 && Number(fuel.manualEntryRate || 0) >= 0.6 && Number(fuel.shortcutEntries || 0) <= 2) {
+    signals.push({
+      key:'fuel_manual_reliance',
+      severity:'low',
+      title:'Fuel logging still leans on manual entry',
+      detail:`${fuel.manualEntries} of ${fuel.entriesLogged} measured entries used the full manual form.`
     });
   }
 
@@ -214,7 +244,7 @@ export function deriveFrictionSignals(summary = {}) {
     });
   }
 
-  const modeTotal = Object.values(workout.modes || {}).reduce((sum, value) => sum + Number(value || 0), 0);
+  const modeTotal = sumMap(workout.modes || {});
   if (modeTotal >= 4 && Number(workout.modes?.quick || 0) / modeTotal >= 0.6) {
     signals.push({
       key:'quick_mode_preference',
@@ -243,11 +273,23 @@ export function summarizeUsage(inputState = {}, { now = Date.now(), days = 14 } 
   const targetEditMethods = tally(events, 'workout_target_edited', 'method');
   const restOverrideMethods = tally(events, 'workout_rest_override', 'method');
   const fuelMethods = tally(events, 'fuel_entry_logged', 'method');
+  const fuelPanelOutcomes = tally(events, 'fuel_panel_closed', 'outcome');
+  const fuelLookupOutcomes = tally(events, 'fuel_lookup_result', 'outcome');
+  const fuelLookupMethods = tally(events, 'fuel_lookup_result', 'method');
   const adventureOutcomes = tally(events, 'adventure_run', 'outcome');
   const guidanceActions = tally(events, 'guidance_acted', 'action');
   const manualHealthKinds = tally(events, 'manual_health_entry', 'kind');
   const sessionsLeft = countBy(events, 'workout_session_left');
   const sessionsResumed = countBy(events, 'workout_session_resumed');
+  const fuelPanelClosed = sumMap(fuelPanelOutcomes);
+  const fuelPanelAbandoned = Number(fuelPanelOutcomes.abandoned || 0);
+  const fuelLookupResolved = sumMap(fuelLookupOutcomes);
+  const fuelLookupSuccess = Number(fuelLookupOutcomes.success || 0);
+  const fuelLookupEmpty = Number(fuelLookupOutcomes.empty || 0);
+  const fuelLookupErrors = Number(fuelLookupOutcomes.error || 0);
+  const fuelEntriesLogged = countBy(events, 'fuel_entry_logged');
+  const fuelManualEntries = Number(fuelMethods.manual || 0);
+  const fuelShortcutEntries = ['repeat','saved','reusable','open_food_facts'].reduce((sum, key) => sum + Number(fuelMethods[key] || 0), 0);
   const summary = {
     windowDays:Math.max(1, days),
     eventCount:events.length,
@@ -284,10 +326,26 @@ export function summarizeUsage(inputState = {}, { now = Date.now(), days = 14 } 
     },
     fuel:{
       panelOpened:countBy(events, 'fuel_panel_opened'),
-      entriesLogged:countBy(events, 'fuel_entry_logged'),
+      panelClosed:fuelPanelClosed,
+      panelOutcomes:fuelPanelOutcomes,
+      panelAbandoned:fuelPanelAbandoned,
+      panelCompleted:Number(fuelPanelOutcomes.logged || 0),
+      panelAbandonRate:fuelPanelClosed ? fuelPanelAbandoned / fuelPanelClosed : 0,
+      entriesLogged:fuelEntriesLogged,
       entriesRemoved:countBy(events, 'fuel_entry_removed'),
       methods:fuelMethods,
-      preferredMethod:topEntry(fuelMethods)?.[0] || null
+      preferredMethod:topEntry(fuelMethods)?.[0] || null,
+      manualEntries:fuelManualEntries,
+      manualEntryRate:fuelEntriesLogged ? fuelManualEntries / fuelEntriesLogged : 0,
+      shortcutEntries:fuelShortcutEntries,
+      lookupAttempts:countBy(events, 'fuel_lookup'),
+      lookupResolved:fuelLookupResolved,
+      lookupResults:fuelLookupOutcomes,
+      lookupMethods:fuelLookupMethods,
+      lookupSuccess:fuelLookupSuccess,
+      lookupEmpty:fuelLookupEmpty,
+      lookupErrors:fuelLookupErrors,
+      lookupSuccessRate:fuelLookupResolved ? fuelLookupSuccess / fuelLookupResolved : 0
     },
     manualHealth:{
       total:countBy(events, 'manual_health_entry'),
