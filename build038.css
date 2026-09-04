@@ -505,3 +505,23 @@ body.z38-rebuild [data-z17-save].z38-saved { color:#e7a52d !important; }
   body.z38-rebuild .z17-summary-grid strong { font-size:18px; }
   body.z38-rebuild .z14-focus-copy h2 { font-size:36px; }
 }
+
+
+/* Build 038 mobile interaction safeguards */
+@media (max-width:820px) {
+  body.z38-rebuild button,
+  body.z38-rebuild [role="button"],
+  body.z38-rebuild summary { min-height:44px; }
+  body.z38-rebuild input,
+  body.z38-rebuild select,
+  body.z38-rebuild textarea { font-size:16px !important; }
+  body.z38-rebuild .z38-sheet { max-height:min(92dvh,760px); overflow:hidden; }
+  body.z38-rebuild .z38-sheet-body { overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
+  body.z38-rebuild .z38-sheet header button { min-width:44px; min-height:44px; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  body.z38-rebuild *,
+  body.z38-rebuild *::before,
+  body.z38-rebuild *::after { scroll-behavior:auto !important; transition-duration:.01ms !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; }
+}
