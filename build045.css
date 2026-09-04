@@ -1,8 +1,9 @@
 /* Build 045 — Fuel friction detail + explicit local tuning controls. */
 .z43-tuning-signals footer{flex-wrap:wrap}
 .z45-tuning-actions{display:flex;align-items:center;gap:12px;margin-left:auto}
+.z45-tuning-actions button{min-height:34px;padding:6px 2px!important;display:inline-flex;align-items:center}
 .z45-measurement-status{color:var(--z40-blue2)!important;font-weight:750}
 .z43-tuning-signals.z45-measurement-paused{border-style:dashed}
 .z43-tuning-signals.z45-measurement-paused .z43-window{background:#f4f6f9;color:var(--z40-muted)}
 .z43-tuning-signals.z45-measurement-paused .z45-measurement-status{color:var(--z40-muted)!important}
-@media(max-width:860px){.z45-tuning-actions{margin-left:0;gap:16px}.z43-tuning-signals footer{gap:8px}}
+@media(max-width:860px){.z45-tuning-actions{margin-left:0;gap:16px}.z45-tuning-actions button{min-height:40px;padding:9px 2px!important}.z43-tuning-signals footer{gap:6px}}
