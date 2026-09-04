@@ -43,6 +43,13 @@ for (const marker of requiredCss) {
   if (!css.includes(marker)) throw new Error(`Build 040 missing CSS marker: ${marker}`);
 }
 
+const styleMarkers = ["'./build040.css'","'./build040-pages.css'","'./build040-mobile.css'"];
+const stylePositions = styleMarkers.map(marker => js.indexOf(marker));
+if (stylePositions.some(position => position < 0) || !(stylePositions[0] < stylePositions[1] && stylePositions[1] < stylePositions[2])) {
+  throw new Error('Build 040 styles must load base → page → mobile so responsive overrides win the cascade.');
+}
+if (/^\s*@import/m.test(cssBase)) throw new Error('Build 040 base stylesheet must not pre-import page/mobile layers ahead of base rules.');
+
 if (!loader.includes("'./build040-blue-orange-ui.js'")) throw new Error('Build 040 loader wiring missing.');
 if (loader.includes("'./build038-product-rebuild.js'")) throw new Error('Build 040 must replace, not stack on, the Build 038 composition layer.');
 if (!sw.includes("'./build040.css'") || !sw.includes("'./build040-pages.css'") || !sw.includes("'./build040-mobile.css'") || !sw.includes("'./build040-blue-orange-ui.js'")) throw new Error('Build 040 offline assets missing.');
