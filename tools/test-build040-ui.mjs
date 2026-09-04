@@ -31,6 +31,7 @@ const requiredCss = [
   '--z40-blue:#1e66e8',
   '--z40-orange:#f47a22',
   '--z40-bg:#f6f8fc',
+  '.nav-item>span:last-child{width:auto!important',
   '.z40-day-brief',
   '.z40-train-stage',
   '.z40-food-panel',
