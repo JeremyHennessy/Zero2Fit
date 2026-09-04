@@ -141,6 +141,7 @@ export function deriveFrictionSignals(summary = {}) {
   const workout = summary.workout || {};
   const fuel = summary.fuel || {};
   const manualHealth = summary.manualHealth || {};
+  const adventure = summary.adventure || {};
 
   if (guidance.shown >= 4 && guidance.followRate < 0.5) {
     signals.push({
@@ -254,6 +255,27 @@ export function deriveFrictionSignals(summary = {}) {
     });
   }
 
+  const progressionRuns = Number(adventure.progressionRuns || 0);
+  const combatWalls = Number(adventure.combatWalls || 0);
+  if (progressionRuns >= 4 && combatWalls >= 3 && Number(adventure.combatWallRate || 0) >= 0.5) {
+    signals.push({
+      key:'adventure_combat_wall',
+      severity:'medium',
+      title:'Adventure repeatedly stops at combat walls',
+      detail:`${combatWalls} of ${progressionRuns} active progression runs ended at a combat wall. Treat this as pacing evidence, not a prompt to train extra.`
+    });
+  }
+
+  const capabilityGates = Number(adventure.capabilityGates || 0);
+  if (capabilityGates >= 3) {
+    signals.push({
+      key:'adventure_capability_gate',
+      severity:'low',
+      title:'Adventure is repeatedly waiting on real-world capability',
+      detail:`${capabilityGates} runs ended at a real-progress capability gate. This is expected fitness-ceiling evidence, not a prompt to overtrain.`
+    });
+  }
+
   return signals;
 }
 
@@ -290,6 +312,10 @@ export function summarizeUsage(inputState = {}, { now = Date.now(), days = 14 } 
   const fuelEntriesLogged = countBy(events, 'fuel_entry_logged');
   const fuelManualEntries = Number(fuelMethods.manual || 0);
   const fuelShortcutEntries = ['repeat','saved','reusable','open_food_facts'].reduce((sum, key) => sum + Number(fuelMethods[key] || 0), 0);
+  const adventureCombatWalls = Number(adventureOutcomes.combat_wall || 0);
+  const adventureCapabilityGates = Number(adventureOutcomes.capability_gate || 0);
+  const adventureAdvancing = Number(adventureOutcomes.advancing || 0);
+  const adventureProgressionRuns = adventureCombatWalls + adventureCapabilityGates + adventureAdvancing;
   const summary = {
     windowDays:Math.max(1, days),
     eventCount:events.length,
@@ -355,7 +381,12 @@ export function summarizeUsage(inputState = {}, { now = Date.now(), days = 14 } 
       runs:countBy(events, 'adventure_run'),
       autoEquips:countBy(events, 'adventure_auto_equip'),
       outcomes:adventureOutcomes,
-      topOutcome:topEntry(adventureOutcomes)?.[0] || null
+      topOutcome:topEntry(adventureOutcomes)?.[0] || null,
+      combatWalls:adventureCombatWalls,
+      capabilityGates:adventureCapabilityGates,
+      advancing:adventureAdvancing,
+      progressionRuns:adventureProgressionRuns,
+      combatWallRate:adventureProgressionRuns ? adventureCombatWalls / adventureProgressionRuns : 0
     }
   };
   summary.signals = deriveFrictionSignals(summary);
