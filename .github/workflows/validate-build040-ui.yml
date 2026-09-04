@@ -1,0 +1,30 @@
+name: Validate Build 040 UI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  ui-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check syntax and clean UI contract
+        run: |
+          node --check build040-blue-orange-ui.js
+          node --check tools/test-build040-ui.mjs
+          node tools/test-build040-ui.mjs
+          test -s build040.css
+          test -s build040-pages.css
+          test -s build040-mobile.css
+          grep -q "build040-blue-orange-ui.js" build022-loader.js
+          if grep -q "build038-product-rebuild.js" build022-loader.js; then
+            echo 'Build 040 must replace the Build 038 composition layer.'
+            exit 1
+          fi
+          grep -q "build040.css" sw.js
+          grep -q "zero2fit-shell-v40-blue-orange-ui" sw.js
