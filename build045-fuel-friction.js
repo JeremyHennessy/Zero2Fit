@@ -75,10 +75,7 @@ function beginPanelSession() {
     panelSession = null;
     return;
   }
-  panelSession = {
-    entryCount:fuelEntryCount(),
-    openedAt:Date.now()
-  };
+  panelSession = { entryCount:fuelEntryCount() };
 }
 
 function finishPanelSession(method = 'close') {
@@ -153,16 +150,28 @@ function ensureControls() {
 
 function renderMeasurementControl() {
   const enabled = measurementEnabled();
+  const usage = readUsage();
   const toggle = document.getElementById('z45ToggleMeasurement');
   const status = document.getElementById('z45MeasurementStatus');
   const panel = document.getElementById('z43TuningSignals');
   const windowLabel = panel?.querySelector('.z43-window');
+  const empty = panel?.querySelector('#z43SignalList .z43-empty');
+
   if (toggle) toggle.textContent = enabled ? 'Pause measurement' : 'Resume measurement';
   if (status) status.textContent = enabled
     ? 'Local tuning measurement is active.'
     : 'Measurement paused. Existing local history is retained until you clear it.';
   panel?.classList.toggle('z45-measurement-paused', !enabled);
   if (windowLabel) windowLabel.textContent = enabled ? '14 days' : 'Paused';
+
+  if (!usage.events.length && empty) {
+    const strong = empty.querySelector('strong');
+    const detail = empty.querySelector('span');
+    if (strong) strong.textContent = enabled ? 'Measurement is active.' : 'Measurement is paused.';
+    if (detail) detail.textContent = enabled
+      ? 'Use Zero2Fit normally. Repeated friction patterns will appear here before they are used to tune the app.'
+      : 'Resume measurement when you want Zero2Fit to collect privacy-minimized interaction outcomes again.';
+  }
 }
 
 function scheduleControls() {
