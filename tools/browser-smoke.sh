@@ -35,7 +35,7 @@ capture_dom() {
       --no-first-run \
       --no-default-browser-check \
       --user-data-dir="$profile" \
-      --virtual-time-budget=22000 \
+      --virtual-time-budget=30000 \
       --dump-dom "http://127.0.0.1:${PORT}/" >"$DOM_FILE" 2>/dev/null
     chrome_status=$?
     set -e
