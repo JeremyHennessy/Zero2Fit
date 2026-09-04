@@ -261,9 +261,13 @@ function ensurePanel() {
     </div>
     <div class="z43-signal-list" id="z43SignalList"></div>
     <footer><span>Stored only in this browser for 90 days, capped at 1,600 interaction events.</span><button type="button" id="z43ClearUsage">Clear tuning history</button></footer>`;
-  const anchor = page.querySelector('.journey-hero') || document.getElementById('z40ProgressIntro');
+  const anchor = document.getElementById('z10Intelligence')
+    || document.getElementById('z4BodyComposition')
+    || page.querySelector('.content-grid')
+    || page.querySelector('.journey-hero')
+    || document.getElementById('z40ProgressIntro');
   if (anchor) anchor.after(panel);
-  else page.prepend(panel);
+  else page.appendChild(panel);
   panel.querySelector('#z43ClearUsage')?.addEventListener('click', () => {
     if (!window.confirm('Clear local Zero2Fit tuning history? Fitness, Fuel, Adventure, photo and device data are not changed.')) return;
     localStorage.removeItem(USAGE_STORAGE_KEY);
