@@ -136,6 +136,7 @@ export function deriveFrictionSignals(summary = {}) {
   const guidance = summary.guidance || {};
   const workout = summary.workout || {};
   const fuel = summary.fuel || {};
+  const manualHealth = summary.manualHealth || {};
 
   if (guidance.shown >= 4 && guidance.followRate < 0.5) {
     signals.push({
@@ -174,6 +175,15 @@ export function deriveFrictionSignals(summary = {}) {
     });
   }
 
+  if (Number(manualHealth.total || 0) >= 3) {
+    signals.push({
+      key:'manual_health_dependency',
+      severity:'medium',
+      title:'Manual health entry is still doing repeated work',
+      detail:`${manualHealth.total} manual weight/steps interactions were recorded in the measurement window.`
+    });
+  }
+
   const modeTotal = Object.values(workout.modes || {}).reduce((sum, value) => sum + Number(value || 0), 0);
   if (modeTotal >= 4 && Number(workout.modes?.quick || 0) / modeTotal >= 0.6) {
     signals.push({
@@ -202,6 +212,7 @@ export function summarizeUsage(inputState = {}, { now = Date.now(), days = 14 } 
   const fuelMethods = tally(events, 'fuel_entry_logged', 'method');
   const adventureOutcomes = tally(events, 'adventure_run', 'outcome');
   const guidanceActions = tally(events, 'guidance_acted', 'action');
+  const manualHealthKinds = tally(events, 'manual_health_entry', 'kind');
   const summary = {
     windowDays:Math.max(1, days),
     eventCount:events.length,
@@ -233,6 +244,10 @@ export function summarizeUsage(inputState = {}, { now = Date.now(), days = 14 } 
       entriesRemoved:countBy(events, 'fuel_entry_removed'),
       methods:fuelMethods,
       preferredMethod:topEntry(fuelMethods)?.[0] || null
+    },
+    manualHealth:{
+      total:countBy(events, 'manual_health_entry'),
+      kinds:manualHealthKinds
     },
     adventure:{
       runs:countBy(events, 'adventure_run'),
