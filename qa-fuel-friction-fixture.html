@@ -5,10 +5,12 @@
 <script>
 (() => {
   const now = Date.now();
+  const DAY_MS = 86400000;
   const events = [];
   let sequence = 0;
   const add = (type, metadata = {}, offsetMinutes = 0) => {
-    const at = now - offsetMinutes * 60000 - sequence * 73;
+    const dayOffset = (sequence % 2) * DAY_MS;
+    const at = now - dayOffset - offsetMinutes * 60000 - sequence * 73;
     sequence += 1;
     const observedAt = new Date(at).toISOString();
     events.push({ id:`qa-fuel-friction-${sequence}`, type, observedAt, day:observedAt.slice(0,10), metadata });
@@ -18,13 +20,11 @@
   add('fuel_panel_closed',{outcome:'abandoned',method:'backdrop'},11);
   add('fuel_panel_closed',{outcome:'abandoned',method:'escape'},10);
   add('fuel_panel_closed',{outcome:'logged',method:'close_button'},9);
-
   add('fuel_lookup_result',{method:'search',outcome:'success'},8);
   add('fuel_lookup_result',{method:'search',outcome:'empty'},8);
   add('fuel_lookup_result',{method:'barcode',outcome:'empty'},7);
   add('fuel_lookup_result',{method:'search',outcome:'error'},7);
   add('fuel_lookup_result',{method:'barcode',outcome:'error'},6);
-
   add('fuel_entry_logged',{method:'manual'},5);
   add('fuel_entry_logged',{method:'manual'},5);
   add('fuel_entry_logged',{method:'manual'},4);
