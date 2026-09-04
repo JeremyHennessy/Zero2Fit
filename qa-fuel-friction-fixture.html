@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Zero2Fit Fuel friction QA fixture</title></head>
+<body>
+<script>
+(() => {
+  const now = Date.now();
+  const events = [];
+  let sequence = 0;
+  const add = (type, metadata = {}, offsetMinutes = 0) => {
+    const at = now - offsetMinutes * 60000 - sequence * 73;
+    sequence += 1;
+    const observedAt = new Date(at).toISOString();
+    events.push({ id:`qa-fuel-friction-${sequence}`, type, observedAt, day:observedAt.slice(0,10), metadata });
+  };
+
+  add('fuel_panel_closed',{outcome:'abandoned',method:'close_button'},12);
+  add('fuel_panel_closed',{outcome:'abandoned',method:'backdrop'},11);
+  add('fuel_panel_closed',{outcome:'abandoned',method:'escape'},10);
+  add('fuel_panel_closed',{outcome:'logged',method:'close_button'},9);
+
+  add('fuel_lookup_result',{method:'search',outcome:'success'},8);
+  add('fuel_lookup_result',{method:'search',outcome:'empty'},8);
+  add('fuel_lookup_result',{method:'barcode',outcome:'empty'},7);
+  add('fuel_lookup_result',{method:'search',outcome:'error'},7);
+  add('fuel_lookup_result',{method:'barcode',outcome:'error'},6);
+
+  add('fuel_entry_logged',{method:'manual'},5);
+  add('fuel_entry_logged',{method:'manual'},5);
+  add('fuel_entry_logged',{method:'manual'},4);
+  add('fuel_entry_logged',{method:'manual'},4);
+  add('fuel_entry_logged',{method:'manual'},3);
+  add('fuel_entry_logged',{method:'repeat'},2);
+  add('fuel_entry_logged',{method:'saved'},1);
+
+  localStorage.setItem('zero2fit-usage-v1', JSON.stringify({ version:1, events, updatedAt:new Date(now).toISOString() }));
+  localStorage.setItem('zero2fit-usage-settings-v1', JSON.stringify({ enabled:true, updatedAt:new Date(now).toISOString() }));
+  location.replace('./qa-fuel-fixture.html?page=journey');
+})();
+</script>
+</body>
+</html>
