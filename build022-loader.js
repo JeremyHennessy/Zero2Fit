@@ -12,7 +12,8 @@
     './build028-qa-focus.js',
     './build031-activation-handoff.js',
     './build040-blue-orange-ui.js',
-    './build042-daily-guidance.js'
+    './build042-daily-guidance.js',
+    './build043-usage-measurement.js'
   ];
 
   async function load() {
