@@ -224,6 +224,9 @@ function bind() {
 }
 
 async function init() {
+  // Mount the status shell before asynchronous data dependencies resolve so
+  // the Adventure page remains structurally ready even on a slow catalog read.
+  ensureUi();
   try {
     [core, catalog] = await Promise.all([
       import('./adventure-core.mjs'),
