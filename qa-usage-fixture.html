@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Zero2Fit usage QA fixture</title></head>
+<body>
+<script>
+(() => {
+  const now = Date.now();
+  const events = [];
+  let sequence = 0;
+  const add = (type, metadata = {}, offsetMinutes = 0) => {
+    const at = now - Math.max(0, offsetMinutes) * 60000 - sequence * 73;
+    sequence += 1;
+    const observedAt = new Date(at).toISOString();
+    events.push({
+      id:`qa-usage-${sequence}`,
+      type,
+      observedAt,
+      day:observedAt.slice(0,10),
+      metadata
+    });
+  };
+
+  for (const action of ['start_move','quick_workout','log_food','recovery_check','quick_workout']) add('guidance_shown',{action},10);
+  add('guidance_acted',{action:'start_move'},9);
+
+  for (let i=0;i<8;i+=1) add('workout_set_completed',{},8);
+  for (let i=0;i<3;i+=1) add('workout_set_skipped',{},7);
+  for (let i=0;i<3;i+=1) add('workout_substitute_selected',{intent:'horizontal_pull',location:'apartmentgym'},6);
+
+  for (const mode of ['quick','quick','quick','standard']) add('workout_mode_selected',{mode},5);
+  for (const location of ['apartmentgym','apartmentgym','home','apartmentgym']) add('workout_location_selected',{location},5);
+
+  for (let i=0;i<5;i+=1) add('fuel_panel_opened',{},4);
+  add('fuel_entry_logged',{method:'repeat'},4);
+  add('fuel_entry_logged',{method:'saved'},4);
+
+  add('manual_health_entry',{kind:'steps'},3);
+  add('manual_health_entry',{kind:'weight'},3);
+  add('manual_health_entry',{kind:'steps'},3);
+
+  add('adventure_run',{outcome:'combat_wall'},2);
+  add('adventure_run',{outcome:'combat_wall'},2);
+  add('adventure_auto_equip',{},2);
+
+  add('page_view',{page:'today',source:'nav'},1);
+  add('page_view',{page:'train',source:'nav'},1);
+  add('page_view',{page:'journey',source:'nav'},1);
+
+  localStorage.setItem('zero2fit-usage-v1', JSON.stringify({
+    version:1,
+    events,
+    updatedAt:new Date(now).toISOString()
+  }));
+
+  location.replace('./qa-fuel-fixture.html?page=journey');
+})();
+</script>
+</body>
+</html>
