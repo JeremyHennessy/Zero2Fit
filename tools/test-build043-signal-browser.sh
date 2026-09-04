@@ -41,8 +41,8 @@ for attempt in 1 2; do
     && grep -Fq 'Daily guidance is often bypassed' "$DOM_FILE" \
     && grep -Fq 'Workout queue has repeated skips' "$DOM_FILE" \
     && grep -Fq 'Exercise substitutions are a recurring need' "$DOM_FILE" \
-    && grep -Fq 'Fuel entry is opened more often than it is completed' "$DOM_FILE" \
-    && grep -Fq 'Quick leads' "$DOM_FILE"; then
+    && grep -Fq 'Quick leads' "$DOM_FILE" \
+    && grep -Fq 'Quick 3 · Standard 1 · Full 0' "$DOM_FILE"; then
     echo "Build 043 populated signal browser test passed on attempt ${attempt}."
     exit 0
   fi
@@ -53,5 +53,5 @@ for attempt in 1 2; do
 done
 
 echo 'Build 043 populated signal browser test failed after bounded retry.' >&2
-grep -E 'z43TuningSignals|Daily guidance|Workout queue|Exercise substitutions|Fuel entry|Quick leads' "$DOM_FILE" || true
+grep -E 'z43TuningSignals|Daily guidance|Workout queue|Exercise substitutions|Quick leads|Quick 3' "$DOM_FILE" || true
 exit 1
