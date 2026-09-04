@@ -14,6 +14,14 @@ let pendingFuelMethod = null;
 let pendingFuelAt = 0;
 let fuelSnapshot = new Map();
 
+function ensureStyle() {
+  if (document.querySelector('link[href="./build043.css"]')) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = './build043.css';
+  document.head.appendChild(link);
+}
+
 function readJson(key, fallback = {}) {
   try {
     const raw = localStorage.getItem(key);
@@ -306,6 +314,7 @@ function scheduleRender() {
 }
 
 function init() {
+  ensureStyle();
   resetFuelSnapshot();
   if (!sessionStorage.getItem(SESSION_KEY)) {
     sessionStorage.setItem(SESSION_KEY, '1');
