@@ -1,0 +1,46 @@
+name: Validate Build 044 Training Friction
+
+on:
+  pull_request:
+    paths:
+      - 'usage-core.mjs'
+      - 'build044-training-friction.js'
+      - 'build022-loader.js'
+      - 'sw.js'
+      - 'tools/test-usage-core.mjs'
+      - 'tools/test-build044-training-friction.mjs'
+      - 'tools/browser-smoke.sh'
+      - '.github/workflows/validate-build044-training-friction.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'usage-core.mjs'
+      - 'build044-training-friction.js'
+      - 'build022-loader.js'
+      - 'sw.js'
+      - 'tools/test-usage-core.mjs'
+      - 'tools/test-build044-training-friction.mjs'
+      - 'tools/browser-smoke.sh'
+      - '.github/workflows/validate-build044-training-friction.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  training-friction:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check Build 044 syntax
+        run: |
+          node --check usage-core.mjs
+          node --check build044-training-friction.js
+          node --check tools/test-usage-core.mjs
+          node --check tools/test-build044-training-friction.mjs
+          bash -n tools/browser-smoke.sh
+      - name: Test detailed training-friction model
+        run: node tools/test-usage-core.mjs
+      - name: Test Build 044 privacy and wiring contract
+        run: node tools/test-build044-training-friction.mjs
+      - name: Browser smoke Build 044 in full app
+        run: bash tools/browser-smoke.sh
