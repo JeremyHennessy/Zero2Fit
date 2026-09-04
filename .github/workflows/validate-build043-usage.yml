@@ -12,6 +12,7 @@ on:
       - 'tools/test-usage-core.mjs'
       - 'tools/test-build043-ui.mjs'
       - 'tools/test-build043-signal-browser.sh'
+      - 'tools/capture-build043-signals.sh'
       - 'tools/browser-smoke.sh'
       - '.github/workflows/validate-build043-usage.yml'
   push:
@@ -26,6 +27,7 @@ on:
       - 'tools/test-usage-core.mjs'
       - 'tools/test-build043-ui.mjs'
       - 'tools/test-build043-signal-browser.sh'
+      - 'tools/capture-build043-signals.sh'
       - 'tools/browser-smoke.sh'
       - '.github/workflows/validate-build043-usage.yml'
 
@@ -44,6 +46,7 @@ jobs:
           node --check tools/test-usage-core.mjs
           node --check tools/test-build043-ui.mjs
           bash -n tools/test-build043-signal-browser.sh
+          bash -n tools/capture-build043-signals.sh
           bash -n tools/browser-smoke.sh
           test -s qa-usage-fixture.html
       - name: Test privacy-minimized usage model
@@ -52,5 +55,14 @@ jobs:
         run: node tools/test-build043-ui.mjs
       - name: Test populated tuning-signal states
         run: bash tools/test-build043-signal-browser.sh
+      - name: Capture populated tuning-signal visual states
+        run: bash tools/capture-build043-signals.sh build043-signal-screenshots
+      - name: Upload populated tuning-signal visual evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: build043-populated-signals-${{ github.sha }}
+          path: build043-signal-screenshots
+          if-no-files-found: error
+          retention-days: 14
       - name: Browser smoke Build 043 in full app
         run: bash tools/browser-smoke.sh
