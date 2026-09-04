@@ -1,0 +1,85 @@
+name: Apply Build 038 Smoke Stability
+
+on:
+  push:
+    branches: [ui/true-redesign-20260903]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ui/true-redesign-20260903
+      - name: Replace copy-sensitive smoke assertions
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('tools/browser-smoke.sh')
+          s = p.read_text()
+          start = s.index("assert_dom 'Use what is actually available'")
+          end = s.index("\nif grep -Fq 'Supabase remains disabled", start)
+          stable = r'''assert_dom 'Bodyweight Squat'
+assert_dom "${EXPECTED_EXERCISES} exercises" 'generated exercise count'
+assert_dom "${EXPECTED_MET_ACTIVITIES} MET activities" 'generated MET activity count'
+assert_dom 'id="page-data"' 'Devices page'
+assert_dom 'Amazfit / Zepp → Apple Health'
+assert_dom 'RENPHO'
+assert_dom 'z4SensorStrip'
+assert_dom './build006.css'
+assert_dom './build007.css'
+assert_dom 'id="z11AdventureStatus"' 'Build 011 Adventure status panel'
+assert_dom 'id="z16Battlefield"' 'Build 016 Adventure battlefield'
+assert_dom 'id="z16Run"' 'Build 016 delegated expedition control'
+assert_dom 'id="z8Stage"' 'Progress photo stage'
+assert_dom 'z12SettingsButton'
+assert_dom 'z12ProgressTabs'
+assert_dom 'z12AdventureControls'
+assert_dom 'z12AdventurePrimary'
+assert_dom 'build012.css'
+assert_dom 'id="z14FocusCard"' 'Build 014 guided workout card'
+assert_dom 'id="z38TrainStage"' 'Build 038 workout stage'
+assert_dom 'Complete set'
+assert_dom 'id="z17Fuel"' 'Build 017 Fuel shell'
+assert_dom 'id="z38AddFood"' 'Build 038 Add Food action'
+assert_dom 'id="z38FuelSheet"' 'Build 038 Fuel sheet'
+assert_dom 'id="z17LegacyNutrition"' 'Build 017 legacy nutrition compatibility bridge'
+assert_dom 'id="mealForm"' 'legacy nutrition form retained for XP bridge'
+assert_dom 'id="z17NutritionIntel"' 'Build 017 personal-intelligence Fuel context'
+assert_dom './build017.css'
+assert_dom 'id="z18FoodLookup"' 'Build 018 food lookup shell'
+assert_dom 'Open Food Facts'
+assert_dom './build018.css'
+assert_dom 'id="z19FuelSync"' 'Build 019 Fuel private-sync strip'
+assert_dom './build019.css'
+assert_dom 'id="z21WorkoutSyncStatus"' 'Build 021 workout-continuity strip'
+assert_dom './build021.css'
+assert_dom 'id="z22PhotoSyncStatus"' 'Build 022 photo-continuity strip'
+assert_dom './build022.css'
+assert_dom 'id="z24Acceptance"' 'Build 024 private-account acceptance panel'
+assert_dom './build024.css'
+assert_dom 'id="z26ActivationGuide"' 'Build 026 activation guide'
+assert_dom './build026.css'
+assert_dom 'id="z28HealthKitEvidence"' 'Build 028 HealthKit evidence matrix'
+assert_dom './build028.css'
+assert_dom 'z38-rebuild' 'Build 038 product shell'
+assert_dom './build038.css' 'Build 038 stylesheet'
+'''
+          p.write_text(s[:start] + stable + s[end:])
+      - name: Verify and commit
+        run: |
+          bash -n tools/browser-smoke.sh
+          grep -Fq 'Build 038 product shell' tools/browser-smoke.sh
+          if grep -Fq 'Train outside. Advance inside.' tools/browser-smoke.sh; then
+            echo 'Copy-sensitive Adventure assertion still present.'
+            exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/browser-smoke.sh
+          git commit -m 'Stabilize browser smoke on structural UI contracts'
+          git push origin HEAD:ui/true-redesign-20260903
