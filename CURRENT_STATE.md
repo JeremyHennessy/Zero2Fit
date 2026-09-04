@@ -12,7 +12,7 @@ Production target:
 
 `https://jeremyhennessy.github.io/Zero2Fit/`
 
-Verified on the Build 044 application tree before merge and re-run on `main` after merge:
+Verified on the Build 044 application tree and again on `main` after merge:
 
 - full `Validate Zero2Fit` regression: **success**
 - whole-app browser smoke with Build 042/043/044 late-module sentinels: **success**
@@ -26,7 +26,8 @@ Verified on the Build 044 application tree before merge and re-run on `main` aft
 - Build 042 Daily Guidance validation: **success**
 - Build 043 usage/privacy/populated-state validation: **success**
 - Build 044 training-friction privacy/model/populated-state validation: **success**
-- 36-screen visual QA: **success on the merge candidate; post-merge run is part of the normal production matrix**
+- 36-screen visual QA: **success**
+- GitHub Pages build/deployment: **success**
 
 The active offline-shell lineage is `zero2fit-shell-v44-training-friction`. Presentation/navigation CSS and JavaScript use network revalidation before the offline cache is refreshed, reducing stale-iPhone presentation risk after deployment.
 
