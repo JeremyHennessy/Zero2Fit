@@ -5,10 +5,12 @@
 <script>
 (() => {
   const now = Date.now();
+  const DAY_MS = 86400000;
   const events = [];
   let sequence = 0;
   const add = (type, metadata = {}, offsetMinutes = 0) => {
-    const at = now - offsetMinutes * 60000 - sequence * 71;
+    const dayOffset = (sequence % 2) * DAY_MS;
+    const at = now - dayOffset - offsetMinutes * 60000 - sequence * 71;
     sequence += 1;
     const observedAt = new Date(at).toISOString();
     events.push({ id:`qa-training-friction-${sequence}`, type, observedAt, day:observedAt.slice(0,10), metadata });
@@ -18,12 +20,10 @@
   add('workout_target_edited',{kind:'load',method:'manual'},10);
   add('workout_target_edited',{kind:'reps',method:'stepper'},9);
   add('workout_target_edited',{kind:'reps',method:'manual'},9);
-
   add('workout_rest_override',{method:'start_next'},8);
   add('workout_rest_override',{method:'start_next'},8);
   add('workout_rest_override',{method:'start_next'},8);
   add('workout_rest_override',{method:'extend'},7);
-
   add('workout_session_left',{outcome:'incomplete',source:'navigation',mode:'standard',location:'home'},6);
   add('workout_session_resumed',{outcome:'resumed',source:'navigation',mode:'standard',location:'home'},5);
   add('workout_session_left',{outcome:'incomplete',source:'background',mode:'standard',location:'home'},4);
