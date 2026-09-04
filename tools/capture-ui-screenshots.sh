@@ -52,6 +52,15 @@ capture iphone 393 852 activation 'qaPage=data&qaFocus=activation'
 capture iphone 393 852 healthkit-evidence 'qaPage=data&qaFocus=healthkitEvidence'
 capture iphone 393 852 settings 'qaPage=today&qaSettings=1'
 
+# Tall mobile captures: inspect the complete vertical composition rather than only the first viewport.
+capture iphonefull 393 7000 today 'qaPage=today'
+capture iphonefull 393 7000 train 'qaPage=train'
+capture iphonefull 393 7000 adventure 'qaPage=character&qaFocus=frontier'
+capture iphonefull 393 7000 fuel 'path:qa-fuel-fixture.html?page=nutrition'
+capture iphonefull 393 7000 progress 'path:qa-fuel-fixture.html?page=journey'
+capture iphonefull 393 7000 devices 'qaPage=data'
+capture iphonefull 393 7000 settings 'qaPage=today&qaSettings=1'
+
 # iPhone Pro Max class viewport used for the primary personal device acceptance pass.
 capture iphone430 430 932 today 'qaPage=today'
 capture iphone430 430 932 train 'qaPage=train'
@@ -69,7 +78,6 @@ capture desktop 1440 1000 fuel 'path:qa-fuel-fixture.html?page=nutrition'
 capture desktop 1440 1000 progress 'path:qa-fuel-fixture.html?page=journey'
 capture desktop 1440 1000 devices 'qaPage=data'
 
-# Expected 16 screenshots before Build036; Build036 added Add Food interaction capture.
 count="$(find "$OUT_DIR" -name '*.png' | wc -l)"
-if [[ "$count" -ne 25 ]]; then echo "Expected 25 screenshots, found ${count}." >&2; exit 1; fi
+if [[ "$count" -ne 32 ]]; then echo "Expected 32 screenshots, found ${count}." >&2; exit 1; fi
 echo "UI screenshot set complete: ${count} images."
