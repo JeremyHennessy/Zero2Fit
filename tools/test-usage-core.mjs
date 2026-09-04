@@ -85,6 +85,9 @@ assert.equal(summary.fuel.shortcutEntries,2);
 assert.equal(summary.fuel.manualEntryRate,5/7);
 
 assert.equal(summary.adventure.topOutcome,'combat_wall');
+assert.equal(summary.adventure.combatWalls,1);
+assert.equal(summary.adventure.capabilityGates,0);
+assert.equal(summary.adventure.progressionRuns,1);
 assert.equal(summary.manualHealth.total,3);
 assert.ok(summary.signals.some(signal => signal.key === 'guidance_follow_through'));
 assert.ok(summary.signals.some(signal => signal.key === 'workout_skip_rate'));
@@ -98,6 +101,44 @@ assert.ok(summary.signals.some(signal => signal.key === 'fuel_manual_reliance'))
 assert.ok(summary.signals.some(signal => signal.key === 'quick_mode_preference'));
 assert.ok(summary.signals.some(signal => signal.key === 'manual_health_dependency'));
 assert.ok(!summary.signals.some(signal => signal.key === 'fuel_abandonment'));
+assert.ok(!summary.signals.some(signal => signal.key.startsWith('adventure_')), 'A single wall must not create Adventure friction.');
+
+function adventureSummary(outcomes) {
+  let adventureState = {};
+  outcomes.forEach((outcome, index) => {
+    const result = recordUsageEvent(adventureState, {
+      type:'adventure_run',
+      metadata:{ outcome },
+      observedAt:now + 100000 + index * 1000
+    }, { now:now + 100000 + index * 1000, dedupeWindowMs:0 });
+    adventureState = result.state;
+  });
+  return summarizeUsage(adventureState, { now:now + 120000, days:14 });
+}
+
+const combatSummary = adventureSummary(['combat_wall','combat_wall','advancing','combat_wall','combat_wall','advancing']);
+assert.equal(combatSummary.adventure.runs,6);
+assert.equal(combatSummary.adventure.combatWalls,4);
+assert.equal(combatSummary.adventure.progressionRuns,6);
+assert.equal(combatSummary.adventure.combatWallRate,4/6);
+const combatSignal = combatSummary.signals.find(signal => signal.key === 'adventure_combat_wall');
+assert.ok(combatSignal);
+assert.match(combatSignal.detail,/not a prompt to train extra/i);
+assert.ok(!combatSummary.signals.some(signal => signal.key === 'adventure_capability_gate'));
+
+const capabilitySummary = adventureSummary(['capability_gate','capability_gate','advancing','capability_gate']);
+assert.equal(capabilitySummary.adventure.runs,4);
+assert.equal(capabilitySummary.adventure.capabilityGates,3);
+assert.equal(capabilitySummary.adventure.progressionRuns,4);
+const capabilitySignal = capabilitySummary.signals.find(signal => signal.key === 'adventure_capability_gate');
+assert.ok(capabilitySignal);
+assert.match(capabilitySignal.detail,/not a prompt to overtrain/i);
+assert.ok(!capabilitySummary.signals.some(signal => signal.key === 'adventure_combat_wall'));
+
+const excludedSummary = adventureSummary(['paused','paused','content_complete','combat_wall','combat_wall']);
+assert.equal(excludedSummary.adventure.runs,5);
+assert.equal(excludedSummary.adventure.progressionRuns,2);
+assert.ok(!excludedSummary.signals.some(signal => signal.key.startsWith('adventure_')), 'Paused/content-complete runs must not inflate Adventure friction thresholds.');
 
 const pruned = normalizeUsageState({events:[
   {id:'old',type:'page_view',observedAt:'2025-01-01T00:00:00Z',metadata:{page:'today'}},
@@ -106,4 +147,4 @@ const pruned = normalizeUsageState({events:[
 assert.equal(pruned.events.length,1);
 assert.equal(pruned.events[0].id,'new');
 
-console.log('Build 045 usage-core Fuel friction tests passed.');
+console.log('Build 047 usage-core tests passed.');

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Zero2Fit Adventure friction QA fixture</title></head>
+<body>
+<script>
+(() => {
+  const now = Date.now();
+  const outcomes = [
+    'combat_wall','capability_gate','combat_wall','advancing',
+    'combat_wall','capability_gate','combat_wall','capability_gate',
+    'paused','content_complete'
+  ];
+  const events = outcomes.map((outcome, index) => {
+    const observedAt = new Date(now - (outcomes.length - index) * 60000).toISOString();
+    return {
+      id:`qa-adventure-friction-${index}`,
+      type:'adventure_run',
+      observedAt,
+      day:observedAt.slice(0,10),
+      metadata:{ outcome }
+    };
+  });
+  localStorage.setItem('zero2fit-usage-v1', JSON.stringify({ version:1, events, updatedAt:new Date(now).toISOString() }));
+  localStorage.setItem('zero2fit-usage-settings-v1', JSON.stringify({ enabled:true, updatedAt:new Date(now).toISOString() }));
+  location.replace('./?qaPage=journey');
+})();
+</script>
+</body>
+</html>
