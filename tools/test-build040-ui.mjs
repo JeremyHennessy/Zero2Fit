@@ -32,6 +32,8 @@ const requiredCss = [
   '--z40-orange:#f47a22',
   '--z40-bg:#f6f8fc',
   '.nav-item>span:last-child{width:auto!important',
+  'grid-template-columns:repeat(6,1fr)!important',
+  '.nav-item[data-page="data"]{display:flex!important;order:6!important',
   '.z40-day-brief',
   '.z40-train-stage',
   '.z40-food-panel',
