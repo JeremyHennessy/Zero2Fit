@@ -7,13 +7,10 @@ on:
   push:
     branches:
       - main
-      - 'build-*'
-      - 'agent/build-*'
     paths:
       - 'app.js'
       - 'build002.css'
       - 'training-core.mjs'
-      - 'tools/browser-smoke.sh'
       - 'tools/sync-fitness-data.mjs'
       - 'tools/build-training-catalog.mjs'
       - 'tools/normalize-generated-metadata.mjs'
