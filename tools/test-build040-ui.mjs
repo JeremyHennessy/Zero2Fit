@@ -20,7 +20,10 @@ const requiredJs = [
   'z40TrainStage',
   'DAILY BRIEF',
   'Trust the source before the score',
-  "document.body.classList.add('z40-rebuild')"
+  "document.body.classList.add('z40-rebuild')",
+  "window.matchMedia('(min-width:861px)').matches",
+  'foodCard.scrollTop = 0',
+  'Devices are available from the main navigation and Settings.'
 ];
 for (const marker of requiredJs) {
   if (!js.includes(marker)) throw new Error(`Build 040 missing UI marker: ${marker}`);
@@ -31,9 +34,11 @@ const requiredCss = [
   '--z40-blue:#1e66e8',
   '--z40-orange:#f47a22',
   '--z40-bg:#f6f8fc',
+  '-webkit-text-size-adjust:100%',
   '.nav-item>span:last-child{width:auto!important',
   'grid-template-columns:repeat(6,1fr)!important',
   '.nav-item[data-page="data"]{display:flex!important;order:6!important',
+  '.z40-settings #resetDemo.z12-reset-action{width:100%!important',
   '.z40-day-brief',
   '.z40-train-stage',
   '.z40-food-panel',
