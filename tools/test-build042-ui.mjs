@@ -36,6 +36,7 @@ for (const marker of [
 for (const marker of [
   '.z42-next-action',
   '.z42-status-row',
+  '.z42-action-context[hidden]{display:none!important}',
   '@media(max-width:860px)',
   'grid-template-columns:repeat(2,minmax(0,1fr))'
 ]) {
