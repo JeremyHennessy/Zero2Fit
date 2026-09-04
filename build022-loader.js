@@ -13,7 +13,8 @@
     './build031-activation-handoff.js',
     './build040-blue-orange-ui.js',
     './build042-daily-guidance.js',
-    './build043-usage-measurement.js'
+    './build043-usage-measurement.js',
+    './build044-training-friction.js'
   ];
 
   async function load() {
