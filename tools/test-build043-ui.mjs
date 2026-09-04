@@ -19,9 +19,11 @@ for (const marker of [
   'adventure_run',
   'Clear tuning history',
   "link[href=\"./build043.css\"]",
-  "const anchor = page.querySelector('.journey-hero') || document.getElementById('z40ProgressIntro');",
+  "const anchor = document.getElementById('z10Intelligence')",
+  "|| document.getElementById('z4BodyComposition')",
+  "|| page.querySelector('.content-grid')",
   'if (anchor) anchor.after(panel);',
-  'else page.prepend(panel);'
+  'else page.appendChild(panel);'
 ]) {
   if (!js.includes(marker)) throw new Error(`Build 043 runtime missing marker: ${marker}`);
 }
