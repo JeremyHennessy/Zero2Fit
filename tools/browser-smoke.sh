@@ -89,11 +89,11 @@ assert_dom 'z12AdventureControls'
 assert_dom 'z12AdventurePrimary'
 assert_dom 'build012.css'
 assert_dom 'id="z14FocusCard"' 'Build 014 guided workout card'
-assert_dom 'id="z38TrainStage"' 'Build 038 workout stage'
+assert_dom 'id="z40TrainStage"' 'Build 040 workout stage'
 assert_dom 'Complete set'
 assert_dom 'id="z17Fuel"' 'Build 017 Fuel shell'
-assert_dom 'id="z38AddFood"' 'Build 038 Add Food action'
-assert_dom 'id="z38FuelSheet"' 'Build 038 Fuel sheet'
+assert_dom 'id="z40AddFood"' 'Build 040 Add Food action'
+assert_dom 'id="z40FuelSheet"' 'Build 040 Fuel panel'
 assert_dom 'id="z17LegacyNutrition"' 'Build 017 legacy nutrition compatibility bridge'
 assert_dom 'id="mealForm"' 'legacy nutrition form retained for XP bridge'
 assert_dom 'id="z17NutritionIntel"' 'Build 017 personal-intelligence Fuel context'
@@ -113,8 +113,8 @@ assert_dom 'id="z26ActivationGuide"' 'Build 026 activation guide'
 assert_dom './build026.css'
 assert_dom 'id="z28HealthKitEvidence"' 'Build 028 HealthKit evidence matrix'
 assert_dom './build028.css'
-assert_dom 'z38-rebuild' 'Build 038 product shell'
-assert_dom './build038.css' 'Build 038 stylesheet'
+assert_dom 'z40-rebuild' 'Build 040 clean product shell'
+assert_dom './build040.css' 'Build 040 stylesheet'
 
 if grep -Fq 'Supabase remains disabled until authenticated RLS is configured and tested.' "$DOM_FILE"; then echo 'Stale pre-private-sync Supabase copy is still rendered.' >&2; exit 1; fi
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then echo 'Workout catalog load failed in browser.' >&2; exit 1; fi
@@ -134,4 +134,4 @@ if grep -q 'Zero2Fit Build 021 workout continuity extension failed to load' "$DO
 if grep -q 'Zero2Fit Build 022 loader failed to load\|Zero2Fit Build 022 private photo continuity failed to load\|Zero2Fit Build 022/024 private continuity failed to load\|Zero2Fit Build 022/024/026 private continuity failed to load\|Zero2Fit Build 022/024/026/028 private continuity failed to load' "$DOM_FILE"; then echo 'Build 022/024/026/028 private continuity modules failed in browser.' >&2; exit 1; fi
 if grep -q 'Zero2Fit private continuity module failed to load' "$DOM_FILE"; then echo 'Late private-continuity/product-shell module failed in browser.' >&2; exit 1; fi
 
-echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution + private set/load continuity, devices, Build 024 private-store acceptance + Build 026 cross-browser guide + Build 028 HealthKit evidence gate, Build 038 product shell, Fuel + food lookup + private sync, adaptive/personal intelligence, RPG adventure, private progress-photo continuity, and PWA/private-sync shell rendered."
+echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution + private set/load continuity, devices, Build 024 private-store acceptance + Build 026 cross-browser guide + Build 028 HealthKit evidence gate, Build 040 clean blue/orange product shell, Fuel + food lookup + private sync, adaptive/personal intelligence, RPG adventure, private progress-photo continuity, and PWA/private-sync shell rendered."

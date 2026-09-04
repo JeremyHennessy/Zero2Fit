@@ -11,7 +11,7 @@
     './build028-verification-guard.js',
     './build028-qa-focus.js',
     './build031-activation-handoff.js',
-    './build038-product-rebuild.js'
+    './build040-blue-orange-ui.js'
   ];
 
   async function load() {
