@@ -43,9 +43,10 @@ capture() {
   return 1
 }
 
-capture 393 3200 collapsed iphone-collapsed
-capture 393 5600 expanded iphone-expanded
-capture 1440 1600 expanded desktop-expanded
+# Heights deliberately include the complete tuning card and its controls, not just the primary Progress evidence above it.
+capture 393 4000 collapsed iphone-collapsed
+capture 393 4300 expanded iphone-expanded
+capture 1440 2600 expanded desktop-expanded
 
 count="$(find "$OUT_DIR" -name '*.png' | wc -l)"
 if [[ "$count" -ne 3 ]]; then echo "Expected 3 Build 046 screenshots, found ${count}." >&2; exit 1; fi
