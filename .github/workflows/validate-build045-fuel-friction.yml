@@ -14,6 +14,7 @@ on:
       - 'tools/test-usage-core.mjs'
       - 'tools/test-build045-fuel-friction.mjs'
       - 'tools/test-build045-fuel-friction-browser.sh'
+      - 'tools/capture-build045-fuel-friction.sh'
       - 'tools/browser-smoke.sh'
       - '.github/workflows/validate-build045-fuel-friction.yml'
   push:
@@ -30,6 +31,7 @@ on:
       - 'tools/test-usage-core.mjs'
       - 'tools/test-build045-fuel-friction.mjs'
       - 'tools/test-build045-fuel-friction-browser.sh'
+      - 'tools/capture-build045-fuel-friction.sh'
       - 'tools/browser-smoke.sh'
       - '.github/workflows/validate-build045-fuel-friction.yml'
 
@@ -50,6 +52,7 @@ jobs:
           node --check tools/test-usage-core.mjs
           node --check tools/test-build045-fuel-friction.mjs
           bash -n tools/test-build045-fuel-friction-browser.sh
+          bash -n tools/capture-build045-fuel-friction.sh
           bash -n tools/browser-smoke.sh
           test -s qa-fuel-friction-fixture.html
       - name: Test detailed Fuel friction model
@@ -58,5 +61,14 @@ jobs:
         run: node tools/test-build045-fuel-friction.mjs
       - name: Test populated Fuel friction signal states
         run: bash tools/test-build045-fuel-friction-browser.sh
+      - name: Capture populated Fuel friction visual states
+        run: bash tools/capture-build045-fuel-friction.sh build045-fuel-friction-screenshots
+      - name: Upload populated Fuel friction visual evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: build045-fuel-friction-${{ github.sha }}
+          path: build045-fuel-friction-screenshots
+          if-no-files-found: error
+          retention-days: 14
       - name: Browser smoke Build 045 in full app
         run: bash tools/browser-smoke.sh
