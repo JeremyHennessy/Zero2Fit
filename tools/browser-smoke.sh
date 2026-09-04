@@ -41,7 +41,7 @@ capture_dom() {
     set -e
     rm -rf "$profile"
 
-    if [[ "$chrome_status" -eq 0 ]] && [[ -s "$DOM_FILE" ]] && grep -Fq 'id="z11AdventureStatus"' "$DOM_FILE" && grep -Fq 'id="z28HealthKitEvidence"' "$DOM_FILE"; then
+    if [[ "$chrome_status" -eq 0 ]] && [[ -s "$DOM_FILE" ]] && grep -Fq 'id="z11AdventureStatus"' "$DOM_FILE" && grep -Fq 'id="z28HealthKitEvidence"' "$DOM_FILE" && grep -Fq 'id="z43TuningSignals"' "$DOM_FILE"; then
       if [[ "$attempt" -eq 2 ]]; then echo 'Browser smoke DOM completed on bounded retry.'; fi
       return 0
     fi
@@ -115,6 +115,10 @@ assert_dom 'id="z28HealthKitEvidence"' 'Build 028 HealthKit evidence matrix'
 assert_dom './build028.css'
 assert_dom 'z40-rebuild' 'Build 040 clean product shell'
 assert_dom './build040.css' 'Build 040 stylesheet'
+assert_dom 'id="z42NextAction"' 'Build 042 daily guidance'
+assert_dom './build042.css' 'Build 042 stylesheet'
+assert_dom 'id="z43TuningSignals"' 'Build 043 tuning signals'
+assert_dom './build043.css' 'Build 043 stylesheet'
 
 if grep -Fq 'Supabase remains disabled until authenticated RLS is configured and tested.' "$DOM_FILE"; then echo 'Stale pre-private-sync Supabase copy is still rendered.' >&2; exit 1; fi
 if grep -q 'Workout reference data could not load' "$DOM_FILE"; then echo 'Workout catalog load failed in browser.' >&2; exit 1; fi
@@ -134,4 +138,4 @@ if grep -q 'Zero2Fit Build 021 workout continuity extension failed to load' "$DO
 if grep -q 'Zero2Fit Build 022 loader failed to load\|Zero2Fit Build 022 private photo continuity failed to load\|Zero2Fit Build 022/024 private continuity failed to load\|Zero2Fit Build 022/024/026 private continuity failed to load\|Zero2Fit Build 022/024/026/028 private continuity failed to load' "$DOM_FILE"; then echo 'Build 022/024/026/028 private continuity modules failed in browser.' >&2; exit 1; fi
 if grep -q 'Zero2Fit private continuity module failed to load' "$DOM_FILE"; then echo 'Late private-continuity/product-shell module failed in browser.' >&2; exit 1; fi
 
-echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution + private set/load continuity, devices, Build 024 private-store acceptance + Build 026 cross-browser guide + Build 028 HealthKit evidence gate, Build 040 clean blue/orange product shell, Fuel + food lookup + private sync, adaptive/personal intelligence, RPG adventure, private progress-photo continuity, and PWA/private-sync shell rendered."
+echo "Browser smoke passed: ${EXPECTED_EXERCISES} exercises, ${EXPECTED_MET_ACTIVITIES} MET activities, training, guided workout execution + private set/load continuity, devices, Build 024 private-store acceptance + Build 026 cross-browser guide + Build 028 HealthKit evidence gate, Build 040 clean blue/orange product shell, Build 042 daily guidance, Build 043 local tuning signals, Fuel + food lookup + private sync, adaptive/personal intelligence, RPG adventure, private progress-photo continuity, and PWA/private-sync shell rendered."
