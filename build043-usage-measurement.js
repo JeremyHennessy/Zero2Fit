@@ -6,6 +6,7 @@ const APP_STORAGE_KEY = 'zero2fit-v1';
 const FUEL_STORAGE_KEY = 'zero2fit-fuel-v2';
 const SESSION_KEY = 'zero2fit-usage-session-v1';
 const WINDOW_DAYS = 14;
+const DEFAULT_VISIBLE_SIGNALS = 3;
 
 let renderTimer = null;
 let lastRenderSignature = '';
@@ -14,13 +15,16 @@ let lastPageAt = 0;
 let pendingFuelMethod = null;
 let pendingFuelAt = 0;
 let fuelSnapshot = new Map();
+let showAllSignals = new URLSearchParams(location.search).get('qaTuning') === 'expanded';
 
 function ensureStyle() {
-  if (document.querySelector('link[href="./build043.css"]')) return;
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = './build043.css';
-  document.head.appendChild(link);
+  for (const href of ['./build043.css','./build046.css']) {
+    if (document.querySelector(`link[href="${href}"]`)) continue;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+  }
 }
 
 function readJson(key, fallback = {}) {
@@ -255,6 +259,10 @@ function fuelDetail(fuel = {}) {
   return parts.join(' · ') || 'Only interaction outcomes are measured, never what you ate.';
 }
 
+function signalHtml(signal) {
+  return `<div class="z43-signal ${signal.severity}"><span></span><div><strong>${signal.title}</strong><small>${signal.detail}</small></div></div>`;
+}
+
 function ensurePanel() {
   const page = document.getElementById('page-journey');
   if (!page) return null;
@@ -274,6 +282,10 @@ function ensurePanel() {
       <section><span>FUEL SHORTCUT</span><strong id="z43FuelMethod">No pattern yet</strong><small id="z43FuelDetail">Only the logging method is measured, never what you ate.</small></section>
     </div>
     <div class="z43-signal-list" id="z43SignalList"></div>
+    <div class="z46-signal-review" id="z46SignalReview" hidden>
+      <span id="z46SignalCount">0 signals</span>
+      <button type="button" id="z46SignalToggle" aria-expanded="false">Show all</button>
+    </div>
     <footer><span>Stored only in this browser for 90 days, capped at 1,600 interaction events.</span><button type="button" id="z43ClearUsage">Clear tuning history</button></footer>`;
   const anchor = document.getElementById('z10Intelligence')
     || document.getElementById('z4BodyComposition')
@@ -285,6 +297,12 @@ function ensurePanel() {
   panel.querySelector('#z43ClearUsage')?.addEventListener('click', () => {
     if (!window.confirm('Clear local Zero2Fit tuning history? Fitness, Fuel, Adventure, photo and device data are not changed.')) return;
     localStorage.removeItem(USAGE_STORAGE_KEY);
+    showAllSignals = false;
+    lastRenderSignature = '';
+    render();
+  });
+  panel.querySelector('#z46SignalToggle')?.addEventListener('click', () => {
+    showAllSignals = !showAllSignals;
     lastRenderSignature = '';
     render();
   });
@@ -295,11 +313,33 @@ function stat(label, value, detail) {
   return `<div class="z43-stat"><span>${label}</span><strong>${value}</strong><small>${detail}</small></div>`;
 }
 
+function renderSignalReview(signals = []) {
+  const review = document.getElementById('z46SignalReview');
+  const count = document.getElementById('z46SignalCount');
+  const toggle = document.getElementById('z46SignalToggle');
+  if (!review || !count || !toggle) return;
+
+  if (signals.length <= DEFAULT_VISIBLE_SIGNALS) {
+    showAllSignals = false;
+    review.hidden = true;
+    toggle.setAttribute('aria-expanded','false');
+    return;
+  }
+
+  review.hidden = false;
+  count.textContent = showAllSignals
+    ? `Showing all ${signals.length} signals`
+    : `Showing ${DEFAULT_VISIBLE_SIGNALS} of ${signals.length} signals`;
+  toggle.textContent = showAllSignals ? 'Show top 3' : `Show all ${signals.length}`;
+  toggle.setAttribute('aria-expanded', String(showAllSignals));
+}
+
 function render() {
   const panel = ensurePanel();
   if (!panel) return;
   const summary = usageCore.summarizeUsage(readUsage(), { days:WINDOW_DAYS });
-  const signature = JSON.stringify(summary);
+  if (summary.signals.length <= DEFAULT_VISIBLE_SIGNALS) showAllSignals = false;
+  const signature = JSON.stringify({ summary, showAllSignals });
   if (signature === lastRenderSignature) return;
   lastRenderSignature = signature;
 
@@ -323,8 +363,10 @@ function render() {
   } else if (!summary.signals.length) {
     list.innerHTML = `<div class="z43-empty"><strong>No repeated friction pattern yet.</strong><span>${summary.eventCount} privacy-minimized interactions across ${summary.activeDays} active day${summary.activeDays === 1 ? '' : 's'} are in the current window.</span></div>`;
   } else {
-    list.innerHTML = summary.signals.slice(0, 3).map(signal => `<div class="z43-signal ${signal.severity}"><span></span><div><strong>${signal.title}</strong><small>${signal.detail}</small></div></div>`).join('');
+    const visible = showAllSignals ? summary.signals : summary.signals.slice(0, DEFAULT_VISIBLE_SIGNALS);
+    list.innerHTML = visible.map(signalHtml).join('');
   }
+  renderSignalReview(summary.signals);
 }
 
 function scheduleRender() {
@@ -335,6 +377,7 @@ function scheduleRender() {
 function init() {
   ensureStyle();
   resetFuelSnapshot();
+  document.documentElement.dataset.zero2fitTuningReview = 'ready';
   if (!sessionStorage.getItem(SESSION_KEY)) {
     sessionStorage.setItem(SESSION_KEY, '1');
     record('app_session', { page:currentPage() });

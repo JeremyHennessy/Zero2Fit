@@ -18,7 +18,7 @@ for (const marker of [
   'manual_health_entry',
   'adventure_run',
   'Clear tuning history',
-  "link[href=\"./build043.css\"]",
+  "for (const href of ['./build043.css','./build046.css'])",
   "const anchor = document.getElementById('z10Intelligence')",
   "|| document.getElementById('z4BodyComposition')",
   "|| page.querySelector('.content-grid')",
@@ -55,7 +55,7 @@ if (!loader.includes("'./build042-daily-guidance.js',\n    './build043-usage-mea
 for (const asset of ["'./build043.css'","'./usage-core.mjs'","'./build043-usage-measurement.js'"]) {
   if (!sw.includes(asset)) throw new Error(`Build 043 offline shell missing ${asset}.`);
 }
-if (!sw.includes('zero2fit-shell-v43-usage-measurement')) throw new Error('Build 043 cache version missing.');
+if (!sw.includes('zero2fit-shell-v43-usage-measurement')) throw new Error('Build 043 cache lineage missing.');
 if (!smoke.includes('id=\"z43TuningSignals\"')) throw new Error('Whole-app browser smoke must require Build 043.');
 for (const marker of ['.z43-tuning-signals','.z43-stats','@media(max-width:860px)','grid-template-columns:repeat(2,minmax(0,1fr))']) {
   if (!css.includes(marker)) throw new Error(`Build 043 responsive CSS missing marker: ${marker}`);
