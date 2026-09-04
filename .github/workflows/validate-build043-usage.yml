@@ -1,0 +1,48 @@
+name: Validate Build 043 Usage Measurement
+
+on:
+  pull_request:
+    paths:
+      - 'usage-core.mjs'
+      - 'build043-usage-measurement.js'
+      - 'build043.css'
+      - 'build022-loader.js'
+      - 'sw.js'
+      - 'tools/test-usage-core.mjs'
+      - 'tools/test-build043-ui.mjs'
+      - 'tools/browser-smoke.sh'
+      - '.github/workflows/validate-build043-usage.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'usage-core.mjs'
+      - 'build043-usage-measurement.js'
+      - 'build043.css'
+      - 'build022-loader.js'
+      - 'sw.js'
+      - 'tools/test-usage-core.mjs'
+      - 'tools/test-build043-ui.mjs'
+      - 'tools/browser-smoke.sh'
+      - '.github/workflows/validate-build043-usage.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  usage-measurement:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check Build 043 syntax
+        run: |
+          node --check usage-core.mjs
+          node --check build043-usage-measurement.js
+          node --check tools/test-usage-core.mjs
+          node --check tools/test-build043-ui.mjs
+          bash -n tools/browser-smoke.sh
+      - name: Test privacy-minimized usage model
+        run: node tools/test-usage-core.mjs
+      - name: Test Build 043 UI and privacy contract
+        run: node tools/test-build043-ui.mjs
+      - name: Browser smoke Build 043 in full app
+        run: bash tools/browser-smoke.sh
