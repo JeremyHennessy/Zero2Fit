@@ -1,4 +1,4 @@
-// zero2fit-shell-v40-blue-orange-ui supersedes zero2fit-shell-v38-product-rebuild and the prior zero2fit-shell-v21-workout-sync lineage while retaining all data, sync, training, nutrition, Adventure and acceptance modules.
+// zero2fit-shell-v40-blue-orange-ui supersedes zero2fit-shell-v38-product-rebuild, zero2fit-shell-v31-activation-handoff, zero2fit-shell-v28-healthkit-evidence, zero2fit-shell-v26-activation-guide, zero2fit-shell-v24-private-acceptance, zero2fit-shell-v22-photo-sync, and the prior zero2fit-shell-v21-workout-sync lineage while retaining all data, sync, training, nutrition, Adventure and acceptance modules.
 const CACHE = 'zero2fit-shell-v40-blue-orange-ui';
 const SHELL = [
   './', './index.html', './styles.css', './build002.css', './build003.css', './build004.css', './build006.css', './build007.css', './build012.css', './build014.css', './build016.css', './build017.css', './build018.css', './build019.css', './build021.css', './build022.css', './build024.css', './build026.css', './build028.css', './build031.css', './build040.css', './build040-pages.css', './build040-mobile.css',
