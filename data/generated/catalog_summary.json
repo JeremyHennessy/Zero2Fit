@@ -2,7 +2,7 @@
   "sources": {
     "exerciseCatalog": {
       "repository": "yuhonas/free-exercise-db",
-      "commit": "a859101d633a01c4a1a920d6a8ce41dabba0705f",
+      "commit": "f00c92c7dcf1216a928a52c3706c7ce8e2f71ed5",
       "license": "Unlicense / public domain",
       "sourceUrl": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json"
     },
